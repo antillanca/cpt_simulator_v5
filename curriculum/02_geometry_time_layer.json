@@ -1,0 +1,49 @@
+[
+  {
+    "id": "geometry_basics",
+    "title": "Geometry",
+    "layer": 7,
+    "prerequisites": [
+      "math_functions"
+    ],
+    "objective": "Calculate the Euclidean distance between two points. Given particle at (0,0) and target at (3,4), compute distance and store in particle.x.",
+    "target_state": {
+      "x": 5
+    },
+    "tolerance": 0.5,
+    "simulation_frames": 1,
+    "order": 70
+  },
+  {
+    "id": "math_vectors",
+    "title": "Vectors",
+    "layer": 8,
+    "prerequisites": [
+      "geometry_basics"
+    ],
+    "objective": "Decompose a vector into its x and y components. Given magnitude 10 and angle 0 degrees, set particle.vx to 10 and particle.vy to 0.",
+    "target_state": {
+      "vx": 10,
+      "vy": 0
+    },
+    "tolerance": 0.5,
+    "simulation_frames": 1,
+    "order": 80
+  },
+  {
+    "id": "math_trigonometry",
+    "title": "Trigonometry",
+    "layer": 9,
+    "prerequisites": [
+      "math_vectors"
+    ],
+    "objective": "Use sine and cosine to compute vector components. Given magnitude 5 and angle 60 degrees, set particle.vx and particle.vy to the correct components.",
+    "target_state": {
+      "vx": 2.5,
+      "vy": 4.33
+    },
+    "tolerance": 0.5,
+    "simulation_frames": 1,
+    "order": 90
+  }
+]

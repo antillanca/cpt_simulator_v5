@@ -1,0 +1,229 @@
+[
+  {
+    "id": "calculus_derivative",
+    "title": "Differential Calculus",
+    "layer": 18,
+    "prerequisites": [
+      "advanced_modeling"
+    ],
+    "objective": "Compute the numerical derivative of position with respect to time. Given that particle.x changes by 3.0 each frame, compute dx/dt and store in particle.vx.",
+    "target_state": {
+      "vx": 3.0
+    },
+    "tolerance": 0.5,
+    "simulation_frames": 1,
+    "order": 180
+  },
+  {
+    "id": "calculus_integral",
+    "title": "Integral Calculus",
+    "layer": 19,
+    "prerequisites": [
+      "calculus_derivative"
+    ],
+    "objective": "Compute the numerical integral (accumulation) of velocity. Given vx=2.0 constant over 10 frames, integrate to get total displacement and store in particle.x.",
+    "target_state": {
+      "x": 20.0
+    },
+    "tolerance": 1.0,
+    "simulation_frames": 10,
+    "order": 190
+  },
+  {
+    "id": "differential_equations",
+    "title": "Differential Equations",
+    "layer": 20,
+    "prerequisites": [
+      "calculus_integral"
+    ],
+    "objective": "Solve a simple ODE: dx/dt = -0.5 * x. Starting at x=100, evolve the system for 10 frames using Euler method. Store final value in particle.x.",
+    "target_state": {
+      "x": 0.59
+    },
+    "tolerance": 0.5,
+    "simulation_frames": 10,
+    "order": 200
+  },
+  {
+    "id": "linear_algebra_matrix",
+    "title": "Linear Algebra: Matrix Transform",
+    "layer": 21,
+    "prerequisites": [
+      "differential_equations"
+    ],
+    "objective": "Apply a 2D rotation matrix to a vector. Rotate the vector (vx=1, vy=0) by 90 degrees using a rotation matrix. Result should be (vx=0, vy=1).",
+    "target_state": {
+      "vx": 0,
+      "vy": 1
+    },
+    "tolerance": 0.1,
+    "simulation_frames": 1,
+    "order": 210
+  },
+  {
+    "id": "numerical_analysis_euler",
+    "title": "Numerical Analysis: Euler Method",
+    "layer": 22,
+    "prerequisites": [
+      "linear_algebra_matrix"
+    ],
+    "objective": "Use the Euler method to numerically integrate free fall. Starting at vy=0, apply gravity=9.81 each frame. After 5 frames store vy in particle.vy.",
+    "target_state": {
+      "vy": 49.05
+    },
+    "tolerance": 1.0,
+    "simulation_frames": 5,
+    "order": 220
+  },
+  {
+    "id": "lagrangian_mechanics",
+    "title": "Lagrangian Mechanics",
+    "layer": 23,
+    "prerequisites": [
+      "numerical_analysis_euler"
+    ],
+    "objective": "Derive motion from energy. For a particle of mass 1 in a potential V=0.5*k*x^2 with k=2 and x=3, compute the Lagrangian L=KE-PE and store in particle.x.",
+    "target_state": {
+      "x": -9.0
+    },
+    "tolerance": 1.0,
+    "simulation_frames": 1,
+    "order": 230
+  },
+  {
+    "id": "hamiltonian_mechanics",
+    "title": "Hamiltonian Mechanics",
+    "layer": 24,
+    "prerequisites": [
+      "lagrangian_mechanics"
+    ],
+    "objective": "Compute the Hamiltonian H=KE+PE for a particle with mass=1, vx=3, vy=0, and potential V=0.5*x^2 where x=2. Store H in particle.x.",
+    "target_state": {
+      "x": 6.5
+    },
+    "tolerance": 0.5,
+    "simulation_frames": 1,
+    "order": 240
+  },
+  {
+    "id": "electromagnetism_maxwell",
+    "title": "Advanced Electromagnetism",
+    "layer": 25,
+    "prerequisites": [
+      "hamiltonian_mechanics"
+    ],
+    "objective": "Simulate an electromagnetic wave: E-field oscillates as E=sin(x - c*t) where c=1. After 5 frames compute E at x=0 and store in particle.y.",
+    "target_state": {
+      "y": -0.959
+    },
+    "tolerance": 0.1,
+    "simulation_frames": 5,
+    "order": 250
+  },
+  {
+    "id": "special_relativity",
+    "title": "Special Relativity",
+    "layer": 26,
+    "prerequisites": [
+      "electromagnetism_maxwell"
+    ],
+    "objective": "Apply Lorentz time dilation. Given v=0.6c (where c=1), compute gamma=1/sqrt(1-v^2/c^2) and store in particle.x. Then compute dilated time for t=10 and store in particle.y.",
+    "target_state": {
+      "x": 1.25,
+      "y": 12.5
+    },
+    "tolerance": 0.1,
+    "simulation_frames": 1,
+    "order": 260
+  },
+  {
+    "id": "general_relativity_geodesic",
+    "title": "General Relativity: Geodesic",
+    "layer": 27,
+    "prerequisites": [
+      "special_relativity"
+    ],
+    "objective": "Compute the spacetime interval. Given delta_t=5, delta_x=3, compute ds^2 = c^2*dt^2 - dx^2 (c=1). Store result in particle.x.",
+    "target_state": {
+      "x": 16.0
+    },
+    "tolerance": 0.5,
+    "simulation_frames": 1,
+    "order": 270
+  },
+  {
+    "id": "quantum_mechanics_wavefunction",
+    "title": "Quantum Mechanics: Wave Function",
+    "layer": 28,
+    "prerequisites": [
+      "general_relativity_geodesic"
+    ],
+    "objective": "Compute the probability density |psi|^2 for a wavefunction psi=sin(pi*x) at x=0.5. Store the result in particle.x.",
+    "target_state": {
+      "x": 1.0
+    },
+    "tolerance": 0.05,
+    "simulation_frames": 1,
+    "order": 280
+  },
+  {
+    "id": "quantum_field_theory",
+    "title": "Quantum Field Theory: Excitation",
+    "layer": 29,
+    "prerequisites": [
+      "quantum_mechanics_wavefunction"
+    ],
+    "objective": "Model a quantum harmonic oscillator energy level. For level n=3, compute E=(n+0.5)*hbar*omega with hbar=1 and omega=1. Store in particle.x.",
+    "target_state": {
+      "x": 3.5
+    },
+    "tolerance": 0.1,
+    "simulation_frames": 1,
+    "order": 290
+  },
+  {
+    "id": "cosmology_expansion",
+    "title": "Cosmology: Universe Expansion",
+    "layer": 30,
+    "prerequisites": [
+      "quantum_field_theory"
+    ],
+    "objective": "Apply Hubble's law: recession velocity v = H0 * d. Given H0=70 and d=particle.x=100, compute v and store in particle.vx.",
+    "target_state": {
+      "vx": 7000.0
+    },
+    "tolerance": 10.0,
+    "simulation_frames": 1,
+    "order": 300
+  },
+  {
+    "id": "chaos_theory",
+    "title": "Chaos Theory: Lorenz System",
+    "layer": 31,
+    "prerequisites": [
+      "cosmology_expansion"
+    ],
+    "objective": "Simulate one step of the logistic map: x_n+1 = r * x * (1 - x) with r=3.9 and initial x=particle.x=0.5. Store x_n+1 in particle.x.",
+    "target_state": {
+      "x": 0.975
+    },
+    "tolerance": 0.01,
+    "simulation_frames": 1,
+    "order": 310
+  },
+  {
+    "id": "frontier_knowledge",
+    "title": "Physics and Mathematics Frontier",
+    "layer": 32,
+    "prerequisites": [
+      "chaos_theory"
+    ],
+    "objective": "Model Planck units: compute the Planck length L_p = sqrt(hbar*G/c^3) in natural units where hbar=G=c=1. Store result in particle.x.",
+    "target_state": {
+      "x": 1.0
+    },
+    "tolerance": 0.01,
+    "simulation_frames": 1,
+    "order": 320
+  }
+]

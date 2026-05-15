@@ -1,0 +1,12 @@
+venv/
+__pycache__/
+*.log
+*.pid
+.env
+.agents/
+.codex/
+rules.db
+snapshots/
+node_modules/
+dist/
+.DS_Store

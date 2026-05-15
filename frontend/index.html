@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPT Cognitive Engine v2 | Autonomous Training Monitor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:        #05070a;
+            --surface:   rgba(15, 20, 28, 0.75);
+            --cyan:      #00f2ff;
+            --purple:    #7000ff;
+            --green:     #00ff94;
+            --amber:     #ffb700;
+            --red:       #ff4b4b;
+            --muted:     #94a3b8;
+            --border:    rgba(255,255,255,0.08);
+            --text:      #e2e8f0;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── HEADER ── */
+        header {
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+            flex-shrink: 0;
+        }
+        .logo {
+            display: flex;
+            align-items: baseline;
+            gap: 0.6rem;
+        }
+        .logo h1 {
+            font-weight: 800;
+            font-size: 1.3rem;
+            letter-spacing: -0.02em;
+            background: linear-gradient(90deg, var(--cyan), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .logo span {
+            font-size: 0.7rem;
+            color: var(--muted);
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 0.1em;
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .badge {
+            font-size: 0.7rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 2rem;
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,0.04);
+            color: var(--muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .badge.online { border-color: var(--cyan); color: var(--cyan); background: rgba(0,242,255,0.07); }
+        .badge.running { border-color: var(--green); color: var(--green); background: rgba(0,255,148,0.07); }
+
+        /* ── LAYOUT ── */
+        main {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            grid-template-rows: 1fr;
+            gap: 1rem;
+            padding: 1rem;
+            overflow: hidden;
+        }
+
+        /* ── LEFT PANEL — Simulation + Monitor ── */
+        #left-col {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            overflow: hidden;
+        }
+
+        /* Tab bar */
+        .tab-bar {
+            display: flex;
+            gap: 0.25rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 0.3rem;
+            flex-shrink: 0;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            background: transparent;
+            color: var(--muted);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            letter-spacing: 0.02em;
+        }
+        .tab-btn.active {
+            background: rgba(0,242,255,0.12);
+            color: var(--cyan);
+        }
+
+        /* Tab content areas */
+        .tab-content {
+            flex: 1;
+            overflow: hidden;
+            display: none;
+        }
+        .tab-content.active { display: flex; flex-direction: column; gap: 1rem; overflow: hidden; }
+
+        /* Simulation canvas */
+        #viewport-container {
+            flex: 1;
+            background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
+            border-radius: 1rem;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            box-shadow: inset 0 0 60px rgba(0,0,0,0.5);
+        }
+        canvas { width: 100%; height: 100%; display: block; }
+
+        /* Cognitive monitor grid */
+        #monitor-tab {
+            overflow-y: auto;
+            padding-right: 0.25rem;
+        }
+        .monitor-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+        }
+
+        /* ── CARDS ── */
+        .card {
+            background: var(--surface);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.25rem;
+        }
+        .card-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--muted);
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            line-height: 1;
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .stat-label { font-size: 0.75rem; color: var(--muted); margin-top: 0.25rem; }
+
+        /* Progress bar */
+        .progress-wrap { margin-top: 0.5rem; }
+        .progress-bar-bg {
+            height: 6px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            background: linear-gradient(90deg, var(--cyan), var(--purple));
+            transition: width 0.8s ease;
+        }
+        .progress-label {
+            font-size: 0.7rem;
+            color: var(--muted);
+            margin-top: 0.3rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Status dot */
+        .status-dot {
+            display: inline-block;
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            margin-right: 0.4rem;
+        }
+        .dot-green { background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse 2s infinite; }
+        .dot-amber { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
+        .dot-red   { background: var(--red); }
+        .dot-muted { background: var(--muted); }
+        @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+
+        /* Module list */
+        .module-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.45rem 0.6rem;
+            border-radius: 0.4rem;
+            font-size: 0.78rem;
+            transition: background 0.15s;
+        }
+        .module-row:hover { background: rgba(255,255,255,0.03); }
+        .module-name { font-family: 'JetBrains Mono', monospace; color: var(--text); }
+        .module-level { color: var(--muted); font-size: 0.7rem; }
+        .module-tag {
+            font-size: 0.65rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 1rem;
+            font-weight: 600;
+        }
+        .tag-confirmed { background: rgba(0,255,148,0.12); color: var(--green); }
+        .tag-pending   { background: rgba(255,183,0,0.12); color: var(--amber); }
+        .tag-repair    { background: rgba(255,75,75,0.12); color: var(--red); }
+
+        /* Intent stream */
+        .intent-entry {
+            padding: 0.5rem 0.75rem;
+            margin-bottom: 0.3rem;
+            border-left: 2px solid var(--purple);
+            font-size: 0.8rem;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--cyan);
+            background: rgba(112,0,255,0.05);
+            border-radius: 0 0.4rem 0.4rem 0;
+        }
+        .intent-entry .ts { color: var(--muted); font-size: 0.68rem; display: block; margin-bottom: 0.2rem; }
+
+        /* Orchestrator log */
+        .orch-log-entry {
+            font-size: 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--muted);
+            padding: 0.2rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+        .orch-log-entry.ok  { color: var(--green); }
+        .orch-log-entry.err { color: var(--red); }
+        .orch-log-entry.inf { color: var(--cyan); }
+
+        /* Models list */
+        .model-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            border-radius: 0.4rem;
+            padding: 0.3rem 0.6rem;
+            font-size: 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            margin: 0.2rem;
+        }
+        .model-chip.loaded { border-color: rgba(0,242,255,0.3); color: var(--cyan); }
+
+        /* ── RIGHT SIDEBAR ── */
+        #sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            overflow-y: auto;
+        }
+
+        /* Chat */
+        .chat-input-row {
+            display: flex;
+            gap: 0.5rem;
+        }
+        input[type="text"] {
+            flex: 1;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            color: white;
+            padding: 0.7rem 0.9rem;
+            outline: none;
+            font-family: inherit;
+            font-size: 0.85rem;
+            transition: border-color 0.2s;
+        }
+        input[type="text"]:focus { border-color: var(--cyan); }
+
+        textarea {
+            width: 100%;
+            height: 130px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            color: var(--cyan);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            padding: 0.9rem;
+            resize: none;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        textarea:focus { border-color: var(--cyan); }
+
+        button {
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            border: none;
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            color: white;
+            box-shadow: 0 4px 15px rgba(0,242,255,0.2);
+        }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,242,255,0.35); }
+        .btn-icon { padding: 0.75rem; }
+
+        /* System logs */
+        #sys-logs {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            overflow-y: auto;
+            color: var(--muted);
+            flex: 1;
+            min-height: 100px;
+        }
+        .log-entry { margin-bottom: 0.35rem; padding-left: 0.5rem; border-left: 2px solid var(--border); }
+        .log-entry.success { color: var(--green); border-color: var(--green); }
+        .log-entry.error   { color: var(--red);   border-color: var(--red); }
+
+        /* Scrollbars */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+
+        /* Full-width card helper */
+        .span-3 { grid-column: span 3; }
+        .span-2 { grid-column: span 2; }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <header>
+        <div class="logo">
+            <h1>CPT Cognitive Engine</h1>
+            <span>v2 · AUTONOMOUS</span>
+        </div>
+        <div class="header-right">
+            <span class="badge" id="orch-badge">⚙ ORCHESTRATOR IDLE</span>
+            <span class="badge" id="ws-status">DISCONNECTED</span>
+        </div>
+    </header>
+
+    <main>
+        <!-- LEFT COLUMN -->
+        <div id="left-col">
+            <!-- Tab Bar -->
+            <div class="tab-bar">
+                <button class="tab-btn active" data-tab="sim-tab">🌌 Simulation</button>
+                <button class="tab-btn" data-tab="monitor-tab">🧠 Cognitive Monitor</button>
+                <button class="tab-btn" data-tab="orch-tab">⚙ Orchestrator</button>
+                <button class="tab-btn" data-tab="language-tab">🗣 Language</button>
+            </div>
+
+            <!-- TAB: Simulation -->
+            <div id="sim-tab" class="tab-content active">
+                <div id="viewport-container">
+                    <canvas id="universoCanvas"></canvas>
+                </div>
+            </div>
+
+            <!-- TAB: Cognitive Monitor -->
+            <div id="monitor-tab" class="tab-content">
+                <div class="monitor-grid">
+                    <!-- Stats row -->
+                    <div class="card">
+                        <div class="card-title">Total Modules</div>
+                        <div class="stat-value" id="stat-total">—</div>
+                        <div class="stat-label">in knowledge registry</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Confirmed</div>
+                        <div class="stat-value" id="stat-confirmed" style="background: linear-gradient(135deg, var(--green), var(--cyan)); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">—</div>
+                        <div class="stat-label">successfully assimilated</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Pending</div>
+                        <div class="stat-value" id="stat-pending" style="background: linear-gradient(135deg, var(--amber), var(--red)); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">—</div>
+                        <div class="stat-label">awaiting training</div>
+                    </div>
+
+                    <!-- Progress card -->
+                    <div class="card span-3">
+                        <div class="card-title">Curriculum Progress</div>
+                        <div class="progress-wrap">
+                            <div class="progress-bar-bg">
+                                <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+                            </div>
+                            <div class="progress-label">
+                                <span id="progress-text">Loading…</span>
+                                <span id="progress-pct">0%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Loaded Neural Filters -->
+                    <div class="card span-2">
+                        <div class="card-title">Loaded Neural Filters (.pt)</div>
+                        <div id="models-list" style="display:flex; flex-wrap:wrap; margin-top:0.25rem;">
+                            <span style="color:var(--muted); font-size:0.8rem;">Scanning models/…</span>
+                        </div>
+                    </div>
+
+                    <!-- Engine split -->
+                    <div class="card">
+                        <div class="card-title">Engine Split</div>
+                        <div style="margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                            <div style="display:flex; justify-content:space-between; font-size:0.82rem;">
+                                <span>🏭 Tabular (DPO)</span>
+                                <span id="split-tabular" style="color:var(--cyan);">—</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; font-size:0.82rem;">
+                                <span>🧠 Lua (StudentEngine)</span>
+                                <span id="split-lua" style="color:var(--purple);">—</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Module list -->
+                    <div class="card span-3" style="max-height: 260px; overflow-y: auto;">
+                        <div class="card-title">Module Registry</div>
+                        <div id="module-list" style="margin-top:0.25rem;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: Orchestrator -->
+            <div id="orch-tab" class="tab-content">
+                <div class="monitor-grid">
+                    <!-- Current target -->
+                    <div class="card span-3" style="display:flex; align-items:center; justify-content:space-between;">
+                        <div>
+                            <div class="card-title">Current Target</div>
+                            <div id="orch-target" style="font-size:1.1rem; font-weight:700; color:var(--cyan); font-family:'JetBrains Mono', monospace;">—</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div class="card-title">Engine</div>
+                            <div id="orch-engine" style="font-size:1rem; font-weight:700; color:var(--amber);">—</div>
+                        </div>
+                    </div>
+
+                    <!-- Kaggle status -->
+                    <div class="card">
+                        <div class="card-title">☁ Kaggle GPU</div>
+                        <div style="font-size:0.85rem; display:flex; align-items:center; gap:0.5rem; margin-top:0.25rem;">
+                            <span class="status-dot" id="kaggle-dot" style="background:var(--muted)"></span>
+                            <span id="kaggle-status">Not running</span>
+                        </div>
+                    </div>
+
+                    <!-- StudentEngine -->
+                    <div class="card">
+                        <div class="card-title">🧠 StudentEngine</div>
+                        <div style="font-size:0.85rem; display:flex; align-items:center; gap:0.5rem; margin-top:0.25rem;">
+                            <span class="status-dot" id="student-dot" style="background:var(--muted)"></span>
+                            <span id="student-status">Idle</span>
+                        </div>
+                    </div>
+
+                    <!-- Repairs -->
+                    <div class="card">
+                        <div class="card-title">🛠 In Repair</div>
+                        <div style="font-size:1.4rem; font-weight:800; color:var(--red); margin-top:0.1rem;" id="stat-repair">—</div>
+                        <div style="font-size:0.72rem; color:var(--muted);">modules need regen</div>
+                    </div>
+
+                    <!-- Orchestrator log -->
+                    <div class="card span-3" style="flex:1; min-height:200px; max-height:320px;">
+                        <div class="card-title" style="display:flex; justify-content:space-between;">
+                            <span>Orchestrator Log</span>
+                            <span id="orch-last-update" style="font-family:'JetBrains Mono',monospace; font-size:0.65rem; color:var(--muted);">—</span>
+                        </div>
+                        <div id="orch-log" style="overflow-y:auto; height:260px; margin-top:0.5rem; padding-right:0.25rem;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: Language -->
+            <div id="language-tab" class="tab-content">
+                <div class="monitor-grid">
+                    <div class="card span-3" style="background: linear-gradient(135deg, rgba(112,0,255,0.08), rgba(0,242,255,0.05));">
+                        <div class="card-title">🗣 Linguistic Intent Stream</div>
+                        <p style="font-size:0.8rem; color:var(--muted); margin-bottom:0.75rem;">
+                            Real-time declarations generated by the SyntaxEngine (SVO grammar) from physical planning events.
+                        </p>
+                        <div id="intent-stream" style="overflow-y:auto; max-height: 340px;"></div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">SymbolEngine Vocab</div>
+                        <div style="font-size:0.78rem; color:var(--muted); line-height:2; font-family:'JetBrains Mono',monospace;">
+                            [SELF] · [OTHER]<br>
+                            [GOAL] · [BLOCK]<br>
+                            [APPROACH] · [RETREAT]<br>
+                            [AVOID] · [PUSH]<br>
+                            [NEAR] · [HIT]
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">SyntaxEngine Grammar</div>
+                        <div style="font-size:0.78rem; color:var(--muted); line-height:2;">
+                            Pattern: <span style="color:var(--cyan);">S V O</span><br>
+                            Subject: <span style="color:var(--purple);">[SELF]</span><br>
+                            Verb: <span style="color:var(--purple);">[APPROACH]</span><br>
+                            Object: <span style="color:var(--purple);">[GOAL]</span><br>
+                            Result: <span style="color:var(--green); font-style:italic;">"I approach the target."</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT SIDEBAR -->
+        <div id="sidebar">
+            <!-- i@ Chat -->
+            <div class="card">
+                <div class="card-title">Asistente i@ (Natural Language)</div>
+                <div class="chat-input-row">
+                    <input type="text" id="chatInput" placeholder='Ej: "Haz que rebote en las paredes"'>
+                    <button id="sendChatBtn" class="btn-primary btn-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Lua rule sandbox -->
+            <div class="card">
+                <div class="card-title">Experimental Rule (Lua Sandbox)</div>
+                <textarea id="ruleInput" placeholder="-- Escribe tu regla aquí&#10;particle.y = particle.y + 0.5">particle.y = particle.y + 0.5</textarea>
+                <button id="runBtn" class="btn-primary">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                    RUN RULE
+                </button>
+            </div>
+
+            <!-- Quick stats strip -->
+            <div class="card" style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:0.5rem; text-align:center; padding:0.9rem;">
+                <div>
+                    <div style="font-size:1.3rem; font-weight:800; color:var(--green);" id="qs-confirmed">—</div>
+                    <div style="font-size:0.65rem; color:var(--muted);">CONFIRMED</div>
+                </div>
+                <div>
+                    <div style="font-size:1.3rem; font-weight:800; color:var(--amber);" id="qs-pending">—</div>
+                    <div style="font-size:0.65rem; color:var(--muted);">PENDING</div>
+                </div>
+                <div>
+                    <div style="font-size:1.3rem; font-weight:800; color:var(--red);" id="qs-repair">—</div>
+                    <div style="font-size:0.65rem; color:var(--muted);">REPAIR</div>
+                </div>
+            </div>
+
+            <!-- System Logs -->
+            <div class="card" style="flex:1; display:flex; flex-direction:column; overflow:hidden;">
+                <div class="card-title">System Logs</div>
+                <div id="sys-logs">
+                    <div class="log-entry">System initialized…</div>
+                    <div class="log-entry">Connecting to API…</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script type="module" src="./src/main.ts"></script>
+</body>
+</html>

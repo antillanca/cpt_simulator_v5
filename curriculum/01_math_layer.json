@@ -1,0 +1,77 @@
+[
+  {
+    "id": "math_number_representation",
+    "title": "Number Representation",
+    "layer": 3,
+    "prerequisites": [
+      "layer_02_operations"
+    ],
+    "objective": "Represent and manipulate integers, negative numbers, fractions, powers, and roots. Compute 2^3 and store the result in particle.x.",
+    "target_state": {
+      "x": 8
+    },
+    "tolerance": 0.5,
+    "simulation_frames": 1,
+    "order": 30
+  },
+  {
+    "id": "math_relations_proportions",
+    "title": "Relations and Proportions",
+    "layer": 4,
+    "prerequisites": [
+      "math_number_representation"
+    ],
+    "objective": "Apply ratios, scales, and percentages. If particle.x is 100, compute 25% of its value and store in particle.y.",
+    "target_state": {
+      "y": 25
+    },
+    "tolerance": 0.5,
+    "simulation_frames": 1,
+    "order": 40
+  },
+  {
+    "id": "math_functions",
+    "title": "Functions",
+    "layer": 6,
+    "prerequisites": [
+      "layer_05_algebra"
+    ],
+    "objective": "Define a deterministic transformation function. Given input particle.x, compute output as 3*x + 2 and store in particle.y.",
+    "target_state": {
+      "y": 17
+    },
+    "tolerance": 0.5,
+    "simulation_frames": 1,
+    "order": 60
+  },
+  {
+    "id": "layer_02_operations",
+    "title": "Fundamental Operations",
+    "layer": 2,
+    "prerequisites": [
+      "layer_01_counting"
+    ],
+    "objective": "Apply addition, subtraction, multiplication, and division.",
+    "target_state": {
+      "x": 5
+    },
+    "tolerance": 0.0,
+    "simulation_frames": 1,
+    "order": 20
+  },
+  {
+    "id": "layer_05_algebra",
+    "title": "Basic Algebra",
+    "layer": 5,
+    "prerequisites": [
+      "layer_02_operations"
+    ],
+    "objective": "Use variables to represent unknown quantities in equations.",
+    "target_state": {
+      "x": 10
+    },
+    "tolerance": 0.0,
+    "simulation_frames": 1,
+    "order": 50
+  }
+]

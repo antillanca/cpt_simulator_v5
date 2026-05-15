@@ -1,0 +1,894 @@
+{
+  "modules": {
+    "layer_00_existence": {
+      "level": 0,
+      "subject": "logic",
+      "status": "confirmed",
+      "description": "Principle of Identity (A = A). Define the inherent identity of the particle. Set particle.essence to 1 and particle.is_self to 1.",
+      "lua_code": "function layer_00_existence(args)\n    return 1\nend",
+      "uses": [],
+      "target_state": {
+        "essence": 1,
+        "is_self": 1
+      },
+      "tolerance": 0.1,
+      "simulation_frames": 1,
+      "order": 0,
+      "engine_type": "tabular",
+      "filter_file": "logic_tabular_filter.pt",
+      "invariants": []
+    },
+    "layer_01_counting": {
+      "level": 1,
+      "subject": "matematica",
+      "status": "confirmed",
+      "description": "Increment or decrement a value by 1. Represent quantity.",
+      "lua_code": "function layer_01_counting(args)\n    return 1\nend",
+      "uses": [
+        "layer_00_existence"
+      ],
+      "confirmed_by": "kaggle_orchestrator",
+      "confirmed_at": "2026-05-12T22:56:41",
+      "engine_type": "tabular",
+      "filter_file": "matematica_tabular_filter.pt",
+      "invariants": []
+    },
+    "layer_02_operations": {
+      "level": 2,
+      "subject": "matematica",
+      "status": "confirmed",
+      "description": "Apply addition, subtraction, multiplication, and division.",
+      "lua_code": "function layer_02_operations(args)\n    return args[1] + args[2] - args[3] / args[4]\nend",
+      "uses": [
+        "layer_01_counting"
+      ],
+      "confirmed_by": "kaggle_orchestrator",
+      "confirmed_at": "2026-05-12T22:56:48",
+      "engine_type": "tabular",
+      "filter_file": "matematica_tabular_filter.pt",
+      "invariants": []
+    },
+    "layer_05_algebra": {
+      "level": 5,
+      "subject": "matematica",
+      "status": "confirmed",
+      "description": "Use variables to represent unknown quantities in equations.",
+      "lua_code": "function layer_05_algebra(args)\n    return args[1] * args[2] / args[3]\nend",
+      "uses": [
+        "layer_02_operations"
+      ],
+      "confirmed_by": "kaggle_orchestrator",
+      "confirmed_at": "2026-05-12T22:56:55",
+      "engine_type": "tabular",
+      "filter_file": "matematica_tabular_filter.pt",
+      "invariants": []
+    },
+    "layer_10_kinematics": {
+      "level": 10,
+      "subject": "fisica",
+      "status": "confirmed",
+      "description": "Describe motion over time using position, velocity, and acceleration.",
+      "lua_code": "local function moveParticle(particle)\n    local dx = particle.x - particle.x\n    local dy = particle.y - particle.y\n    local dist = math.sqrt(dx * dx + dy * dy)\n    if dist > 1 then\n        particle.vx = (dx / dist) * particle.speed\n        particle.vy = (dy / dist) * particle.speed\n    end\nend",
+      "uses": [
+        "layer_05_algebra"
+      ],
+      "confirmed_by": "kaggle_orchestrator",
+      "confirmed_at": "2026-05-12T22:57:04",
+      "engine_type": "tabular",
+      "filter_file": "fisica_tabular_filter.pt",
+      "invariants": []
+    },
+    "math_number_representation": {
+      "level": 3,
+      "subject": "math",
+      "status": "confirmed",
+      "description": "Represent and manipulate integers, negative numbers, fractions, powers, and roots. Compute 2^3 and store the result in particle.x.",
+      "lua_code": "function math_number_representation(args)\n    local result = math.pow(args[1], args[2])\n    return result\nend",
+      "uses": [
+        "layer_02_operations"
+      ],
+      "target_state": {
+        "x": 8
+      },
+      "tolerance": 0.5,
+      "simulation_frames": 1,
+      "order": 30,
+      "confirmed_by": "kaggle_orchestrator",
+      "confirmed_at": "2026-05-13T07:36:50",
+      "engine_type": "tabular",
+      "filter_file": "math_tabular_filter.pt",
+      "invariants": []
+    },
+    "math_relations_proportions": {
+      "level": 4,
+      "subject": "math",
+      "status": "confirmed",
+      "description": "Apply ratios, scales, and percentages. If particle.x is 100, compute 25% of its value and store in particle.y.",
+      "lua_code": "function math_relations_proportions(args)\n    local value = args[1]\n    local percentage = args[2]\n    local result = math.pow(value, percentage / 100)\n    return result\nend",
+      "uses": [
+        "math_number_representation"
+      ],
+      "target_state": {
+        "y": 25
+      },
+      "tolerance": 0.5,
+      "simulation_frames": 1,
+      "order": 40,
+      "confirmed_by": "kaggle_orchestrator",
+      "confirmed_at": "2026-05-13T07:36:59",
+      "engine_type": "tabular",
+      "filter_file": "math_tabular_filter.pt",
+      "invariants": []
+    },
+    "math_functions": {
+      "level": 6,
+      "subject": "math",
+      "status": "confirmed",
+      "description": "Define a deterministic transformation function. Given input particle.x, compute output as 3*x + 2 and store in particle.y.",
+      "lua_code": "function math_functions(args)\n    return 3 * args[1] + 2\nend",
+      "uses": [
+        "layer_05_algebra"
+      ],
+      "target_state": {
+        "y": 17
+      },
+      "tolerance": 0.5,
+      "simulation_frames": 1,
+      "order": 60,
+      "confirmed_by": "kaggle_orchestrator",
+      "confirmed_at": "2026-05-13T07:37:05",
+      "engine_type": "tabular",
+      "filter_file": "math_tabular_filter.pt",
+      "invariants": []
+    },
+    "geometry_basics": {
+      "level": 7,
+      "subject": "geometry",
+      "status": "confirmed",
+      "description": "Calculate the Euclidean distance between two points. Given particle at (0,0) and target at (3,4), compute distance and store in particle.x.",
+      "lua_code": "function geometry_basics(args)\n    return math.sqrt(args[1] * args[1] + args[2] * args[2])\nend",
+      "uses": [
+        "math_functions"
+      ],
+      "target_state": {
+        "x": 5
+      },
+      "tolerance": 0.5,
+      "simulation_frames": 1,
+      "order": 70,
+      "confirmed_by": "kaggle_orchestrator",
+      "confirmed_at": "2026-05-13T07:37:13",
+      "engine_type": "tabular",
+      "filter_file": "geometry_tabular_filter.pt",
+      "invariants": []
+    },
+    "math_vectors": {
+      "level": 8,
+      "subject": "math",
+      "status": "confirmed",
+      "description": "Decompose a vector into its x and y components. Given magnitude 10 and angle 0 degrees, set particle.vx to 10 and particle.vy to 0.",
+      "lua_code": "function math_vectors(args)\n    return math.sqrt(args[1] * args[1] + args[2] * args[2])\nend",
+      "uses": [
+        "geometry_basics"
+      ],
+      "target_state": {
+        "vx": 10,
+        "vy": 0
+      },
+      "tolerance": 0.5,
+      "simulation_frames": 1,
+      "order": 80,
+      "confirmed_by": "kaggle_orchestrator",
+      "confirmed_at": "2026-05-13T07:37:20",
+      "engine_type": "tabular",
+      "filter_file": "math_tabular_filter.pt",
+      "invariants": []
+    },
+    "math_trigonometry": {
+      "level": 9,
+      "subject": "math",
+      "status": "confirmed",
+      "description": "Use sine and cosine to compute vector components. Given magnitude 5 and angle 60 degrees, set particle.vx and particle.vy to the correct components.",
+      "lua_code": "function math_trigonometry(args)\n    local magnitude, angle = args\n    local x = magnitude * math.cos(angle * math.pi / 180)\n    local y = magnitude * math.sin(angle * math.pi / 180)\n    return x, y\nend",
+      "uses": [
+        "math_vectors"
+      ],
+      "target_state": {
+        "vx": 2.5,
+        "vy": 4.33
+      },
+      "tolerance": 0.5,
+      "simulation_frames": 1,
+      "order": 90,
+      "confirmed_by": "kaggle_orchestrator",
+      "confirmed_at": "2026-05-13T07:37:29",
+      "engine_type": "tabular",
+      "filter_file": "math_tabular_filter.pt",
+      "invariants": []
+    },
+    "dynamics_newton_second_law": {
+      "level": 11,
+      "subject": "dynamics",
+      "status": "confirmed",
+      "description": "Apply a constant force to a particle of mass 2.0. Set particle.vx to increase by 3.0 per frame (F=ma, a=F/m=6/2=3).",
+      "lua_code": "local particle = {\n    x = 0,\n    y = 0,\n    vx = 0,\n    vy = 0\n}\n\nfunction update()\n    particle.vx = 3.0\nend",
+      "uses": [
+        "layer_10_kinematics"
+      ],
+      "target_state": {
+        "vx": 3.0
+      },
+      "tolerance": 0.5,
+      "simulation_frames": 1,
+      "order": 110,
+      "confirmed_by": "kaggle_orchestrator",
+      "confirmed_at": "2026-05-13T07:37:38",
+      "engine_type": "tabular",
+      "filter_file": "dynamics_tabular_filter.pt",
+      "invariants": []
+    },
+    "energy_kinetic": {
+      "level": 12,
+      "subject": "energy",
+      "status": "confirmed",
+      "description": "Compute the kinetic energy of a particle with mass 2.0 and velocity vx=3.0, vy=4.0. Store the result (0.5*m*v^2) in particle.x.",
+      "lua_code": "function update()\n    particle.x = 0.5 * 2.0 * 3.0 * 3.0\nend\n\n-- Initialize particle with default values\nlocal particle = {\n    x = 0,\n    y = 0,\n    vx = 0,\n    vy = 0\n}\n\nfunction update_particle(particle)\n    particle.vx = 3.0\nend\n\nfunction update()\n    particle.x = 0.",
+      "uses": [
+        "dynamics_newton_second_law"
+      ],
+      "target_state": {
+        "x": 12.5
+      },
+      "tolerance": 0.5,
+      "simulation_frames": 1,
+      "order": 120,
+      "rejection_reason": "Needs work: Test case failed",
+      "rejection_count": 2,
+      "confirmed_by": "owl-alpha",
+      "confirmed_at": "2026-05-15T07:14:22",
+      "engine_type": "lua",
+      "filter_file": null,
+      "invariants": []
+    },
+    "energy_potential": {
+      "level": 12,
+      "subject": "energy",
+      "status": "confirmed",
+      "description": "Compute gravitational potential energy. Given mass=2.0, gravity=9.81, and height=particle.y=10, store m*g*h in particle.x.",
+      "lua_code": "if particle then\n    local g = 9.8\n    local m = 1\n    particle.pe = m * g * (600 - particle.y)\nend",
+      "uses": [
+        "energy_kinetic"
+      ],
+      "target_state": {
+        "x": 196.2
+      },
+      "tolerance": 1.0,
+      "simulation_frames": 1,
+      "order": 125,
+      "engine_type": "lua",
+      "filter_file": null,
+      "invariants": [],
+      "rejection_reason": "",
+      "rejection_count": 0,
+      "code_size": 249,
+      "confirmed_by": "owl-alpha",
+      "confirmed_at": "2026-05-15T12:27:16"
+    },
+    "energy_conservation": {
+      "level": 12,
+      "subject": "energy",
+      "status": "confirmed",
+      "description": "Verify total energy conservation. A particle falls from y=100 with vx=0. After 20 frames, compute KE+PE and store in particle.x. Total should remain constant.",
+      "lua_code": "if particle.x < 0 then particle.x = 0; particle.vx = -particle.vx elseif particle.x > 800 then particle.x = 800; particle.vx = -particle.vx end\nif particle.y < 0 then particle.y = 0; particle.vy = -particle.vy elseif particle.y > 600 then particle.y = 600; particle.vy = -particle.vy end",
+      "uses": [
+        "energy_potential"
+      ],
+      "target_state": {
+        "x": 1962
+      },
+      "tolerance": 5.0,
+      "simulation_frames": 20,
+      "order": 128,
+      "rejection_reason": "",
+      "rejection_count": 0,
+      "confirmed_by": "owl-alpha",
+      "confirmed_at": "2026-05-15T12:28:39",
+      "engine_type": "lua",
+      "filter_file": null,
+      "invariants": [
+        "energy_conservation"
+      ]
+    },
+    "waves_oscillation": {
+      "level": 13,
+      "subject": "waves",
+      "status": "rejected",
+      "description": "Make the particle oscillate horizontally using sine. Set particle.x = 50 * sin(time) where time is the frame counter. After 15 frames, particle.x should be near 0.",
+      "lua_code": null,
+      "uses": [
+        "energy_conservation"
+      ],
+      "target_state": {
+        "x": 0
+      },
+      "tolerance": 5.0,
+      "simulation_frames": 15,
+      "order": 130,
+      "engine_type": "lua",
+      "filter_file": null,
+      "invariants": [],
+      "rejection_count": 4,
+      "rejection_reason": "Error de Sandbox: /sandbox/sandbox_runner.lua:52: Failed to compile rule: [string \"user_rule\"]:1: syntax error near 'a'"
+    },
+    "waves_frequency_amplitude": {
+      "level": 13,
+      "subject": "waves",
+      "status": "confirmed",
+      "description": "Control wave parameters. Set particle.y = amplitude * sin(2 * pi * frequency * t) with amplitude=30 and frequency=0.1. After 10 frames, particle.y should be near 0.",
+      "lua_code": "-- Wave motion\nlocal speed = 2\nlocal amplitude = 50\nlocal frequency = 0.02\nlocal centerY = 300\nparticle.x = (particle.x + speed) % 800\nparticle.y = centerY + amplitude * math.sin(frequency * particle.x)",
+      "uses": [
+        "waves_oscillation"
+      ],
+      "target_state": {
+        "y": 0
+      },
+      "tolerance": 3.0,
+      "simulation_frames": 10,
+      "order": 135,
+      "rejection_reason": "Error de Sandbox: /sandbox/sandbox_runner.lua:52: Failed to compile rule: [string \"user_rule\"]:1: syntax error near 'code'",
+      "rejection_count": 2,
+      "confirmed_by": "owl-alpha",
+      "confirmed_at": "2026-05-15T13:01:47",
+      "engine_type": "lua",
+      "filter_file": null,
+      "invariants": []
+    },
+    "electricity_ohm_law": {
+      "level": 14,
+      "subject": "electricity",
+      "status": "confirmed",
+      "description": "Apply Ohm's law V=I*R. Given voltage=12 and resistance=4, compute current I=V/R and store in particle.x. Then compute power P=V*I and store in particle.y.",
+      "lua_code": "local particle = {\n    x = 0,\n    y = 0,\n    vx = 0,\n    vy = 0\n}\n\nlocal voltage = 12\nlocal resistance = 4\n\n-- Compute current I = V/R\nlocal I = voltage / resistance\n\n-- Store current in particle.x\nparticle.x = I\n\n-- Compute power P = V*I\nlocal P = voltage * I\n\n-- Store power in particle.y\nparticle.y = P",
+      "uses": [
+        "waves_frequency_amplitude"
+      ],
+      "target_state": {
+        "x": 3,
+        "y": 36
+      },
+      "tolerance": 0.5,
+      "simulation_frames": 1,
+      "order": 140,
+      "confirmed_by": "owl-alpha",
+      "confirmed_at": "2026-05-13T07:39:37",
+      "engine_type": "lua",
+      "filter_file": null,
+      "invariants": []
+    },
+    "magnetism_lorentz_force": {
+      "level": 14,
+      "subject": "magnetism",
+      "status": "rejected",
+      "description": "Apply Lorentz force F=q*v*B on a charged particle. Given q=1, v=particle.vx=5, B=2, compute force and update particle.vy accordingly.",
+      "lua_code": null,
+      "uses": [
+        "electricity_ohm_law"
+      ],
+      "target_state": {
+        "vy": 10
+      },
+      "tolerance": 1.0,
+      "simulation_frames": 1,
+      "order": 145,
+      "rejection_reason": "Error de Sandbox: /sandbox/sandbox_runner.lua:52: Failed to compile rule: [string \"user_rule\"]:1: unexpected symbol near 'then'",
+      "rejection_count": 6,
+      "confirmed_by": null,
+      "confirmed_at": "2026-05-13T07:39:53",
+      "engine_type": "lua",
+      "filter_file": null,
+      "invariants": []
+    },
+    "thermodynamics_temperature": {
+      "level": 15,
+      "subject": "thermodynamics",
+      "status": "confirmed",
+      "description": "Model temperature change via heat transfer. Given mass=2, specific_heat=1, heat_input=100, compute delta_T = Q/(m*c) and store in particle.x.",
+      "lua_code": "function thermodynamics_temperature(args)\n    local mass, specific_heat, heat_input = args\n    local delta_T = Q / (m * c)\n    particle.x = delta_T\n    return particle.x\nend",
+      "uses": [
+        "magnetism_lorentz_force"
+      ],
+      "target_state": {
+        "x": 50
+      },
+      "tolerance": 0.5,
+      "simulation_frames": 1,
+      "order": 150,
+      "confirmed_by": "owl-alpha",
+      "confirmed_at": "2026-05-13T07:40:01",
+      "engine_type": "lua",
+      "filter_file": null,
+      "invariants": []
+    },
+    "thermodynamics_entropy": {
+      "level": 15,
+      "subject": "thermodynamics",
+      "status": "confirmed",
+      "description": "Compute entropy change. Given Q=100 and T=300, compute delta_S = Q/T and store in particle.x.",
+      "lua_code": "function thermodynamics_entropy(args)\n    local Q, T = args\n    local delta_S = Q / T\n    return delta_S\nend",
+      "uses": [
+        "thermodynamics_temperature"
+      ],
+      "target_state": {
+        "x": 0.333
+      },
+      "tolerance": 0.01,
+      "simulation_frames": 1,
+      "order": 155,
+      "confirmed_by": "owl-alpha",
+      "confirmed_at": "2026-05-13T07:40:09",
+      "engine_type": "lua",
+      "filter_file": null,
+      "invariants": []
+    },
+    "probability_statistics": {
+      "level": 16,
+      "subject": "probability",
+      "status": "confirmed",
+      "description": "Compute the mean of 5 random values. Generate 5 values using math.random(1,100), compute their average, and store in particle.x.",
+      "lua_code": "function probability_statistics(args)\n    local values = {}\n    for _ = 1,5 do\n        local r = math.random(1, 100)\n        table.insert(values, r)\n    end\n    local average = table.concat(values, \"/\")\n    return average\nend",
+      "uses": [
+        "thermodynamics_entropy"
+      ],
+      "target_state": {
+        "x": 50
+      },
+      "tolerance": 20.0,
+      "simulation_frames": 1,
+      "order": 160,
+      "confirmed_by": "owl-alpha",
+      "confirmed_at": "2026-05-13T07:40:18",
+      "engine_type": "lua",
+      "filter_file": null,
+      "invariants": []
+    },
+    "advanced_modeling": {
+      "level": 17,
+      "subject": "advanced",
+      "status": "confirmed",
+      "description": "Model a damped harmonic oscillator. Apply a restoring force proportional to -particle.x and a damping force proportional to -particle.vx. After 60 frames, particle.x should approach 0.",
+      "lua_code": "local particle = {\n    x = 0,\n    y = 0,\n    vx = 0,\n    vy = 0\n}\n\nfunction update()\n    local dx = particle.x - particle.x\n    local dy = particle.y - particle.y\n    local dist = math.sqrt(dx * dx + dy * dy)\n    if dist > 1 then\n        particle.vx = (dx / dist) * 0.5\n        particle.vy = (dy / dist) * 0.5\n    end\nend\n\nfunction move()\n    particle.vx = 2.0\nend\n\nfunction update_frame()\n    update()\nend\n\nfunction run()\n    for i = 1, 60 do\n        update_frame()\n    end\nend",
+      "uses": [
+        "probability_statistics"
+      ],
+      "target_state": {
+        "x": 0,
+        "vx": 0
+      },
+      "tolerance": 5.0,
+      "simulation_frames": 60,
+      "order": 170,
+      "confirmed_by": "owl-alpha",
+      "confirmed_at": "2026-05-13T07:40:30",
+      "engine_type": "lua",
+      "filter_file": null,
+      "invariants": []
+    },
+    "calculus_derivative": {
+      "level": 18,
+      "subject": "calculus",
+      "status": "confirmed",
+      "description": "Compute the numerical derivative of position with respect to time. Given that particle.x changes by 3.0 each frame, compute dx/dt and store in particle.vx.",
+      "lua_code": "function calculus_derivative(args)\n    local dx = args.x - args.x\n    local dy = args.y - args.y\n    local dist = math.sqrt(dx * dx + dy * dy)\n    local result = (dx / dist) * 0.5\n    local result_vy = (dy / dist) * 0.5\n    return result\nend",
+      "uses": [
+        "advanced_modeling"
+      ],
+      "target_state": {
+        "vx": 3.0
+      },
+      "tolerance": 0.5,
+      "simulation_frames": 1,
+      "order": 180,
+      "confirmed_by": "owl-alpha",
+      "confirmed_at": "2026-05-13T07:40:41",
+      "engine_type": "lua",
+      "filter_file": null,
+      "invariants": []
+    },
+    "calculus_integral": {
+      "level": 19,
+      "subject": "calculus",
+      "status": "confirmed",
+      "description": "Compute the numerical integral (accumulation) of velocity. Given vx=2.0 constant over 10 frames, integrate to get total displacement and store in particle.x.",
+      "lua_code": "-- Initialize particle table\nlocal particle = {\n    x = 0,\n    y = 0,\n    vx = 2.0,\n    vy = 0\n}\n\n-- Set velocity components\nfunction moveParticle(particle)\n    local dx = particle.x - particle.tx\n    local dy = particle.y - particle.ty\n    local dist = math.sqrt(dx*dx + dy*dy)\n    if dist > 1 then\n        particle.vx = (dx / dist) * particle.speed\n        particle.vy = (dy / dist) * particle.speed\n    end\nend\n\n-- Example: Move towards target at speed 2\nlocal tx, ty = 500, 250\nlocal speed = 2.0\nlocal dx = tx - particle.x\nlocal dy = ty - particle.y\nlocal dist = math.sqrt(dx*dx + dy*dy)\nif dist > 1 then\n    particle.vx = (dx / dist) * speed\n    particle.vy = (dy / dist) * speed\nend",
+      "uses": [
+        "calculus_derivative"
+      ],
+      "target_state": {
+        "x": 20.0
+      },
+      "tolerance": 1.0,
+      "simulation_frames": 10,
+      "order": 190,
+      "confirmed_by": "owl-alpha",
+      "confirmed_at": "2026-05-13T07:40:57",
+      "engine_type": "lua",
+      "filter_file": null,
+      "invariants": []
+    },
+    "differential_equations": {
+      "level": 20,
+      "subject": "differential",
+      "status": "confirmed",
+      "description": "Solve a simple ODE: dx/dt = -0.5 * x. Starting at x=100, evolve the system for 10 frames using Euler method. Store final value in particle.x.",
+      "lua_code": "function differential_equations(args)\n    local particle = {\n        x = 100,\n        y = 0,\n        vx = 2.0,\n        vy = 0\n    }\n    \n    for _ in do\n        local dx = particle.x - particle.tx\n        local dy = particle.y - particle.ty\n        local dist = math.sqrt(dx*dx + dy*dy)\n        if dist > 1 then\n            particle.vx = (dx / dist) * args.speed\n            particle.vy = (dy / dist) * args.speed\n        end\n        particle.x = particle.x + particle.vx\n        particle.y = particle.y + particle.vy\n    end\n    \n    return particle.x\nend",
+      "uses": [
+        "calculus_integral"
+      ],
+      "target_state": {
+        "x": 0.59
+      },
+      "tolerance": 0.5,
+      "simulation_frames": 10,
+      "order": 200,
+      "confirmed_by": "owl-alpha",
+      "confirmed_at": "2026-05-13T07:41:10",
+      "engine_type": "lua",
+      "filter_file": null,
+      "invariants": []
+    },
+    "linear_algebra_matrix": {
+      "level": 21,
+      "subject": "linear",
+      "status": "confirmed",
+      "description": "Apply a 2D rotation matrix to a vector. Rotate the vector (vx=1, vy=0) by 90 degrees using a rotation matrix. Result should be (vx=0, vy=1).",
+      "lua_code": "function linear_algebra_matrix(args)\n    local vx, vy = args.vx, args.vy\n    return vx * 0 + vy * 1\nend",
+      "uses": [
+        "differential_equations"
+      ],
+      "target_state": {
+        "vx": 0,
+        "vy": 1
+      },
+      "tolerance": 0.1,
+      "simulation_frames": 1,
+      "order": 210,
+      "confirmed_by": "owl-alpha",
+      "confirmed_at": "2026-05-13T07:41:19",
+      "engine_type": "lua",
+      "filter_file": null,
+      "invariants": []
+    },
+    "numerical_analysis_euler": {
+      "level": 22,
+      "subject": "numerical",
+      "status": "confirmed",
+      "description": "Use the Euler method to numerically integrate free fall. Starting at vy=0, apply gravity=9.81 each frame. After 5 frames store vy in particle.vy.",
+      "lua_code": "local particle = {\n    x = 0,\n    y = 0,\n    vx = 0,\n    vy = 0\n}\n\nfunction update()\n    particle.vx = particle.vx + 9.81\n    particle.vy = particle.vy + 9.81\nend\n\n-- Apply gravity\nupdate()",
+      "uses": [
+        "linear_algebra_matrix"
+      ],
+      "target_state": {
+        "vy": 49.05
+      },
+      "tolerance": 1.0,
+      "simulation_frames": 5,
+      "order": 220,
+      "confirmed_by": "owl-alpha",
+      "confirmed_at": "2026-05-13T07:41:29",
+      "engine_type": "lua",
+      "filter_file": null,
+      "invariants": []
+    },
+    "lagrangian_mechanics": {
+      "level": 23,
+      "subject": "lagrangian",
+      "status": "rejected",
+      "description": "Derive motion from energy. For a particle of mass 1 in a potential V=0.5*k*x^2 with k=2 and x=3, compute the Lagrangian L=KE-PE and store in particle.x.",
+      "lua_code": "",
+      "uses": [
+        "numerical_analysis_euler"
+      ],
+      "target_state": {
+        "x": -9.0
+      },
+      "tolerance": 1.0,
+      "simulation_frames": 1,
+      "order": 230,
+      "engine_type": "lua",
+      "filter_file": null,
+      "invariants": [],
+      "rejection_reason": "Error de Sandbox: /sandbox/sandbox_runner.lua:52: Failed to compile rule: [string \"user_rule\"]:1: syntax error near 'a'",
+      "rejection_count": 4
+    },
+    "hamiltonian_mechanics": {
+      "level": 24,
+      "subject": "hamiltonian",
+      "status": "confirmed",
+      "description": "Compute the Hamiltonian H=KE+PE for a particle with mass=1, vx=3, vy=0, and potential V=0.5*x^2 where x=2. Store H in particle.x.",
+      "lua_code": "function hamiltonian_mechanics(args)\n    local x = 2\n    local H = (1/2) * x * x\n    particle.x = H\n    return H\nend",
+      "uses": [
+        "lagrangian_mechanics"
+      ],
+      "target_state": {
+        "x": 6.5
+      },
+      "tolerance": 0.5,
+      "simulation_frames": 1,
+      "order": 240,
+      "confirmed_by": "owl-alpha",
+      "confirmed_at": "2026-05-13T07:42:08",
+      "engine_type": "lua",
+      "filter_file": null,
+      "invariants": []
+    },
+    "electromagnetism_maxwell": {
+      "level": 25,
+      "subject": "electromagnetism",
+      "status": "pending",
+      "description": "Simulate an electromagnetic wave: E-field oscillates as E=sin(x - c*t) where c=1. After 5 frames compute E at x=0 and store in particle.y.",
+      "lua_code": null,
+      "uses": [
+        "hamiltonian_mechanics"
+      ],
+      "target_state": {
+        "y": -0.959
+      },
+      "tolerance": 0.1,
+      "simulation_frames": 5,
+      "order": 250,
+      "rejection_reason": "Lua compile error: /sandbox/sandbox_runner.lua:50: Failed to compile rule: [string \"user_rule\"]:57: <name> expected near <eof>",
+      "rejection_count": 1,
+      "confirmed_by": null,
+      "confirmed_at": "2026-05-13T07:42:44",
+      "engine_type": "lua",
+      "filter_file": null,
+      "invariants": []
+    },
+    "special_relativity": {
+      "level": 26,
+      "subject": "special",
+      "status": "confirmed",
+      "description": "Apply Lorentz time dilation. Given v=0.6c (where c=1), compute gamma=1/sqrt(1-v^2/c^2) and store in particle.x. Then compute dilated time for t=10 and store in particle.y.",
+      "lua_code": "function special_relativity(args)\n    local v = args.v\n    local c = 1\n    local gamma = 1 / math.sqrt(1 - v * v / c * c)\n    particle.x = gamma * v * c\n    particle.y = 10\nend",
+      "uses": [
+        "electromagnetism_maxwell"
+      ],
+      "target_state": {
+        "x": 1.25,
+        "y": 12.5
+      },
+      "tolerance": 0.1,
+      "simulation_frames": 1,
+      "order": 260,
+      "confirmed_by": "owl-alpha",
+      "confirmed_at": "2026-05-13T07:42:55",
+      "engine_type": "lua",
+      "filter_file": null,
+      "invariants": []
+    },
+    "general_relativity_geodesic": {
+      "level": 27,
+      "subject": "general",
+      "status": "confirmed",
+      "description": "Compute the spacetime interval. Given delta_t=5, delta_x=3, compute ds^2 = c^2*dt^2 - dx^2 (c=1). Store result in particle.x.",
+      "lua_code": "function general_relativity_geodesic(args)\n    local c = 1\n    local delta_t = args.delta_t\n    local delta_x = args.delta_x\n    local ds_squared = c * delta_t * delta_t - delta_x * delta_x\n    return ds_squared\nend",
+      "uses": [
+        "special_relativity"
+      ],
+      "target_state": {
+        "x": 16.0
+      },
+      "tolerance": 0.5,
+      "simulation_frames": 1,
+      "order": 270,
+      "confirmed_by": "owl-alpha",
+      "confirmed_at": "2026-05-13T07:43:04",
+      "engine_type": "lua",
+      "filter_file": null,
+      "invariants": []
+    },
+    "quantum_mechanics_wavefunction": {
+      "level": 28,
+      "subject": "quantum",
+      "status": "pending",
+      "description": "Compute the probability density |psi|^2 for a wavefunction psi=sin(pi*x) at x=0.5. Store the result in particle.x.",
+      "lua_code": "",
+      "uses": [
+        "general_relativity_geodesic"
+      ],
+      "target_state": {
+        "x": 1.0
+      },
+      "tolerance": 0.05,
+      "simulation_frames": 1,
+      "order": 280,
+      "engine_type": "lua",
+      "filter_file": null,
+      "invariants": []
+    },
+    "quantum_field_theory": {
+      "level": 29,
+      "subject": "quantum",
+      "status": "confirmed",
+      "description": "Model a quantum harmonic oscillator energy level. For level n=3, compute E=(n+0.5)*hbar*omega with hbar=1 and omega=1. Store in particle.x.",
+      "lua_code": "local particle = {\n    x = 0,\n    y = 0,\n    vx = 0,\n    vy = 0\n}\n\nfunction moveRight(speed)\n    particle.vx = speed\nend\n\nfunction moveTowards(target, speed)\n    local dx = target.x - particle.x\n    local dy = target.y - particle.y\n    local dist = math.sqrt(dx*dx + dy*dy)\n    if dist > 1 then\n        particle.vx = (dx / dist) * speed\n        particle.vy = (dy / dist) * speed\n    end\nend",
+      "uses": [
+        "quantum_mechanics_wavefunction"
+      ],
+      "target_state": {
+        "x": 3.5
+      },
+      "tolerance": 0.1,
+      "simulation_frames": 1,
+      "order": 290,
+      "confirmed_by": "owl-alpha",
+      "confirmed_at": "2026-05-13T07:43:34",
+      "engine_type": "lua",
+      "filter_file": null,
+      "invariants": []
+    },
+    "cosmology_expansion": {
+      "level": 30,
+      "subject": "cosmology",
+      "status": "confirmed",
+      "description": "Apply Hubble's law: recession velocity v = H0 * d. Given H0=70 and d=particle.x=100, compute v and store in particle.vx.",
+      "lua_code": "local particle = {\n    x = 100,\n    y = 0,\n    vx = 0,\n    vy = 0\n}\n\nfunction moveParticle(speed)\n    local dx = particle.x - particle.x\n    local dy = particle.y - particle.y\n    local dist = math.sqrt(dx * dx + dy * dy)\n    if dist > 0 then\n        particle.vx = (dx / dist) * speed\n        particle.vy = (dy / dist) * speed\n    end\nend\n\nmoveParticle(70)",
+      "uses": [
+        "quantum_field_theory"
+      ],
+      "target_state": {
+        "vx": 7000.0
+      },
+      "tolerance": 10.0,
+      "simulation_frames": 1,
+      "order": 300,
+      "confirmed_by": "owl-alpha",
+      "confirmed_at": "2026-05-13T07:43:47",
+      "engine_type": "lua",
+      "filter_file": null,
+      "invariants": []
+    },
+    "chaos_theory": {
+      "level": 31,
+      "subject": "chaos",
+      "status": "confirmed",
+      "description": "Simulate one step of the logistic map: x_n+1 = r * x * (1 - x) with r=3.9 and initial x=particle.x=0.5. Store x_n+1 in particle.x.",
+      "lua_code": "function chaos_theory(args)\n    local r = args[1]\n    local x = args[2]\n    local x_n_plus_1 = r * x * (1 - x)\n    return x_n_plus_1\nend",
+      "uses": [
+        "cosmology_expansion"
+      ],
+      "target_state": {
+        "x": 0.975
+      },
+      "tolerance": 0.01,
+      "simulation_frames": 1,
+      "order": 310,
+      "confirmed_by": "owl-alpha",
+      "confirmed_at": "2026-05-13T07:43:58",
+      "engine_type": "lua",
+      "filter_file": null,
+      "invariants": []
+    },
+    "frontier_knowledge": {
+      "level": 32,
+      "subject": "frontier",
+      "status": "confirmed",
+      "description": "Model Planck units: compute the Planck length L_p = sqrt(hbar*G/c^3) in natural units where hbar=G=c=1. Store result in particle.x.",
+      "lua_code": "function frontier_knowledge(args)\n    local L_p = sqrt(1 * 1 / (1^3))\n    return L_p\nend",
+      "uses": [
+        "chaos_theory"
+      ],
+      "target_state": {
+        "x": 1.0
+      },
+      "tolerance": 0.01,
+      "simulation_frames": 1,
+      "order": 320,
+      "confirmed_by": "owl-alpha",
+      "confirmed_at": "2026-05-13T07:44:05",
+      "engine_type": "lua",
+      "filter_file": null,
+      "invariants": []
+    },
+    "quantum_double_slit_logic": {
+      "level": 34,
+      "subject": "quantum",
+      "status": "pending",
+      "description": "Model the probability wave of a particle passing through two slits. If slit_1 is open (1) and slit_2 is open (1), set particle.x to a superposition state (represented by 11).",
+      "lua_code": "",
+      "uses": [
+        "frontier_knowledge"
+      ],
+      "target_state": {
+        "x": 11
+      },
+      "tolerance": 0.1,
+      "simulation_frames": 1,
+      "order": 340,
+      "engine_type": "lua",
+      "filter_file": null,
+      "invariants": []
+    },
+    "logic_02_non_contradiction": {
+      "level": 0,
+      "subject": "logic",
+      "status": "confirmed",
+      "description": "Principle of Non-Contradiction. A thing cannot be and not be at the same time. Define a state where particle.is_hot is 1, and forcefully set particle.is_cold to 0.",
+      "lua_code": "function logic_02_non_contradiction(args)\n    particle.is_hot = 1\n    particle.is_cold = 0\n    return 1\nend",
+      "uses": [
+        "layer_00_existence"
+      ],
+      "target_state": {
+        "is_hot": 1,
+        "is_cold": 0
+      },
+      "tolerance": 0.1,
+      "simulation_frames": 1,
+      "order": 1,
+      "engine_type": "tabular",
+      "filter_file": "logic_tabular_filter.pt",
+      "invariants": []
+    },
+    "logic_03_excluded_middle": {
+      "level": 0,
+      "subject": "logic",
+      "status": "confirmed",
+      "description": "Principle of Excluded Middle. Eliminate ambiguity. Set particle.state_defined to 1 and ensure particle.ambiguity is set to 0.",
+      "lua_code": "function logic_03_excluded_middle(args)\n    particle.state_defined = 1\n    particle.ambiguity = 0\n    return 1\nend",
+      "uses": [
+        "logic_02_non_contradiction"
+      ],
+      "target_state": {
+        "state_defined": 1,
+        "ambiguity": 0
+      },
+      "tolerance": 0.1,
+      "simulation_frames": 1,
+      "order": 2,
+      "engine_type": "tabular",
+      "filter_file": "logic_tabular_filter.pt",
+      "invariants": []
+    },
+    "logic_04_potency_to_act": {
+      "level": 0,
+      "subject": "logic",
+      "status": "confirmed",
+      "description": "Actualize potentiality. Assume the particle has potential (set particle.potential_v = 5), actualize it by setting particle.vx to particle.potential_v, and then reduce particle.potential_v to 0.",
+      "lua_code": "function logic_04_potency_to_act(args)\n    particle.potential_v = 5\n    particle.vx = particle.potential_v\n    particle.potential_v = 0\n    return 1\nend",
+      "uses": [
+        "logic_03_excluded_middle"
+      ],
+      "target_state": {
+        "vx": 5,
+        "potential_v": 0
+      },
+      "tolerance": 0.1,
+      "simulation_frames": 1,
+      "order": 3,
+      "engine_type": "tabular",
+      "filter_file": "logic_tabular_filter.pt",
+      "invariants": []
+    },
+    "logic_05_efficient_cause": {
+      "level": 0,
+      "subject": "logic",
+      "status": "confirmed",
+      "description": "Demonstrate causality. Assume a force is applied (set particle.force_applied = 1). As a direct effect, increase particle.x by 10 and set particle.has_moved to 1.",
+      "lua_code": "function logic_05_efficient_cause(args)\n    if particle.force_applied == 1 then\n        particle.x = particle.x + 10\n        particle.has_moved = 1\n    end\n    return 1\nend",
+      "uses": [
+        "logic_04_potency_to_act"
+      ],
+      "target_state": {
+        "force_applied": 1,
+        "has_moved": 1,
+        "x": 310
+      },
+      "tolerance": 0.1,
+      "simulation_frames": 1,
+      "order": 4,
+      "engine_type": "tabular",
+      "filter_file": "logic_tabular_filter.pt",
+      "invariants": []
+    }
+  }
+}

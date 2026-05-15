@@ -1,0 +1,33 @@
+[
+  {
+    "id": "probability_statistics",
+    "title": "Probability and Statistics",
+    "layer": 16,
+    "prerequisites": [
+      "thermodynamics_entropy"
+    ],
+    "objective": "Compute the mean of 5 random values. Generate 5 values using math.random(1,100), compute their average, and store in particle.x.",
+    "target_state": {
+      "x": 50
+    },
+    "tolerance": 20.0,
+    "simulation_frames": 1,
+    "order": 160
+  },
+  {
+    "id": "advanced_modeling",
+    "title": "Advanced Dynamic Systems",
+    "layer": 17,
+    "prerequisites": [
+      "probability_statistics"
+    ],
+    "objective": "Model a damped harmonic oscillator. Apply a restoring force proportional to -particle.x and a damping force proportional to -particle.vx. After 60 frames, particle.x should approach 0.",
+    "target_state": {
+      "x": 0,
+      "vx": 0
+    },
+    "tolerance": 5.0,
+    "simulation_frames": 60,
+    "order": 170
+  }
+]

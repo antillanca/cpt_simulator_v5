@@ -1,0 +1,169 @@
+[
+  {
+    "id": "dynamics_newton_second_law",
+    "title": "Dynamics: Newton Second Law",
+    "layer": 11,
+    "prerequisites": [
+      "layer_10_kinematics"
+    ],
+    "objective": "Apply a constant force to a particle of mass 2.0. Set particle.vx to increase by 3.0 per frame (F=ma, a=F/m=6/2=3).",
+    "target_state": {
+      "vx": 3.0
+    },
+    "tolerance": 0.5,
+    "simulation_frames": 1,
+    "order": 110
+  },
+  {
+    "id": "energy_kinetic",
+    "title": "Kinetic Energy",
+    "layer": 12,
+    "prerequisites": [
+      "dynamics_newton_second_law"
+    ],
+    "objective": "Compute the kinetic energy of a particle with mass 2.0 and velocity vx=3.0, vy=4.0. Store the result (0.5*m*v^2) in particle.x.",
+    "target_state": {
+      "x": 12.5
+    },
+    "tolerance": 0.5,
+    "simulation_frames": 1,
+    "order": 120
+  },
+  {
+    "id": "energy_potential",
+    "title": "Potential Energy",
+    "layer": 12,
+    "prerequisites": [
+      "energy_kinetic"
+    ],
+    "objective": "Compute gravitational potential energy. Given mass=2.0, gravity=9.81, and height=particle.y=10, store m*g*h in particle.x.",
+    "target_state": {
+      "x": 196.2
+    },
+    "tolerance": 1.0,
+    "simulation_frames": 1,
+    "order": 125
+  },
+  {
+    "id": "energy_conservation",
+    "title": "Energy Conservation",
+    "layer": 12,
+    "prerequisites": [
+      "energy_potential"
+    ],
+    "objective": "Verify total energy conservation. A particle falls from y=100 with vx=0. After 20 frames, compute KE+PE and store in particle.x. Total should remain constant.",
+    "target_state": {
+      "x": 1962
+    },
+    "tolerance": 5.0,
+    "simulation_frames": 20,
+    "order": 128
+  },
+  {
+    "id": "waves_oscillation",
+    "title": "Oscillations and Waves",
+    "layer": 13,
+    "prerequisites": [
+      "energy_conservation"
+    ],
+    "objective": "Make the particle oscillate horizontally using sine. Set particle.x = 50 * sin(time) where time is the frame counter. After 15 frames, particle.x should be near 0.",
+    "target_state": {
+      "x": 0
+    },
+    "tolerance": 5.0,
+    "simulation_frames": 15,
+    "order": 130
+  },
+  {
+    "id": "waves_frequency_amplitude",
+    "title": "Wave Frequency and Amplitude",
+    "layer": 13,
+    "prerequisites": [
+      "waves_oscillation"
+    ],
+    "objective": "Control wave parameters. Set particle.y = amplitude * sin(2 * pi * frequency * t) with amplitude=30 and frequency=0.1. After 10 frames, particle.y should be near 0.",
+    "target_state": {
+      "y": 0
+    },
+    "tolerance": 3.0,
+    "simulation_frames": 10,
+    "order": 135
+  },
+  {
+    "id": "electricity_ohm_law",
+    "title": "Electricity: Ohm Law",
+    "layer": 14,
+    "prerequisites": [
+      "waves_frequency_amplitude"
+    ],
+    "objective": "Apply Ohm's law V=I*R. Given voltage=12 and resistance=4, compute current I=V/R and store in particle.x. Then compute power P=V*I and store in particle.y.",
+    "target_state": {
+      "x": 3,
+      "y": 36
+    },
+    "tolerance": 0.5,
+    "simulation_frames": 1,
+    "order": 140
+  },
+  {
+    "id": "magnetism_lorentz_force",
+    "title": "Magnetism: Lorentz Force",
+    "layer": 14,
+    "prerequisites": [
+      "electricity_ohm_law"
+    ],
+    "objective": "Apply Lorentz force F=q*v*B on a charged particle. Given q=1, v=particle.vx=5, B=2, compute force and update particle.vy accordingly.",
+    "target_state": {
+      "vy": 10
+    },
+    "tolerance": 1.0,
+    "simulation_frames": 1,
+    "order": 145
+  },
+  {
+    "id": "thermodynamics_temperature",
+    "title": "Thermodynamics: Temperature and Heat",
+    "layer": 15,
+    "prerequisites": [
+      "magnetism_lorentz_force"
+    ],
+    "objective": "Model temperature change via heat transfer. Given mass=2, specific_heat=1, heat_input=100, compute delta_T = Q/(m*c) and store in particle.x.",
+    "target_state": {
+      "x": 50
+    },
+    "tolerance": 0.5,
+    "simulation_frames": 1,
+    "order": 150
+  },
+  {
+    "id": "thermodynamics_entropy",
+    "title": "Thermodynamics: Entropy",
+    "layer": 15,
+    "prerequisites": [
+      "thermodynamics_temperature"
+    ],
+    "objective": "Compute entropy change. Given Q=100 and T=300, compute delta_S = Q/T and store in particle.x.",
+    "target_state": {
+      "x": 0.333
+    },
+    "tolerance": 0.01,
+    "simulation_frames": 1,
+    "order": 155
+  },
+  {
+    "id": "layer_10_kinematics",
+    "title": "Basic Kinematics",
+    "layer": 10,
+    "prerequisites": [
+      "math_trigonometry"
+    ],
+    "objective": "Describe motion over time using position, velocity, and acceleration.",
+    "target_state": {
+      "vx": 5,
+      "vy": 0
+    },
+    "tolerance": 0.5,
+    "simulation_frames": 1,
+    "order": 100
+  }
+]

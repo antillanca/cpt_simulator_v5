@@ -1,0 +1,30 @@
+[
+  {
+    "id": "layer_00_existence",
+    "title": "Existence and Difference",
+    "layer": 0,
+    "prerequisites": [],
+    "objective": "Distinguish between states A and B. Set a variable to a specific value.",
+    "target_state": {
+      "x": 1
+    },
+    "tolerance": 0.0,
+    "simulation_frames": 1,
+    "order": 0
+  },
+  {
+    "id": "layer_01_counting",
+    "title": "Discrete Counting",
+    "layer": 1,
+    "prerequisites": [
+      "layer_00_existence"
+    ],
+    "objective": "Increment or decrement a value by 1. Represent quantity.",
+    "target_state": {
+      "x": 2
+    },
+    "tolerance": 0.0,
+    "simulation_frames": 1,
+    "order": 10
+  }
+]
