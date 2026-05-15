@@ -8,6 +8,7 @@
 
 - **Módulos**: 43 total — 36 confirmados (84%), 6 pendientes (14%)
 - **Fase**: 1 — Completar módulos Lua pendientes
+- **Repositorio**: [antillanca/cpt_simulator_v5](https://github.com/antillanca/cpt_simulator_v5) (Público)
 - **Siguiente paso**: Resolver los 6 módulos Lua bloqueados para desbloquear niveles 13+
 
 | Nivel | Módulo | Problema |

@@ -2,6 +2,11 @@
 
 Motor de razonamiento neuro-simbólico. Aprende física y matemática desde cero vía simulaciones deterministas + redes neuronales.
 
+## Repositorio Oficial
+
+→ **[GitHub: antillanca/cpt_simulator_v5](https://github.com/antillanca/cpt_simulator_v5)**
+
+
 ## Documento Maestro
 
 → **[HANDOVER.md](HANDOVER.md)** — Contexto completo (arquitectura, estado, flujo, configuración, roadmap)
