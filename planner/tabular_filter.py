@@ -51,6 +51,7 @@ class TabularFilter:
             "geometry": 4,
             "vector": 6,
             "time": 2,
+            "trig": 4,      # Capa 9
             "action": 8,    # Planificador / Kinematics
             "newton": 8     # Dynamics
         }

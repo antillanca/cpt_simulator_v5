@@ -177,12 +177,17 @@ class TrainingOrchestrator:
                     full_path = self.base_dir / factory_script
                     env = os.environ.copy()
                     env["PYTHONPATH"] = str(self.base_dir) + ":" + env.get("PYTHONPATH", "")
-                    
+
+                    # Ejecutar como módulo (-m) para que 'planner' se resuelva como paquete
+                    # Convertir "planner/logic_automation.py" -> "planner.logic_automation"
+                    module_path = factory_script.replace("/", ".").replace(".py", "")
+
                     process = await asyncio.create_subprocess_exec(
-                        "python3", str(full_path),
+                        "python3", "-m", module_path,
                         stdout=subprocess.PIPE,
                         stderr=subprocess.PIPE,
-                        env=env
+                        env=env,
+                        cwd=str(self.base_dir)
                     )
                     stdout, stderr = await process.communicate()
                     
@@ -196,6 +201,7 @@ class TrainingOrchestrator:
                         if success:
                             mod["status"] = "confirmed"
                             mod["confirmed_by"] = "kaggle_orchestrator"
+                            mod["generated_by"] = "kaggle_orchestrator"
                             self.save_modules(data)
                             notifier.send(f"✅ <b>Capa Asimilada y Verificada</b>: {mod_key}")
                         else:
@@ -204,6 +210,7 @@ class TrainingOrchestrator:
                             if repaired:
                                 mod["status"] = "confirmed"
                                 mod["confirmed_by"] = "hermes_override"
+                                mod["generated_by"] = "hermes_override"
                                 self.save_modules(data)
                             else:
                                 break
@@ -214,6 +221,7 @@ class TrainingOrchestrator:
                         if repaired:
                             mod["status"] = "confirmed"
                             mod["confirmed_by"] = "hermes_override"
+                            mod["generated_by"] = "hermes_override"
                             self.save_modules(data)
                         else:
                             break
@@ -234,6 +242,7 @@ class TrainingOrchestrator:
                     if repaired:
                         mod["status"] = "confirmed"
                         mod["confirmed_by"] = "hermes_override"
+                        mod["generated_by"] = "hermes_override"
                         self.save_modules(data)
                         notifier.send(f"✅ <b>Módulo confirmado por Hermes</b>: {mod_key}")
                     else:
@@ -242,6 +251,7 @@ class TrainingOrchestrator:
                 else:
                     mod["status"] = "confirmed"
                     mod["confirmed_by"] = "student_engine"
+                    mod["generated_by"] = student._last_model_used
                     self.save_modules(data)
                     notifier.send(f"🧠 <b>Capa Asimilada (Lua)</b>: {mod_key}\nVerificación neuro-simbólica exitosa.")
             

@@ -372,6 +372,7 @@ async def ai_confirm(module_name: str, request: dict):
         student.modules["modules"][module_name]["status"] = "confirmed"
         student.modules["modules"][module_name]["lua_code"] = lua_code
         student.modules["modules"][module_name]["confirmed_by"] = "owl-alpha"
+        student.modules["modules"][module_name]["generated_by"] = student._last_model_used
         student.modules["modules"][module_name]["confirmed_at"] = time.strftime("%Y-%m-%dT%H:%M:%S")
         save_modules(student.modules)
         return {"status": "confirmed", "module": module_name, "code_size": len(lua_code)}

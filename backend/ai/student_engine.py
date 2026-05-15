@@ -327,11 +327,9 @@ Write the Lua code:"""
         else:
             is_physics = any(kw in (module_name + final_desc).lower() for kw in physics_keywords)
 
-        # Use Tutor to generate the prompt if advanced motor is enabled
-        if USE_ADVANCED_MOTOR:
-            prompt = await tutor_engine.get_student_prompt(module_name, {})
-        else:
-            prompt = self.build_prompt(module_name, final_desc, is_physics)
+        # Always build the full physics prompt — it contains the actual task description
+        # and formula hints that the model needs to generate correct Lua code.
+        physics_prompt = self.build_prompt(module_name, final_desc, is_physics)
 
         for attempt in range(retries):
             logger.info(f"[Student] Generating '{module_name}' (attempt {attempt + 1}/{retries}) [Advanced={USE_ADVANCED_MOTOR}]...")
@@ -341,12 +339,13 @@ Write the Lua code:"""
             
             if USE_ADVANCED_MOTOR:
                 # Use the powerful cascading engine (OpenRouter/Nvidia)
+                # Pass the full physics prompt as the objective, NOT the meta-prompt
                 self._last_model_used = "OpenRouter/Tutor"
-                response = await tutor_engine.generate_rule(prompt, {})
+                response = await tutor_engine.generate_rule(physics_prompt, {})
             else:
                 # Use the selected local expert
                 self._last_model_used = model
-                response = await ollama_generate(prompt, model=model)
+                response = await ollama_generate(physics_prompt, model=model)
 
             if response:
                 # Extract Lua code from response
@@ -391,7 +390,7 @@ Write the Lua code:"""
             if not stripped.startswith("`"):
                 clean_lines.append(line)
 
-        text = "\n".join(clean_lines).strip()
+            text = "\n".join(clean_lines).strip()
 
         # Basic validation
         if len(text) < 5 or len(text) > 2000:
@@ -402,7 +401,22 @@ Write the Lua code:"""
         if not any(kw in text.lower() for kw in lua_keywords):
             return None
 
+        # Lua compile gate: verify the extracted text is valid Lua before returning it.
+        # This prevents English prose (e.g. from meta-prompts) from reaching the sandbox.
+        if not self._lua_compiles(text):
+            logger.warning(f"[Student] _extract_lua: text failed Lua compile gate, discarding")
+            return None
+
         return text
+
+    def _lua_compiles(self, code: str) -> bool:
+        """Quick Lua syntax check via the sandbox. Returns True if code compiles."""
+        try:
+            from backend.core_truth.sandbox import sandbox_manager
+            result = sandbox_manager.run_rule(code, {"x": 0, "y": 0, "vx": 0, "vy": 0}, frames=1)
+            return result.get("status") == "ok"
+        except Exception:
+            return False
 
     async def learn_module(self, module_name: str, test_fn, teacher_fn=None) -> bool:
         """Full learning cycle for one module (async)."""
