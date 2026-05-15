@@ -6,18 +6,18 @@
 
 ## Estado Actual
 
-- **Módulos**: 43 total — 36 confirmados (84%), 6 pendientes (14%)
-- **Fase**: 1 — Completar módulos Lua pendientes
+- **Módulos**: 43 total — 3 confirmados (7%), 37 pendientes (86%), 3 rechazados (7%)
+- **Fase**: 1 — Regenerando módulos con tracking de `generated_by`
 - **Repositorio**: [antillanca/cpt_simulator_v5](https://github.com/antillanca/cpt_simulator_v5) (Público)
-- **Siguiente paso**: Resolver los 6 módulos Lua bloqueados para desbloquear niveles 13+
+- **Siguiente paso**: Orquestador regenerando módulos automáticamente
+
+**Nota**: El 2026-05-15 se resetearon 37 módulos confirmed→pending para regenerar con el nuevo campo `generated_by` que registra qué modelo (Ollama/OpenRouter) produjo cada código Lua.
 
 | Nivel | Módulo | Problema |
 |:---:|:---|:---|
-| 13 | `waves_frequency_amplitude` | Sin código Lua |
-| 14 | `magnetism_lorentz_force` | Fuerza incorrecta (1 rechazo) |
-| 23 | `lagrangian_mechanics` | Sin código Lua |
-| 25 | `electromagnetism_maxwell` | Error compilación Lua (1 rechazo) |
-| 28 | `quantum_mechanics_wavefunction` | Sin código Lua |
+| 13 | `waves_oscillation` | Rechazado (4 intentos) |
+| 14 | `magnetism_lorentz_force` | Rechazado (6 intentos) — bloqueo pedagógico |
+| 23 | `lagrangian_mechanics` | Rechazado (4 intentos) |
 | 34 | `quantum_double_slit_logic` | Sin código Lua |
 
 **Recientes confirmados**: `energy_potential` y `energy_conservation` (nivel 12, owl-alpha). `waves_oscillation` también confirmado.

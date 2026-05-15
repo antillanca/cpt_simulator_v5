@@ -751,7 +751,7 @@
     "logic_04_potency_to_act": {
       "level": 0,
       "subject": "logic",
-      "status": "pending",
+      "status": "confirmed",
       "description": "Actualize potentiality. Assume the particle has potential (set particle.potential_v = 5), actualize it by setting particle.vx to particle.potential_v, and then reduce particle.potential_v to 0.",
       "uses": [
         "logic_03_excluded_middle"
@@ -765,7 +765,9 @@
       "order": 3,
       "engine_type": "tabular",
       "filter_file": "logic_tabular_filter.pt",
-      "invariants": []
+      "invariants": [],
+      "confirmed_by": "kaggle_orchestrator",
+      "generated_by": "kaggle_orchestrator"
     },
     "logic_05_efficient_cause": {
       "level": 0,

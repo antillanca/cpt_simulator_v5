@@ -1,6 +1,6 @@
 # Estado del Currículo — CPT v2.5
 
-> **Resumen**: 43 módulos totales — 36 confirmados (84%), 6 pendientes (14%). Los 6 pendientes son módulos Lua que bloquean el avance a niveles 13+.
+> **Resumen**: 43 módulos totales — 3 confirmados (7%), 37 pendientes (86%), 3 rechazados (7%). Regeneración en curso con tracking de `generated_by`.
 
 ---
 
@@ -8,11 +8,32 @@
 
 | Métrica | Valor |
 |:---|:---:|
-|| Total de módulos | **43** |
-|| Confirmados | **36** (84%) |
-|| Pendientes | **6** (14%) |
+| Total de módulos | **43** |
+| Confirmados | **3** (7%) |
+| Pendientes | **37** (86%) |
+| Rechazados | **3** (7%) |
 
 Fuente de verdad: `backend/core_truth/modules.json`
+
+**Nota**: Los 37 módulos fueron reseteados de confirmed→pending el 2026-05-15 para regenerar con el nuevo campo `generated_by` que registra qué modelo Ollama produjo cada código Lua.
+
+---
+
+## Módulos Confirmados (regenerados)
+
+| Nivel | Módulo | confirmed_by | generated_by |
+|:---:|:---|:---|:---|
+| L00 | layer_00_existence | hermes_override | hermes_override |
+| L00 | logic_02_non_contradiction | hermes_override | hermes_override |
+| L00 | logic_03_excluded_middle | kaggle_orchestrator | kaggle_orchestrator |
+
+## Módulos Rechazados
+
+| Nivel | Módulo | rejection_count |
+|:---:|:---|:---:|
+| L13 | waves_oscillation | 4 |
+| L14 | magnetism_lorentz_force | 6 |
+| L23 | lagrangian_mechanics | 4 |
 
 ---
 
