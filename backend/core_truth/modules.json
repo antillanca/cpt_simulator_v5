@@ -283,7 +283,7 @@
     "waves_oscillation": {
       "level": 13,
       "subject": "waves",
-      "status": "rejected",
+      "status": "confirmed",
       "description": "Make the particle oscillate horizontally using sine. Set particle.x = 50 * sin(time) where time is the frame counter. After 15 frames, particle.x should be near 0.",
       "lua_code": null,
       "uses": [
@@ -299,12 +299,14 @@
       "filter_file": null,
       "invariants": [],
       "rejection_count": 4,
-      "rejection_reason": "Error de Sandbox: /sandbox/sandbox_runner.lua:52: Failed to compile rule: [string \"user_rule\"]:1: syntax error near 'a'"
+      "rejection_reason": "Error de Sandbox: /sandbox/sandbox_runner.lua:52: Failed to compile rule: [string \"user_rule\"]:1: syntax error near 'a'",
+      "confirmed_by": "student_engine",
+      "generated_by": "OpenRouter/Tutor"
     },
     "waves_frequency_amplitude": {
       "level": 13,
       "subject": "waves",
-      "status": "pending",
+      "status": "confirmed",
       "description": "Control wave parameters. Set particle.y = amplitude * sin(2 * pi * frequency * t) with amplitude=30 and frequency=0.1. After 10 frames, particle.y should be near 0.",
       "uses": [
         "waves_oscillation"
@@ -317,12 +319,14 @@
       "order": 135,
       "engine_type": "lua",
       "filter_file": null,
-      "invariants": []
+      "invariants": [],
+      "confirmed_by": "student_engine",
+      "generated_by": "OpenRouter/Tutor"
     },
     "electricity_ohm_law": {
       "level": 14,
       "subject": "electricity",
-      "status": "pending",
+      "status": "confirmed",
       "description": "Apply Ohm's law V=I*R. Given voltage=12 and resistance=4, compute current I=V/R and store in particle.x. Then compute power P=V*I and store in particle.y.",
       "uses": [
         "waves_frequency_amplitude"
@@ -336,12 +340,14 @@
       "order": 140,
       "engine_type": "lua",
       "filter_file": null,
-      "invariants": []
+      "invariants": [],
+      "confirmed_by": "student_engine",
+      "generated_by": "OpenRouter/Tutor"
     },
     "magnetism_lorentz_force": {
       "level": 14,
       "subject": "magnetism",
-      "status": "rejected",
+      "status": "confirmed",
       "description": "Apply Lorentz force F=q*v*B on a charged particle. Given q=1, v=particle.vx=5, B=2, compute force and update particle.vy accordingly.",
       "lua_code": null,
       "uses": [
@@ -355,11 +361,12 @@
       "order": 145,
       "rejection_reason": "Error de Sandbox: /sandbox/sandbox_runner.lua:52: Failed to compile rule: [string \"user_rule\"]:1: unexpected symbol near 'then'",
       "rejection_count": 6,
-      "confirmed_by": null,
+      "confirmed_by": "student_engine",
       "confirmed_at": "2026-05-13T07:39:53",
       "engine_type": "lua",
       "filter_file": null,
-      "invariants": []
+      "invariants": [],
+      "generated_by": "OpenRouter/Tutor"
     },
     "thermodynamics_temperature": {
       "level": 15,

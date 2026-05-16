@@ -36,17 +36,21 @@ NVIDIA_RETRY_DELAY = 5
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 OPENROUTER_MODELS = [
-    "nousresearch/hermes-3-llama-3.1-405b:free",
-    "meta-llama/llama-3.3-70b-instruct:free",
-    "nvidia/nemotron-3-super-120b-a12b:free",
-    "inclusionai/ring-2.6-1t:free",
-    "qwen/qwen3-next-80b-a3b-instruct:free",
-    "arcee-ai/trinity-large-thinking:free",
+    # Tier 1: Proven to work well (deterministic, follow instructions)
     "openai/gpt-oss-120b:free",
+    "nvidia/nemotron-3-super-120b-a12b:free",
+    "nousresearch/hermes-3-llama-3.1-405b:free",
+    # Tier 2: Good fallback models
+    "meta-llama/llama-3.3-70b-instruct:free",
     "z-ai/glm-4.5-air:free",
     "minimax/minimax-m2.5:free",
+    # Tier 3: Last resort (may have thinking/verbosity issues)
+    "qwen/qwen3-next-80b-a3b-instruct:free",
     "google/gemma-4-31b-it:free",
-    "meta-llama/llama-3.2-3b-instruct:free"
+    "meta-llama/llama-3.2-3b-instruct:free",
+    # Disabled: known to repeat prompt or generate prose instead of code
+    # "inclusionai/ring-2.6-1t:free",
+    # "arcee-ai/trinity-large-thinking:free",
 ]
 OPENROUTER_MAX_TOKENS = 512
 OPENROUTER_TEMPERATURE = 0.0
