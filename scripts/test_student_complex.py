@@ -3,8 +3,11 @@ import logging
 import os
 from backend.ai.student_engine import student
 import backend.ai.student_engine as student_mod
+import pytest
 
 logging.basicConfig(level=logging.INFO)
+
+pytestmark = pytest.mark.skipif(os.getenv("RUN_INTEGRATION_TESTS", "0") != "1", reason="integration probe requires explicit opt-in")
 
 async def test():
     # Force Advanced Motor to use the cascaded LLMs (NVIDIA/OpenRouter)

@@ -240,6 +240,9 @@ class TrainingOrchestrator:
                     logger.error(f"❌ StudentEngine falló en {mod_key}")
                     repaired = await self.invoke_hermes_repair(mod_key, "StudentEngine falló tras 5 intentos o validación fallida.")
                     if repaired:
+                        # Actualizar desde disco para no sobreescribir lo que hizo el estudiante
+                        data = self.load_modules()
+                        mod = data["modules"][mod_key]
                         mod["status"] = "confirmed"
                         mod["confirmed_by"] = "hermes_override"
                         mod["generated_by"] = "hermes_override"
@@ -249,6 +252,10 @@ class TrainingOrchestrator:
                         logger.error(f"❌ Hermes no pudo reparar {mod_key}. Deteniendo.")
                         break
                 else:
+                    # El estudiante ya guardó el código en el JSON. 
+                    # Recargamos para tener la versión actualizada con el lua_code.
+                    data = self.load_modules()
+                    mod = data["modules"][mod_key]
                     mod["status"] = "confirmed"
                     mod["confirmed_by"] = "student_engine"
                     mod["generated_by"] = student._last_model_used

@@ -1,8 +1,22 @@
 import asyncio
 import httpx
 import time
+import socket
+
+import pytest
 
 BASE_URL = "http://localhost:8000"
+
+
+def _server_available() -> bool:
+    try:
+        with socket.create_connection(("127.0.0.1", 8000), timeout=0.2):
+            return True
+    except OSError:
+        return False
+
+
+pytestmark = pytest.mark.skipif(not _server_available(), reason="local API server is not running")
 
 async def simulate_call(i):
     async with httpx.AsyncClient(timeout=30) as client:

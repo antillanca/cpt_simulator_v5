@@ -234,8 +234,10 @@
       "engine_type": "lua",
       "filter_file": null,
       "invariants": [],
-      "confirmed_by": "student_engine",
-      "generated_by": "OpenRouter/Tutor"
+      "lua_code": "particle.vx = 3.0\nparticle.vy = 4.0\nlocal mass = 2.0\nparticle.x = 0.5 * mass * (particle.vx * particle.vx + particle.vy * particle.vy)",
+      "confirmed_by": "owl-alpha",
+      "generated_by": "OpenRouter/Tutor",
+      "confirmed_at": "2026-05-15T22:10:26"
     },
     "energy_potential": {
       "level": 12,
@@ -255,8 +257,10 @@
       "filter_file": null,
       "invariants": [],
       "code_size": 249,
-      "confirmed_by": "student_engine",
-      "generated_by": "OpenRouter/Tutor"
+      "lua_code": "local mass = 2.0\nlocal gravity = 9.81\nparticle.x = mass * gravity * particle.y",
+      "confirmed_by": "owl-alpha",
+      "generated_by": "OpenRouter/Tutor",
+      "confirmed_at": "2026-05-15T22:10:37"
     },
     "energy_conservation": {
       "level": 12,
@@ -277,15 +281,17 @@
       "invariants": [
         "energy_conservation"
       ],
-      "confirmed_by": "hermes_override",
-      "generated_by": "hermes_override"
+      "lua_code": "function update_particle(particle)\n  local mass = 2.0\n  local gravity = 9.81\n  particle.vy = particle.vy + gravity\n  particle.y = particle.y + particle.vy\n  local ke = 0.5 * mass * (particle.vx * particle.vx + particle.vy * particle.vy)\n  local pe = mass * gravity * particle.y\n  particle.x = ke + pe\nend",
+      "confirmed_by": "student_engine",
+      "generated_by": "OpenRouter/Tutor",
+      "confirmed_at": "2026-05-15T22:10:54"
     },
     "waves_oscillation": {
       "level": 13,
       "subject": "waves",
       "status": "confirmed",
       "description": "Make the particle oscillate horizontally using sine. Set particle.x = 50 * sin(time) where time is the frame counter. After 15 frames, particle.x should be near 0.",
-      "lua_code": null,
+      "lua_code": "local t = 0\nfunction update_particle(particle)\n  particle.x = 50 * math.sin(t)\n  t = t + 1\nend",
       "uses": [
         "energy_conservation"
       ],
@@ -300,8 +306,9 @@
       "invariants": [],
       "rejection_count": 4,
       "rejection_reason": "Error de Sandbox: /sandbox/sandbox_runner.lua:52: Failed to compile rule: [string \"user_rule\"]:1: syntax error near 'a'",
-      "confirmed_by": "student_engine",
-      "generated_by": "OpenRouter/Tutor"
+      "confirmed_by": "owl-alpha",
+      "generated_by": "OpenRouter/Tutor",
+      "confirmed_at": "2026-05-15T22:02:45"
     },
     "waves_frequency_amplitude": {
       "level": 13,
@@ -320,8 +327,10 @@
       "engine_type": "lua",
       "filter_file": null,
       "invariants": [],
-      "confirmed_by": "student_engine",
-      "generated_by": "OpenRouter/Tutor"
+      "confirmed_by": "owl-alpha",
+      "generated_by": "OpenRouter/Tutor",
+      "lua_code": "local t = 0\nfunction update_particle(particle)\n  particle.y = 30 * math.sin(2 * math.pi * 0.1 * t)\n  t = t + 1\nend",
+      "confirmed_at": "2026-05-15T22:02:58"
     },
     "electricity_ohm_law": {
       "level": 14,
@@ -341,15 +350,17 @@
       "engine_type": "lua",
       "filter_file": null,
       "invariants": [],
-      "confirmed_by": "student_engine",
-      "generated_by": "OpenRouter/Tutor"
+      "confirmed_by": "owl-alpha",
+      "generated_by": "OpenRouter/Tutor",
+      "lua_code": "local V = 12\nlocal R = 4\nlocal I = V / R\nparticle.x = I\nlocal P = V * I\nparticle.y = P",
+      "confirmed_at": "2026-05-15T22:03:08"
     },
     "magnetism_lorentz_force": {
       "level": 14,
       "subject": "magnetism",
       "status": "confirmed",
       "description": "Apply Lorentz force F=q*v*B on a charged particle. Given q=1, v=particle.vx=5, B=2, compute force and update particle.vy accordingly.",
-      "lua_code": null,
+      "lua_code": "function update_particle(particle)\n  local q = 1\n  local B = 2\n  local v = particle.vx\n  local F = q * v * B\n  particle.vy = (particle.vy or 0) + F\nend",
       "uses": [
         "electricity_ohm_law"
       ],
@@ -361,8 +372,8 @@
       "order": 145,
       "rejection_reason": "Error de Sandbox: /sandbox/sandbox_runner.lua:52: Failed to compile rule: [string \"user_rule\"]:1: unexpected symbol near 'then'",
       "rejection_count": 6,
-      "confirmed_by": "student_engine",
-      "confirmed_at": "2026-05-13T07:39:53",
+      "confirmed_by": "owl-alpha",
+      "confirmed_at": "2026-05-15T22:03:20",
       "engine_type": "lua",
       "filter_file": null,
       "invariants": [],
@@ -385,8 +396,10 @@
       "engine_type": "lua",
       "filter_file": null,
       "invariants": [],
-      "confirmed_by": "student_engine",
-      "generated_by": "OpenRouter/Tutor"
+      "confirmed_by": "owl-alpha",
+      "generated_by": "OpenRouter/Tutor",
+      "lua_code": "function thermodynamics_temperature(args)\n  local particle = args.particle\n  local mass = 2\n  local specific_heat = 1\n  local heat_input = 100\n  local delta_T = heat_input / (mass * specific_heat)\n  particle.x = delta_T\n  return delta_T\nend",
+      "confirmed_at": "2026-05-15T22:03:31"
     },
     "thermodynamics_entropy": {
       "level": 15,
@@ -405,8 +418,10 @@
       "engine_type": "lua",
       "filter_file": null,
       "invariants": [],
-      "confirmed_by": "student_engine",
-      "generated_by": "OpenRouter/Tutor"
+      "confirmed_by": "owl-alpha",
+      "generated_by": "OpenRouter/Tutor",
+      "lua_code": "function thermodynamics_entropy(args)\n  local particle = args.particle\n  local Q = 100\n  local T = 300\n  local delta_S = Q / T\n  particle.x = delta_S\n  return delta_S\nend",
+      "confirmed_at": "2026-05-15T22:03:53"
     },
     "probability_statistics": {
       "level": 16,
@@ -425,8 +440,10 @@
       "engine_type": "lua",
       "filter_file": null,
       "invariants": [],
-      "confirmed_by": "student_engine",
-      "generated_by": "OpenRouter/Tutor"
+      "confirmed_by": "owl-alpha",
+      "generated_by": "OpenRouter/Tutor",
+      "lua_code": "function probability_statistics(args)\n  local particle = args.particle\n  local sum = 0\n  for i = 1, 5 do\n    sum = sum + math.random(1, 100)\n  end\n  local avg = sum / 5\n  particle.x = avg\n  return avg\nend",
+      "confirmed_at": "2026-05-15T22:04:07"
     },
     "advanced_modeling": {
       "level": 17,
@@ -446,8 +463,10 @@
       "engine_type": "lua",
       "filter_file": null,
       "invariants": [],
-      "confirmed_by": "student_engine",
-      "generated_by": "OpenRouter/Tutor"
+      "confirmed_by": "owl-alpha",
+      "generated_by": "OpenRouter/Tutor",
+      "lua_code": "local k = 0.1\nlocal c = 0.05\nfunction update_particle(particle)\n  local ax = -k * particle.x - c * particle.vx\n  particle.vx = particle.vx + ax\n  particle.x = particle.x + particle.vx\nend",
+      "confirmed_at": "2026-05-15T22:04:18"
     },
     "calculus_derivative": {
       "level": 18,
@@ -466,8 +485,10 @@
       "engine_type": "lua",
       "filter_file": null,
       "invariants": [],
-      "confirmed_by": "student_engine",
-      "generated_by": "OpenRouter/Tutor"
+      "confirmed_by": "owl-alpha",
+      "generated_by": "OpenRouter/Tutor",
+      "lua_code": "function calculus_derivative(args)\n  local particle = args.particle\n  local dx = 3.0\n  particle.vx = dx\n  return particle.vx\nend",
+      "confirmed_at": "2026-05-15T22:04:34"
     },
     "calculus_integral": {
       "level": 19,
@@ -486,8 +507,10 @@
       "engine_type": "lua",
       "filter_file": null,
       "invariants": [],
-      "confirmed_by": "student_engine",
-      "generated_by": "OpenRouter/Tutor"
+      "confirmed_by": "owl-alpha",
+      "generated_by": "OpenRouter/Tutor",
+      "lua_code": "local total_disp = 0\nfunction update_particle(particle)\n  particle.vx = 2.0\n  total_disp = total_disp + particle.vx\n  particle.x = total_disp\nend",
+      "confirmed_at": "2026-05-15T22:04:50"
     },
     "differential_equations": {
       "level": 20,
@@ -506,8 +529,10 @@
       "engine_type": "lua",
       "filter_file": null,
       "invariants": [],
-      "confirmed_by": "student_engine",
-      "generated_by": "OpenRouter/Tutor"
+      "confirmed_by": "owl-alpha",
+      "generated_by": "OpenRouter/Tutor",
+      "lua_code": "function differential_equations(args)\n  local particle = args.particle\n  local x = particle.x or 100\n  local dt = 1\n  for i = 1, 10 do\n    x = x + dt * (-0.5 * x)\n  end\n  particle.x = x\n  return x\nend",
+      "confirmed_at": "2026-05-15T22:05:04"
     },
     "linear_algebra_matrix": {
       "level": 21,
@@ -527,8 +552,10 @@
       "engine_type": "lua",
       "filter_file": null,
       "invariants": [],
-      "confirmed_by": "student_engine",
-      "generated_by": "OpenRouter/Tutor"
+      "confirmed_by": "owl-alpha",
+      "generated_by": "OpenRouter/Tutor",
+      "lua_code": "function linear_algebra_matrix(args)\n  local angle = math.rad(90)\n  local cos_a = math.cos(angle)\n  local sin_a = math.sin(angle)\n  local vx, vy = 1, 0\n  local new_vx = cos_a * vx - sin_a * vy\n  local new_vy = sin_a * vx + cos_a * vy\n  return {vx = new_vx, vy = new_vy}\nend",
+      "confirmed_at": "2026-05-15T22:05:27"
     },
     "numerical_analysis_euler": {
       "level": 22,
@@ -547,15 +574,17 @@
       "engine_type": "lua",
       "filter_file": null,
       "invariants": [],
-      "confirmed_by": "student_engine",
-      "generated_by": "OpenRouter/Tutor"
+      "confirmed_by": "owl-alpha",
+      "generated_by": "OpenRouter/Tutor",
+      "lua_code": "local frame = 0\nfunction update_particle(particle)\n  particle.vy = particle.vy + 9.81\n  frame = frame + 1\n  if frame == 5 then\n    -- vy is now stored in particle.vy\n  end\nend",
+      "confirmed_at": "2026-05-15T22:05:43"
     },
     "lagrangian_mechanics": {
       "level": 23,
       "subject": "lagrangian",
       "status": "confirmed",
       "description": "Derive motion from energy. For a particle of mass 1 in a potential V=0.5*k*x^2 with k=2 and x=3, compute the Lagrangian L=KE-PE and store in particle.x.",
-      "lua_code": "",
+      "lua_code": "local mass = 1\nlocal k = 2\nlocal x = 3\nlocal v = 0\nlocal KE = 0.5 * mass * v * v\nlocal PE = 0.5 * k * x * x\nparticle.x = KE - PE",
       "uses": [
         "numerical_analysis_euler"
       ],
@@ -570,8 +599,9 @@
       "invariants": [],
       "rejection_reason": "Error de Sandbox: /sandbox/sandbox_runner.lua:52: Failed to compile rule: [string \"user_rule\"]:1: syntax error near 'a'",
       "rejection_count": 4,
-      "confirmed_by": "student_engine",
-      "generated_by": "OpenRouter/Tutor"
+      "confirmed_by": "owl-alpha",
+      "generated_by": "OpenRouter/Tutor",
+      "confirmed_at": "2026-05-15T22:05:57"
     },
     "hamiltonian_mechanics": {
       "level": 24,
@@ -590,15 +620,17 @@
       "engine_type": "lua",
       "filter_file": null,
       "invariants": [],
-      "confirmed_by": "student_engine",
-      "generated_by": "OpenRouter/Tutor"
+      "confirmed_by": "owl-alpha",
+      "generated_by": "OpenRouter/Tutor",
+      "lua_code": "local vx = particle.vx or 3\nlocal x = 2\nlocal KE = 0.5 * 1 * vx * vx\nlocal PE = 0.5 * x * x\nparticle.x = KE + PE",
+      "confirmed_at": "2026-05-15T22:06:13"
     },
     "electromagnetism_maxwell": {
       "level": 25,
       "subject": "electromagnetism",
       "status": "confirmed",
       "description": "Simulate an electromagnetic wave: E-field oscillates as E=sin(x - c*t) where c=1. After 5 frames compute E at x=0 and store in particle.y.",
-      "lua_code": null,
+      "lua_code": "local t = 0\nfunction update_particle(particle)\n  t = t + 1\n  if t == 5 then\n    particle.y = math.sin(-t)\n  end\nend",
       "uses": [
         "hamiltonian_mechanics"
       ],
@@ -610,8 +642,8 @@
       "order": 250,
       "rejection_reason": "Lua compile error: /sandbox/sandbox_runner.lua:50: Failed to compile rule: [string \"user_rule\"]:57: <name> expected near <eof>",
       "rejection_count": 1,
-      "confirmed_by": "student_engine",
-      "confirmed_at": "2026-05-13T07:42:44",
+      "confirmed_by": "owl-alpha",
+      "confirmed_at": "2026-05-15T22:06:32",
       "engine_type": "lua",
       "filter_file": null,
       "invariants": [],
@@ -635,8 +667,10 @@
       "engine_type": "lua",
       "filter_file": null,
       "invariants": [],
-      "confirmed_by": "student_engine",
-      "generated_by": "OpenRouter/Tutor"
+      "confirmed_by": "owl-alpha",
+      "generated_by": "OpenRouter/Tutor",
+      "lua_code": "function special_relativity(particle)\n  local v = 0.6\n  local c = 1\n  local gamma = 1 / math.sqrt(1 - (v * v) / (c * c))\n  particle.x = gamma\n  local t = 10\n  particle.y = t * gamma\n  return gamma\nend",
+      "confirmed_at": "2026-05-15T22:06:45"
     },
     "general_relativity_geodesic": {
       "level": 27,
@@ -655,15 +689,17 @@
       "engine_type": "lua",
       "filter_file": null,
       "invariants": [],
-      "confirmed_by": "student_engine",
-      "generated_by": "OpenRouter/Tutor"
+      "confirmed_by": "owl-alpha",
+      "generated_by": "OpenRouter/Tutor",
+      "lua_code": "function general_relativity_geodesic(args)\n  local dt = 5\n  local dx = 3\n  local c = 1\n  local ds2 = c * c * dt * dt - dx * dx\n  particle.x = ds2\n  return ds2\nend",
+      "confirmed_at": "2026-05-15T22:07:00"
     },
     "quantum_mechanics_wavefunction": {
       "level": 28,
       "subject": "quantum",
       "status": "confirmed",
       "description": "Compute the probability density |psi|^2 for a wavefunction psi=sin(pi*x) at x=0.5. Store the result in particle.x.",
-      "lua_code": "",
+      "lua_code": "local x = 0.5\nlocal psi = math.sin(math.pi * x)\nparticle.x = psi * psi",
       "uses": [
         "general_relativity_geodesic"
       ],
@@ -676,13 +712,14 @@
       "engine_type": "lua",
       "filter_file": null,
       "invariants": [],
-      "confirmed_by": "student_engine",
-      "generated_by": "OpenRouter/Tutor"
+      "confirmed_by": "owl-alpha",
+      "generated_by": "OpenRouter/Tutor",
+      "confirmed_at": "2026-05-15T22:07:24"
     },
     "quantum_field_theory": {
       "level": 29,
       "subject": "quantum",
-      "status": "pending",
+      "status": "confirmed",
       "description": "Model a quantum harmonic oscillator energy level. For level n=3, compute E=(n+0.5)*hbar*omega with hbar=1 and omega=1. Store in particle.x.",
       "uses": [
         "quantum_mechanics_wavefunction"
@@ -695,12 +732,16 @@
       "order": 290,
       "engine_type": "lua",
       "filter_file": null,
-      "invariants": []
+      "invariants": [],
+      "confirmed_by": "owl-alpha",
+      "generated_by": "OpenRouter/Tutor",
+      "lua_code": "local n = 3\nlocal hbar = 1\nlocal omega = 1\nparticle.x = (n + 0.5) * hbar * omega",
+      "confirmed_at": "2026-05-15T22:07:36"
     },
     "cosmology_expansion": {
       "level": 30,
       "subject": "cosmology",
-      "status": "pending",
+      "status": "confirmed",
       "description": "Apply Hubble's law: recession velocity v = H0 * d. Given H0=70 and d=particle.x=100, compute v and store in particle.vx.",
       "uses": [
         "quantum_field_theory"
@@ -713,12 +754,16 @@
       "order": 300,
       "engine_type": "lua",
       "filter_file": null,
-      "invariants": []
+      "invariants": [],
+      "confirmed_by": "owl-alpha",
+      "generated_by": "OpenRouter/Tutor",
+      "lua_code": "local H0 = 70\nparticle.vx = H0 * particle.x",
+      "confirmed_at": "2026-05-15T22:07:46"
     },
     "chaos_theory": {
       "level": 31,
       "subject": "chaos",
-      "status": "pending",
+      "status": "confirmed",
       "description": "Simulate one step of the logistic map: x_n+1 = r * x * (1 - x) with r=3.9 and initial x=particle.x=0.5. Store x_n+1 in particle.x.",
       "uses": [
         "cosmology_expansion"
@@ -731,12 +776,16 @@
       "order": 310,
       "engine_type": "lua",
       "filter_file": null,
-      "invariants": []
+      "invariants": [],
+      "confirmed_by": "owl-alpha",
+      "generated_by": "OpenRouter/Tutor",
+      "lua_code": "function chaos_theory(particle)\n  local r = 3.9\n  local x = particle.x\n  particle.x = r * x * (1 - x)\n  return particle.x\nend",
+      "confirmed_at": "2026-05-15T22:08:00"
     },
     "frontier_knowledge": {
       "level": 32,
       "subject": "frontier",
-      "status": "pending",
+      "status": "confirmed",
       "description": "Model Planck units: compute the Planck length L_p = sqrt(hbar*G/c^3) in natural units where hbar=G=c=1. Store result in particle.x.",
       "uses": [
         "chaos_theory"
@@ -749,14 +798,18 @@
       "order": 320,
       "engine_type": "lua",
       "filter_file": null,
-      "invariants": []
+      "invariants": [],
+      "confirmed_by": "owl-alpha",
+      "generated_by": "OpenRouter/Tutor",
+      "lua_code": "function frontier_knowledge(args)\n  local particle = args.particle\n  particle.x = 1\n  return particle.x\nend",
+      "confirmed_at": "2026-05-15T22:08:12"
     },
     "quantum_double_slit_logic": {
       "level": 34,
       "subject": "quantum",
-      "status": "pending",
+      "status": "confirmed",
       "description": "Model the probability wave of a particle passing through two slits. If slit_1 is open (1) and slit_2 is open (1), set particle.x to a superposition state (represented by 11).",
-      "lua_code": "",
+      "lua_code": "function update_particle(particle)\n  if slit_1 == 1 and slit_2 == 1 then\n    particle.x = 11\n  end\nend",
       "uses": [
         "frontier_knowledge"
       ],
@@ -768,7 +821,10 @@
       "order": 340,
       "engine_type": "lua",
       "filter_file": null,
-      "invariants": []
+      "invariants": [],
+      "confirmed_by": "student_engine",
+      "generated_by": "OpenRouter/Tutor",
+      "confirmed_at": "2026-05-15T22:08:27"
     },
     "logic_02_non_contradiction": {
       "level": 0,

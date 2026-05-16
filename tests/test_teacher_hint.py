@@ -1,9 +1,13 @@
 import asyncio
 import logging
+import os
+import pytest
 from backend.ai.teacher_engine import teacher
 from backend.ai.student_engine import student
 
 logging.basicConfig(level=logging.INFO)
+
+pytestmark = pytest.mark.skipif(os.getenv("RUN_INTEGRATION_TESTS", "0") != "1", reason="integration probe requires explicit opt-in")
 
 async def test_teacher_hint():
     print("Testing Teacher Intervention...")

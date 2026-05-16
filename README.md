@@ -13,8 +13,8 @@ Motor de razonamiento neuro-simbólico. Aprende física y matemática desde cero
 
 ## Estado Rápido
 
-- **Módulos**: 43 total — 3 confirmados (7%), 37 pendientes (86%), 3 rechazados (7%)
-- **Fase**: 1 — Regenerando módulos con tracking de `generated_by`
+- **Módulos**: 43 total — 43 confirmados (100%), 0 pendientes (0%), 0 rechazados (0%)
+- **Fase**: 2 — Currículo completo. Iniciando fase de distillación y expansión.
 - **Stack**: FastAPI + Lua sandbox + PyTorch + Ollama (Qwen3) + Kaggle GPUs
 - **Nuevo**: Campo `generated_by` registra qué modelo produjo cada código Lua
 

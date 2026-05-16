@@ -5,6 +5,7 @@ and validates rule structure before sandbox execution.
 """
 from backend.config import RULE_MAX_LENGTH, PROHIBITED_TOKENS, CANVAS_WIDTH, CANVAS_HEIGHT
 from backend.verifiers import verify_simulation
+from backend.traces.schema import canonicalize_trace, TraceValidationError
 
 
 class Validator:
@@ -65,6 +66,14 @@ class Validator:
     def validate_trace(self, trace: dict, invariant_set: list[str]) -> dict:
         """Validate a simulation trace against deterministic invariants."""
         return verify_simulation(trace, invariant_set)
+
+    def validate_trace_schema(self, trace: dict) -> tuple[bool, str]:
+        """Validate that a trace already matches the structured trace schema."""
+        try:
+            canonicalize_trace(trace).validate()
+        except TraceValidationError as exc:
+            return False, str(exc)
+        return True, ""
 
 
 validator = Validator()
