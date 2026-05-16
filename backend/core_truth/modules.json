@@ -371,7 +371,7 @@
     "thermodynamics_temperature": {
       "level": 15,
       "subject": "thermodynamics",
-      "status": "pending",
+      "status": "confirmed",
       "description": "Model temperature change via heat transfer. Given mass=2, specific_heat=1, heat_input=100, compute delta_T = Q/(m*c) and store in particle.x.",
       "uses": [
         "magnetism_lorentz_force"
@@ -384,12 +384,14 @@
       "order": 150,
       "engine_type": "lua",
       "filter_file": null,
-      "invariants": []
+      "invariants": [],
+      "confirmed_by": "student_engine",
+      "generated_by": "OpenRouter/Tutor"
     },
     "thermodynamics_entropy": {
       "level": 15,
       "subject": "thermodynamics",
-      "status": "pending",
+      "status": "confirmed",
       "description": "Compute entropy change. Given Q=100 and T=300, compute delta_S = Q/T and store in particle.x.",
       "uses": [
         "thermodynamics_temperature"
@@ -402,12 +404,14 @@
       "order": 155,
       "engine_type": "lua",
       "filter_file": null,
-      "invariants": []
+      "invariants": [],
+      "confirmed_by": "student_engine",
+      "generated_by": "OpenRouter/Tutor"
     },
     "probability_statistics": {
       "level": 16,
       "subject": "probability",
-      "status": "pending",
+      "status": "confirmed",
       "description": "Compute the mean of 5 random values. Generate 5 values using math.random(1,100), compute their average, and store in particle.x.",
       "uses": [
         "thermodynamics_entropy"
@@ -420,12 +424,14 @@
       "order": 160,
       "engine_type": "lua",
       "filter_file": null,
-      "invariants": []
+      "invariants": [],
+      "confirmed_by": "student_engine",
+      "generated_by": "OpenRouter/Tutor"
     },
     "advanced_modeling": {
       "level": 17,
       "subject": "advanced",
-      "status": "pending",
+      "status": "confirmed",
       "description": "Model a damped harmonic oscillator. Apply a restoring force proportional to -particle.x and a damping force proportional to -particle.vx. After 60 frames, particle.x should approach 0.",
       "uses": [
         "probability_statistics"
@@ -439,12 +445,14 @@
       "order": 170,
       "engine_type": "lua",
       "filter_file": null,
-      "invariants": []
+      "invariants": [],
+      "confirmed_by": "student_engine",
+      "generated_by": "OpenRouter/Tutor"
     },
     "calculus_derivative": {
       "level": 18,
       "subject": "calculus",
-      "status": "pending",
+      "status": "confirmed",
       "description": "Compute the numerical derivative of position with respect to time. Given that particle.x changes by 3.0 each frame, compute dx/dt and store in particle.vx.",
       "uses": [
         "advanced_modeling"
@@ -457,12 +465,14 @@
       "order": 180,
       "engine_type": "lua",
       "filter_file": null,
-      "invariants": []
+      "invariants": [],
+      "confirmed_by": "student_engine",
+      "generated_by": "OpenRouter/Tutor"
     },
     "calculus_integral": {
       "level": 19,
       "subject": "calculus",
-      "status": "pending",
+      "status": "confirmed",
       "description": "Compute the numerical integral (accumulation) of velocity. Given vx=2.0 constant over 10 frames, integrate to get total displacement and store in particle.x.",
       "uses": [
         "calculus_derivative"
@@ -475,12 +485,14 @@
       "order": 190,
       "engine_type": "lua",
       "filter_file": null,
-      "invariants": []
+      "invariants": [],
+      "confirmed_by": "student_engine",
+      "generated_by": "OpenRouter/Tutor"
     },
     "differential_equations": {
       "level": 20,
       "subject": "differential",
-      "status": "pending",
+      "status": "confirmed",
       "description": "Solve a simple ODE: dx/dt = -0.5 * x. Starting at x=100, evolve the system for 10 frames using Euler method. Store final value in particle.x.",
       "uses": [
         "calculus_integral"
@@ -493,12 +505,14 @@
       "order": 200,
       "engine_type": "lua",
       "filter_file": null,
-      "invariants": []
+      "invariants": [],
+      "confirmed_by": "student_engine",
+      "generated_by": "OpenRouter/Tutor"
     },
     "linear_algebra_matrix": {
       "level": 21,
       "subject": "linear",
-      "status": "pending",
+      "status": "confirmed",
       "description": "Apply a 2D rotation matrix to a vector. Rotate the vector (vx=1, vy=0) by 90 degrees using a rotation matrix. Result should be (vx=0, vy=1).",
       "uses": [
         "differential_equations"
@@ -512,12 +526,14 @@
       "order": 210,
       "engine_type": "lua",
       "filter_file": null,
-      "invariants": []
+      "invariants": [],
+      "confirmed_by": "student_engine",
+      "generated_by": "OpenRouter/Tutor"
     },
     "numerical_analysis_euler": {
       "level": 22,
       "subject": "numerical",
-      "status": "pending",
+      "status": "confirmed",
       "description": "Use the Euler method to numerically integrate free fall. Starting at vy=0, apply gravity=9.81 each frame. After 5 frames store vy in particle.vy.",
       "uses": [
         "linear_algebra_matrix"
@@ -530,12 +546,14 @@
       "order": 220,
       "engine_type": "lua",
       "filter_file": null,
-      "invariants": []
+      "invariants": [],
+      "confirmed_by": "student_engine",
+      "generated_by": "OpenRouter/Tutor"
     },
     "lagrangian_mechanics": {
       "level": 23,
       "subject": "lagrangian",
-      "status": "rejected",
+      "status": "confirmed",
       "description": "Derive motion from energy. For a particle of mass 1 in a potential V=0.5*k*x^2 with k=2 and x=3, compute the Lagrangian L=KE-PE and store in particle.x.",
       "lua_code": "",
       "uses": [
@@ -551,12 +569,14 @@
       "filter_file": null,
       "invariants": [],
       "rejection_reason": "Error de Sandbox: /sandbox/sandbox_runner.lua:52: Failed to compile rule: [string \"user_rule\"]:1: syntax error near 'a'",
-      "rejection_count": 4
+      "rejection_count": 4,
+      "confirmed_by": "student_engine",
+      "generated_by": "OpenRouter/Tutor"
     },
     "hamiltonian_mechanics": {
       "level": 24,
       "subject": "hamiltonian",
-      "status": "pending",
+      "status": "confirmed",
       "description": "Compute the Hamiltonian H=KE+PE for a particle with mass=1, vx=3, vy=0, and potential V=0.5*x^2 where x=2. Store H in particle.x.",
       "uses": [
         "lagrangian_mechanics"
@@ -569,12 +589,14 @@
       "order": 240,
       "engine_type": "lua",
       "filter_file": null,
-      "invariants": []
+      "invariants": [],
+      "confirmed_by": "student_engine",
+      "generated_by": "OpenRouter/Tutor"
     },
     "electromagnetism_maxwell": {
       "level": 25,
       "subject": "electromagnetism",
-      "status": "pending",
+      "status": "confirmed",
       "description": "Simulate an electromagnetic wave: E-field oscillates as E=sin(x - c*t) where c=1. After 5 frames compute E at x=0 and store in particle.y.",
       "lua_code": null,
       "uses": [
@@ -588,16 +610,17 @@
       "order": 250,
       "rejection_reason": "Lua compile error: /sandbox/sandbox_runner.lua:50: Failed to compile rule: [string \"user_rule\"]:57: <name> expected near <eof>",
       "rejection_count": 1,
-      "confirmed_by": null,
+      "confirmed_by": "student_engine",
       "confirmed_at": "2026-05-13T07:42:44",
       "engine_type": "lua",
       "filter_file": null,
-      "invariants": []
+      "invariants": [],
+      "generated_by": "OpenRouter/Tutor"
     },
     "special_relativity": {
       "level": 26,
       "subject": "special",
-      "status": "pending",
+      "status": "confirmed",
       "description": "Apply Lorentz time dilation. Given v=0.6c (where c=1), compute gamma=1/sqrt(1-v^2/c^2) and store in particle.x. Then compute dilated time for t=10 and store in particle.y.",
       "uses": [
         "electromagnetism_maxwell"
@@ -611,12 +634,14 @@
       "order": 260,
       "engine_type": "lua",
       "filter_file": null,
-      "invariants": []
+      "invariants": [],
+      "confirmed_by": "student_engine",
+      "generated_by": "OpenRouter/Tutor"
     },
     "general_relativity_geodesic": {
       "level": 27,
       "subject": "general",
-      "status": "pending",
+      "status": "confirmed",
       "description": "Compute the spacetime interval. Given delta_t=5, delta_x=3, compute ds^2 = c^2*dt^2 - dx^2 (c=1). Store result in particle.x.",
       "uses": [
         "special_relativity"
@@ -629,12 +654,14 @@
       "order": 270,
       "engine_type": "lua",
       "filter_file": null,
-      "invariants": []
+      "invariants": [],
+      "confirmed_by": "student_engine",
+      "generated_by": "OpenRouter/Tutor"
     },
     "quantum_mechanics_wavefunction": {
       "level": 28,
       "subject": "quantum",
-      "status": "pending",
+      "status": "confirmed",
       "description": "Compute the probability density |psi|^2 for a wavefunction psi=sin(pi*x) at x=0.5. Store the result in particle.x.",
       "lua_code": "",
       "uses": [
@@ -648,7 +675,9 @@
       "order": 280,
       "engine_type": "lua",
       "filter_file": null,
-      "invariants": []
+      "invariants": [],
+      "confirmed_by": "student_engine",
+      "generated_by": "OpenRouter/Tutor"
     },
     "quantum_field_theory": {
       "level": 29,
