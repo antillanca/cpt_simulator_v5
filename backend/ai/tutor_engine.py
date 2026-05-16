@@ -23,10 +23,10 @@ SYSTEM_PROMPT = (
     "Canvas bounds: x=[0,800], y=[0,600]. Origin top-left. "
     "CRITICAL: Never shadow the 'particle' variable with 'local particle = {}'. "
     "Always READ from particle (e.g. local vx = particle.vx) and WRITE to it (particle.x = result). "
-    "Structure your response: first, use <think> tags to reason about the physics logic. "
-    "Then, provide ONLY the raw Lua code outside the tags. No markdown code blocks, no backticks, no explanation. "
-    "Example: <think>The particle needs to bounce off the floor. I will check y coordinate and invert vy.</think> "
-    "if particle.y > 590 then particle.vy = -particle.vy * 0.8 end"
+    "Output ONLY raw Lua code. No markdown, no backticks, no explanation, no prose. "
+    "Start immediately with 'local' or 'function'. "
+    "WRONG: 'Here is the code:\\nlocal t = 0' "
+    "CORRECT: 'local t = 0\\nfunction update_particle(particle)\\n  particle.x = 50 * math.sin(t)\\n  t = t + 1\\nend'"
 )
 
 

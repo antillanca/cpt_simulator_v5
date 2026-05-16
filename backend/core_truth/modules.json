@@ -22,55 +22,63 @@
     "layer_01_counting": {
       "level": 1,
       "subject": "matematica",
-      "status": "pending",
+      "status": "confirmed",
       "description": "Increment or decrement a value by 1. Represent quantity.",
       "uses": [
         "layer_00_existence"
       ],
       "engine_type": "tabular",
       "filter_file": "matematica_tabular_filter.pt",
-      "invariants": []
+      "invariants": [],
+      "confirmed_by": "kaggle_orchestrator",
+      "generated_by": "kaggle_orchestrator"
     },
     "layer_02_operations": {
       "level": 2,
       "subject": "matematica",
-      "status": "pending",
+      "status": "confirmed",
       "description": "Apply addition, subtraction, multiplication, and division.",
       "uses": [
         "layer_01_counting"
       ],
       "engine_type": "tabular",
       "filter_file": "matematica_tabular_filter.pt",
-      "invariants": []
+      "invariants": [],
+      "confirmed_by": "kaggle_orchestrator",
+      "generated_by": "kaggle_orchestrator"
     },
     "layer_05_algebra": {
       "level": 5,
       "subject": "matematica",
-      "status": "pending",
+      "status": "confirmed",
       "description": "Use variables to represent unknown quantities in equations.",
       "uses": [
         "layer_02_operations"
       ],
       "engine_type": "tabular",
       "filter_file": "matematica_tabular_filter.pt",
-      "invariants": []
+      "invariants": [],
+      "confirmed_by": "kaggle_orchestrator",
+      "generated_by": "kaggle_orchestrator"
     },
     "layer_10_kinematics": {
       "level": 10,
       "subject": "fisica",
-      "status": "pending",
+      "status": "confirmed",
       "description": "Describe motion over time using position, velocity, and acceleration.",
       "uses": [
         "layer_05_algebra"
       ],
       "engine_type": "tabular",
       "filter_file": "fisica_tabular_filter.pt",
-      "invariants": []
+      "invariants": [],
+      "confirmed_by": "kaggle_orchestrator",
+      "generated_by": "kaggle_orchestrator"
     },
     "math_number_representation": {
       "level": 3,
       "subject": "math",
-      "status": "pending",
+      "status": "confirmed",
       "description": "Represent and manipulate integers, negative numbers, fractions, powers, and roots. Compute 2^3 and store the result in particle.x.",
       "uses": [
         "layer_02_operations"
@@ -83,12 +91,14 @@
       "order": 30,
       "engine_type": "tabular",
       "filter_file": "math_tabular_filter.pt",
-      "invariants": []
+      "invariants": [],
+      "confirmed_by": "kaggle_orchestrator",
+      "generated_by": "kaggle_orchestrator"
     },
     "math_relations_proportions": {
       "level": 4,
       "subject": "math",
-      "status": "pending",
+      "status": "confirmed",
       "description": "Apply ratios, scales, and percentages. If particle.x is 100, compute 25% of its value and store in particle.y.",
       "uses": [
         "math_number_representation"
@@ -101,12 +111,14 @@
       "order": 40,
       "engine_type": "tabular",
       "filter_file": "math_tabular_filter.pt",
-      "invariants": []
+      "invariants": [],
+      "confirmed_by": "kaggle_orchestrator",
+      "generated_by": "kaggle_orchestrator"
     },
     "math_functions": {
       "level": 6,
       "subject": "math",
-      "status": "pending",
+      "status": "confirmed",
       "description": "Define a deterministic transformation function. Given input particle.x, compute output as 3*x + 2 and store in particle.y.",
       "uses": [
         "layer_05_algebra"
@@ -119,12 +131,14 @@
       "order": 60,
       "engine_type": "tabular",
       "filter_file": "math_tabular_filter.pt",
-      "invariants": []
+      "invariants": [],
+      "confirmed_by": "kaggle_orchestrator",
+      "generated_by": "kaggle_orchestrator"
     },
     "geometry_basics": {
       "level": 7,
       "subject": "geometry",
-      "status": "pending",
+      "status": "confirmed",
       "description": "Calculate the Euclidean distance between two points. Given particle at (0,0) and target at (3,4), compute distance and store in particle.x.",
       "uses": [
         "math_functions"
@@ -137,12 +151,14 @@
       "order": 70,
       "engine_type": "tabular",
       "filter_file": "geometry_tabular_filter.pt",
-      "invariants": []
+      "invariants": [],
+      "confirmed_by": "kaggle_orchestrator",
+      "generated_by": "kaggle_orchestrator"
     },
     "math_vectors": {
       "level": 8,
       "subject": "math",
-      "status": "pending",
+      "status": "confirmed",
       "description": "Decompose a vector into its x and y components. Given magnitude 10 and angle 0 degrees, set particle.vx to 10 and particle.vy to 0.",
       "uses": [
         "geometry_basics"
@@ -156,12 +172,14 @@
       "order": 80,
       "engine_type": "tabular",
       "filter_file": "math_tabular_filter.pt",
-      "invariants": []
+      "invariants": [],
+      "confirmed_by": "kaggle_orchestrator",
+      "generated_by": "kaggle_orchestrator"
     },
     "math_trigonometry": {
       "level": 9,
       "subject": "math",
-      "status": "pending",
+      "status": "confirmed",
       "description": "Use sine and cosine to compute vector components. Given magnitude 5 and angle 60 degrees, set particle.vx and particle.vy to the correct components.",
       "uses": [
         "math_vectors"
@@ -175,12 +193,14 @@
       "order": 90,
       "engine_type": "tabular",
       "filter_file": "math_tabular_filter.pt",
-      "invariants": []
+      "invariants": [],
+      "confirmed_by": "kaggle_orchestrator",
+      "generated_by": "kaggle_orchestrator"
     },
     "dynamics_newton_second_law": {
       "level": 11,
       "subject": "dynamics",
-      "status": "pending",
+      "status": "confirmed",
       "description": "Apply a constant force to a particle of mass 2.0. Set particle.vx to increase by 3.0 per frame (F=ma, a=F/m=6/2=3).",
       "uses": [
         "layer_10_kinematics"
@@ -193,12 +213,14 @@
       "order": 110,
       "engine_type": "tabular",
       "filter_file": "dynamics_tabular_filter.pt",
-      "invariants": []
+      "invariants": [],
+      "confirmed_by": "kaggle_orchestrator",
+      "generated_by": "kaggle_orchestrator"
     },
     "energy_kinetic": {
       "level": 12,
       "subject": "energy",
-      "status": "pending",
+      "status": "confirmed",
       "description": "Compute the kinetic energy of a particle with mass 2.0 and velocity vx=3.0, vy=4.0. Store the result (0.5*m*v^2) in particle.x.",
       "uses": [
         "dynamics_newton_second_law"
@@ -211,12 +233,14 @@
       "order": 120,
       "engine_type": "lua",
       "filter_file": null,
-      "invariants": []
+      "invariants": [],
+      "confirmed_by": "student_engine",
+      "generated_by": "OpenRouter/Tutor"
     },
     "energy_potential": {
       "level": 12,
       "subject": "energy",
-      "status": "pending",
+      "status": "confirmed",
       "description": "Compute gravitational potential energy. Given mass=2.0, gravity=9.81, and height=particle.y=10, store m*g*h in particle.x.",
       "uses": [
         "energy_kinetic"
@@ -230,12 +254,14 @@
       "engine_type": "lua",
       "filter_file": null,
       "invariants": [],
-      "code_size": 249
+      "code_size": 249,
+      "confirmed_by": "student_engine",
+      "generated_by": "OpenRouter/Tutor"
     },
     "energy_conservation": {
       "level": 12,
       "subject": "energy",
-      "status": "pending",
+      "status": "confirmed",
       "description": "Verify total energy conservation. A particle falls from y=100 with vx=0. After 20 frames, compute KE+PE and store in particle.x. Total should remain constant.",
       "uses": [
         "energy_potential"
@@ -250,7 +276,9 @@
       "filter_file": null,
       "invariants": [
         "energy_conservation"
-      ]
+      ],
+      "confirmed_by": "hermes_override",
+      "generated_by": "hermes_override"
     },
     "waves_oscillation": {
       "level": 13,
@@ -772,7 +800,7 @@
     "logic_05_efficient_cause": {
       "level": 0,
       "subject": "logic",
-      "status": "pending",
+      "status": "confirmed",
       "description": "Demonstrate causality. Assume a force is applied (set particle.force_applied = 1). As a direct effect, increase particle.x by 10 and set particle.has_moved to 1.",
       "uses": [
         "logic_04_potency_to_act"
@@ -787,7 +815,9 @@
       "order": 4,
       "engine_type": "tabular",
       "filter_file": "logic_tabular_filter.pt",
-      "invariants": []
+      "invariants": [],
+      "confirmed_by": "kaggle_orchestrator",
+      "generated_by": "kaggle_orchestrator"
     }
   }
 }

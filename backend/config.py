@@ -27,7 +27,7 @@ NVIDIA_API_KEY = os.getenv("NVIDIA_API_KEY", "")
 NVIDIA_BASE_URL = "https://integrate.api.nvidia.com/v1"
 NVIDIA_MODEL = "z-ai/glm-5.1"
 NVIDIA_MAX_TOKENS = 300
-NVIDIA_TEMPERATURE = 0.2
+NVIDIA_TEMPERATURE = 0.0
 NVIDIA_TIMEOUT = 30
 NVIDIA_MAX_RETRIES = 3
 NVIDIA_RETRY_DELAY = 5
@@ -49,7 +49,7 @@ OPENROUTER_MODELS = [
     "meta-llama/llama-3.2-3b-instruct:free"
 ]
 OPENROUTER_MAX_TOKENS = 512
-OPENROUTER_TEMPERATURE = 0.3
+OPENROUTER_TEMPERATURE = 0.0
 OPENROUTER_TIMEOUT = 45
 
 # Fallback 2: Ollama local (any available model)

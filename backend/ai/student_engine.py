@@ -283,13 +283,26 @@ Requirements:
 - For single-frame calculations, write inline code.
 - For multi-frame behaviors (like oscillation), wrap your code in 'function update_particle(particle) ... end' so it runs every frame!
 - Keep it minimal and correct
-- Return ONLY the Lua code, no explanation
+- Return ONLY the Lua code, no explanation, no markdown, no backticks
+- Start immediately with 'local' or 'function'
+
 {hints_str}{formula_hints}
 Available dependencies (previously learned rules):
 {deps_code if deps_code else "None"}
 
 Example for 'move right at speed 2':
   particle.vx = 2.0
+
+WRONG (do not do this):
+  Here is the code you need:
+  local t = 0
+
+CORRECT:
+  local t = 0
+  function update_particle(particle)
+    particle.x = 50 * math.sin(t)
+    t = t + 1
+  end
 
 Write the Lua code:"""
         else:
@@ -359,26 +372,29 @@ Write the Lua code:"""
 
     def _extract_lua(self, text: str) -> Optional[str]:
         """Extract clean Lua code from model response.
-        Handles markdown code blocks, backticks, and extra text.
+        Handles markdown code blocks, backticks, and extra prose text.
+        Aggressively strips any non-Lua content before the first valid Lua line.
         """
         import re
 
         text = text.strip()
 
-        # Try to extract from markdown code block
-        # Match ```lua ... ``` or ``` ... ```
+        # 0. Remove <think>...</think> blocks (some models leak reasoning)
+        text = re.sub(r'<think>.*?</think>', '', text, flags=re.DOTALL).strip()
+
+        # 1. Try to extract from markdown code block
         block_match = re.search(r'```(?:lua)?\s*\n(.*?)```', text, re.DOTALL)
         if block_match:
             return block_match.group(1).strip()
 
-        # Try inline code: `code`
+        # 2. Try inline code: `code`
         inline_match = re.search(r'`([^`]+)`', text)
         if inline_match:
             candidate = inline_match.group(1).strip()
             if any(kw in candidate.lower() for kw in ["function", "local", "return"]):
                 return candidate
 
-        # Remove any remaining backtick lines
+        # 3. Strip backtick lines and markdown artifacts
         lines = text.split("\n")
         clean_lines = []
         in_block = False
@@ -390,19 +406,38 @@ Write the Lua code:"""
             if not stripped.startswith("`"):
                 clean_lines.append(line)
 
-            text = "\n".join(clean_lines).strip()
+        text = "\n".join(clean_lines).strip()
 
-        # Basic validation
+        # 4. Find the first line that looks like Lua code and discard everything before it.
+        #    Valid Lua starters: 'local', 'function', '--', 'if', 'for', 'while', 'return', 'end'
+        lua_starters = re.compile(
+            r'^\s*(local\s|function\s|--|if\s|for\s|while\s|return\s|end\b|particle\.)',
+            re.IGNORECASE
+        )
+        code_lines = []
+        found_code = False
+        for line in text.split("\n"):
+            if not found_code:
+                if lua_starters.match(line):
+                    found_code = True
+                    code_lines.append(line)
+                # else: skip prose lines before the first Lua line
+            else:
+                code_lines.append(line)
+
+        if code_lines:
+            text = "\n".join(code_lines).strip()
+
+        # 5. Basic validation
         if len(text) < 5 or len(text) > 2000:
             return None
 
-        # Must contain some Lua keywords
+        # 6. Must contain some Lua keywords
         lua_keywords = ["function", "local", "return", "if", "then", "end", "for", "while"]
         if not any(kw in text.lower() for kw in lua_keywords):
             return None
 
-        # Lua compile gate: verify the extracted text is valid Lua before returning it.
-        # This prevents English prose (e.g. from meta-prompts) from reaching the sandbox.
+        # 7. Lua compile gate: verify the extracted text is valid Lua before returning it.
         if not self._lua_compiles(text):
             logger.warning(f"[Student] _extract_lua: text failed Lua compile gate, discarding")
             return None
