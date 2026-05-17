@@ -12,10 +12,12 @@ from typing import Any
 
 import yaml
 
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 from backend.neural.training_snapshot import fingerprint_jsonl, fingerprint_mapping, git_commit_hash, stable_fingerprint
 
-
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 
 def load_kaggle_profile(path: str | Path) -> dict[str, Any]:
