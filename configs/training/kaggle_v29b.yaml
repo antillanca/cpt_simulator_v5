@@ -1,0 +1,22 @@
+seed: 42
+
+device:
+  prefer_cuda: true
+
+training:
+  epochs: 10
+  batch_size: 32
+  learning_rate: 0.001
+
+dataset:
+  train_path: workspace/datasets/circuits/train_10k.jsonl
+  eval_split: 0.2
+
+model:
+  hidden_dim: 64
+  max_params: 250000
+
+evaluation:
+  voltage_tolerance: 1e-3
+  invariant_tolerance: 1e-6
+
