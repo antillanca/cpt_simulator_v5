@@ -1,0 +1,118 @@
+{
+  "avg_solve_time_ms": 0.0673,
+  "failed": 0,
+  "invariant_pass_rate": 1.0,
+  "passed": 12,
+  "results": [
+    {
+      "details": "invariants=PASS, trace_det=YES",
+      "invariant_passed": true,
+      "max_error": 0.0,
+      "name": "current_parallel",
+      "solve_time_ms": 0.0408,
+      "success": true,
+      "trace_deterministic": true
+    },
+    {
+      "details": "invariants=PASS, trace_det=YES",
+      "invariant_passed": true,
+      "max_error": 0.0,
+      "name": "current_source_simple",
+      "solve_time_ms": 0.0511,
+      "success": true,
+      "trace_deterministic": true
+    },
+    {
+      "details": "invariants=PASS, trace_det=YES",
+      "invariant_passed": true,
+      "max_error": 0.0,
+      "name": "divider_3r",
+      "solve_time_ms": 0.0524,
+      "success": true,
+      "trace_deterministic": true
+    },
+    {
+      "details": "invariants=PASS, trace_det=YES",
+      "invariant_passed": true,
+      "max_error": 0.0,
+      "name": "gnd_alias",
+      "solve_time_ms": 0.045,
+      "success": true,
+      "trace_deterministic": true
+    },
+    {
+      "details": "invariants=PASS, trace_det=YES",
+      "invariant_passed": true,
+      "max_error": 0.0,
+      "name": "ladder_4r",
+      "solve_time_ms": 0.058,
+      "success": true,
+      "trace_deterministic": true
+    },
+    {
+      "details": "invariants=PASS, trace_det=YES",
+      "invariant_passed": true,
+      "max_error": 1.666e-09,
+      "name": "mixed_sources",
+      "solve_time_ms": 0.0463,
+      "success": true,
+      "trace_deterministic": true
+    },
+    {
+      "details": "invariants=PASS, trace_det=YES",
+      "invariant_passed": true,
+      "max_error": 0.0,
+      "name": "parallel_2r",
+      "solve_time_ms": 0.0427,
+      "success": true,
+      "trace_deterministic": true
+    },
+    {
+      "details": "invariants=PASS, trace_det=YES",
+      "invariant_passed": true,
+      "max_error": 0.0,
+      "name": "series_3r",
+      "solve_time_ms": 0.0621,
+      "success": true,
+      "trace_deterministic": true
+    },
+    {
+      "details": "invariants=PASS, trace_det=YES",
+      "invariant_passed": true,
+      "max_error": 0.0,
+      "name": "single_resistor",
+      "solve_time_ms": 0.06,
+      "success": true,
+      "trace_deterministic": true
+    },
+    {
+      "details": "invariants=PASS, trace_det=YES",
+      "invariant_passed": true,
+      "max_error": 0.0,
+      "name": "two_vsources",
+      "solve_time_ms": 0.0442,
+      "success": true,
+      "trace_deterministic": true
+    },
+    {
+      "details": "invariants=PASS, trace_det=YES",
+      "invariant_passed": true,
+      "max_error": 1e-09,
+      "name": "voltage_divider",
+      "solve_time_ms": 0.2378,
+      "success": true,
+      "trace_deterministic": true
+    },
+    {
+      "details": "invariants=PASS, trace_det=YES",
+      "invariant_passed": true,
+      "max_error": 0.0,
+      "name": "wheatstone",
+      "solve_time_ms": 0.0668,
+      "success": true,
+      "trace_deterministic": true
+    }
+  ],
+  "total": 12,
+  "trace_determinism_rate": 1.0
+}

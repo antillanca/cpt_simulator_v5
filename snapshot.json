@@ -1,0 +1,174 @@
+{
+  "benchmark": {
+    "fingerprint": "87734b3df7ab4414",
+    "metrics": {
+      "cases": 48,
+      "causal_consistency": 0.5,
+      "exact_match_rate": 0.5,
+      "failed": 24,
+      "invariant_violation_rate": 0.5,
+      "pass_rate": 0.5,
+      "passed": 24,
+      "suite_version": "2.6.0",
+      "symbolic_consistency": 0.5,
+      "trajectory_deviation": 2614.5749892050712
+    },
+    "version": "2.6.0"
+  },
+  "config": {
+    "PYTHONPATH": "."
+  },
+  "cpt_version": "2.6.0",
+  "curriculum": {
+    "directory_hash": "fc617fbfc2d83f6b"
+  },
+  "curriculum_coverage": {
+    "layers": {
+      "0": [
+        "layer_00_existence",
+        "logic_02_non_contradiction",
+        "logic_03_excluded_middle",
+        "logic_04_potency_to_act",
+        "logic_05_efficient_cause"
+      ],
+      "1": [
+        "layer_01_counting"
+      ],
+      "10": [
+        "layer_10_kinematics"
+      ],
+      "11": [
+        "dynamics_newton_second_law"
+      ],
+      "12": [
+        "energy_kinetic",
+        "energy_potential",
+        "energy_conservation"
+      ],
+      "13": [
+        "waves_oscillation",
+        "waves_frequency_amplitude"
+      ],
+      "14": [
+        "electricity_ohm_law",
+        "magnetism_lorentz_force"
+      ],
+      "15": [
+        "thermodynamics_temperature",
+        "thermodynamics_entropy"
+      ],
+      "16": [
+        "probability_statistics"
+      ],
+      "17": [
+        "advanced_modeling"
+      ],
+      "18": [
+        "calculus_derivative"
+      ],
+      "19": [
+        "calculus_integral"
+      ],
+      "2": [
+        "layer_02_operations"
+      ],
+      "20": [
+        "differential_equations"
+      ],
+      "21": [
+        "linear_algebra_matrix"
+      ],
+      "22": [
+        "numerical_analysis_euler"
+      ],
+      "23": [
+        "lagrangian_mechanics"
+      ],
+      "24": [
+        "hamiltonian_mechanics"
+      ],
+      "25": [
+        "electromagnetism_maxwell"
+      ],
+      "26": [
+        "special_relativity"
+      ],
+      "27": [
+        "general_relativity_geodesic"
+      ],
+      "28": [
+        "quantum_mechanics_wavefunction"
+      ],
+      "29": [
+        "quantum_field_theory"
+      ],
+      "3": [
+        "math_number_representation"
+      ],
+      "30": [
+        "cosmology_expansion"
+      ],
+      "31": [
+        "chaos_theory"
+      ],
+      "32": [
+        "frontier_knowledge"
+      ],
+      "34": [
+        "quantum_double_slit_logic"
+      ],
+      "4": [
+        "math_relations_proportions"
+      ],
+      "5": [
+        "layer_05_algebra"
+      ],
+      "6": [
+        "math_functions"
+      ],
+      "7": [
+        "geometry_basics"
+      ],
+      "8": [
+        "math_vectors"
+      ],
+      "9": [
+        "math_trigonometry"
+      ]
+    },
+    "total_modules": 43
+  },
+  "fingerprint": "e679cb995d0ee1ab",
+  "git": {
+    "branch": "master",
+    "commit": "7248bb293cc8deb575291135b44bb80945a09b31",
+    "dirty": true
+  },
+  "key_files": {
+    "backend/benchmarks/cpt_bench/suite.py": "75af64d7e8dd4e65",
+    "backend/core_truth/sandbox.py": "3ac3cb47973623fa",
+    "backend/datasets/oracle_generator.py": "09f4f75e9e490ce1",
+    "backend/main.py": "da7eb7fdc96229e7",
+    "backend/tooling/permissions.py": "72d81ffcf413ea3d",
+    "backend/traces/schema.py": "795d55936b344463",
+    "backend/validation/pipeline.py": "04b31c0be1be8b8a",
+    "backend/validation/thresholds.py": "3ff7e2c339bc23cc"
+  },
+  "modules": {
+    "content_hash": "41daf23f2703bcbe",
+    "hash": "41daf23f2703bcbe",
+    "path": "backend/core_truth/modules.json"
+  },
+  "schema_version": "1.0.0",
+  "seeds": {
+    "default_benchmark_seed": 42,
+    "default_oracle_seed": 42
+  },
+  "tests": {
+    "exit_code": 0,
+    "passed": true,
+    "summary": "45 passed, 2 skipped, 2 deselected, 1 warning in 1.61s"
+  },
+  "timestamp": "2026-05-16T16:50:09",
+  "timestamp_unix": 1778950209
+}

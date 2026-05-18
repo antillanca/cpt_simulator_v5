@@ -297,6 +297,10 @@ class OracleDatasetGenerator:
             "parameter_sweeps": self.parameter_sweeps,
             "generated_at": time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(self.seed or 0)),
             "dataset_fingerprint": dataset_fingerprint,
+            "module_versions": {
+                module_key: _stable_hash(self.registry.get("modules", {}).get(module_key, {}))
+                for module_key in modules_used
+            },
         }
         manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True), encoding="utf-8")
 

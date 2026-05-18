@@ -1,0 +1,24 @@
+{
+  "benchmark_fingerprint": "4c857708443d5be752ab2c37278814a1a35779aee6623acc557b762ae30233ff",
+  "curriculum_coverage": [],
+  "dataset_version": "2.9c",
+  "fingerprint": "c9a9b07c7c4f3b7f160b541a5066fa15834e678655670de76002d42a33d4abda",
+  "generation_seed": 42,
+  "generator_version": "v29c-subset",
+  "module_hash": "4c857708443d5be752ab2c37278814a1a35779aee6623acc557b762ae30233ff",
+  "module_versions": {
+    "ood_circuit_subset": "2.9c"
+  },
+  "modules_used": [
+    "ood_circuit_subset"
+  ],
+  "parameter_sweeps": {},
+  "record_count": 64,
+  "schema_version": "2.7.0",
+  "shard_list": [
+    "workspace/datasets/circuits/ood_circuits_subset_v29c.jsonl"
+  ],
+  "snapshot_hash": "4c857708443d5be752ab2c37278814a1a35779aee6623acc557b762ae30233ff",
+  "timestamp": "2026-05-17T00:00:00",
+  "timestamp_unix": 0.0
+}

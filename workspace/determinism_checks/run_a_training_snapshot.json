@@ -1,0 +1,21 @@
+{
+  "artifact_fingerprint": "ed65aa12cec04ca456bb3b6434228c2097369a7969a866c341d761f9d2ba894f",
+  "best_epoch": 1,
+  "checkpoint_fingerprint": "35c585fb200050a98dfd6e3579b5086bbf6133ad3256c55c40053fa20eaaa7f3",
+  "config_fingerprint": "e28f255bf42b6322616f50b83ac867aa1828c12fddf44240a86a483a8814ab71",
+  "config_path": "configs/training/kaggle_v29b.yaml",
+  "cuda_enabled": false,
+  "dataset_fingerprint": "3ff4dcb6e9d589e4e0d4cc7f4032a7426187bb56ddc23bf873cc7b783dffa9b9",
+  "dataset_path": "workspace/datasets/circuits/train_10k_subset_v29c.jsonl",
+  "device_name": "cpu",
+  "eval_fingerprint": "8056cd7f15e4a570e57d5316dd4dcdebd295c489f14741619364076bc7e03428",
+  "evaluation_fingerprint": "8056cd7f15e4a570e57d5316dd4dcdebd295c489f14741619364076bc7e03428",
+  "git_commit": "7248bb293cc8deb575291135b44bb80945a09b31",
+  "model_fingerprint": "baddf1b708917dbf5cc489900a018ec66f76752d7cac5a18d0197e89c6b480f1",
+  "parent_oracle_version": "v2.8",
+  "resolved_config_path": "/home/john/www/cpt_simulator_v5/configs/training/kaggle_v29b.yaml",
+  "resolved_dataset_path": "/home/john/www/cpt_simulator_v5/workspace/datasets/circuits/train_10k_subset_v29c.jsonl",
+  "schema_version": "2.9b",
+  "seed": 42,
+  "torch_version": "2.12.0+cu130"
+}

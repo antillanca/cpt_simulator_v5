@@ -1,0 +1,18 @@
+{
+  "artifacts": {
+    "arena_reports": "workspace/arena_reports/v29d_comparison.json",
+    "arena_results": "workspace/arena_results/v29d_full_arena_metrics.json",
+    "checkpoint": "workspace/checkpoints/circuit_gnn_v29d_full.pt",
+    "docs_report": "docs/V29D_PHYSICS_INFORMED_COMPARISON.md",
+    "snapshot": "workspace/training_snapshots/training_snapshot.json"
+  },
+  "config_fingerprint": "4c8cd7ad43505b56894f8c9a9733c56faa0b03355ea09b62f68d5c9c16e875f4",
+  "config_path": "/home/john/www/cpt_simulator_v5/configs/training/kaggle_v29d.yaml",
+  "dataset_fingerprint": "3c5b08dbb43a21542849527da2e55593a0103e7b673bdaf7a07334a790a44b31",
+  "dataset_path": "/home/john/www/cpt_simulator_v5/workspace/datasets/circuits/train_10k/circuits.jsonl",
+  "git_commit": "096143114b5f3840f2e91492c8ee4dc80521ba75",
+  "profile": "kaggle_v29d",
+  "profile_fingerprint": "f4ee40c932ab1fcf79b4aa9bbc7498e2f451a28836218821a89b4a6b8a674c03",
+  "run_command": "bash run_kaggle_v29d.sh",
+  "schema_version": "2.9d"
+}

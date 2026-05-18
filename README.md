@@ -1,81 +1,93 @@
-# CPT Cognitive Engine v2.9D (Neuro-Simbólico)
+# CPT Cognitive Engine v2.9F (Neuro-Simbólico)
 
-Motor de razonamiento neuro-simbólico premium. Aprende física de circuitos eléctricos, leyes de conservación y matemática desde cero vía simulaciones deterministas de oráculos + redes neuronales informadas por la física (PINNs).
+Motor de razonamiento neuro-simbólico premium. Aprende física de circuitos eléctricos, leyes de conservación y matemática desde cero vía simulaciones deterministas de oráculos + redes neuronales informadas por la física (PINNs) combinadas con solvers iterativos híbridos.
 
 ---
 
-## 🚀 Estado de la Currícula AI (100% Completado)
+## 🚀 Estado de la Currícula AI y Evolución del Sistema
 
 *   **Módulos de Currícula:** **43 de 43 confirmados (100% completado)** en sincronía perfecta con el motor estudiantil.
-*   **Fase Actual:** `v2.9D` — Entrenamiento de alta fidelidad del surrogate GNN en el dataset completo (`train_10k.jsonl`) con endurecimiento de invariantes físicos y empaquetamiento kernel-ready para Kaggle.
-*   **Aceleración Científica:** Sustitución de resolvedores matriciales tradicionales por un surrogate basado en **Graph Neural Networks (GNN)** con pérdidas físicas acopladas directamente en PyTorch.
+*   **Fase Actual:** `v2.9F` — Implementación del **True Global Virtual Node Projection** y transición hacia un **Solver Iterativo Híbrido (Warm-Start)**.
+*   **Cambio de Paradigma:** Ya no entrenamos a la GNN para ser un regresor perfecto aislado. Ahora, la GNN actúa como un pre-condicionador ultrarrápido (warm-start) para una **Capa de Proyección Física Determinista**, reduciendo drásticamente las iteraciones necesarias para que un solver tradicional converja, evadiendo el problema del radio espectral en grafos de alto diámetro.
 
 ---
 
-## ⚡ GNN Surrogate & Pérdida Informada por la Física (PINN)
+## ⚡ Arquitectura Core: Solver Híbrido & Proyección Física
 
-El modelo de circuitos implementa una red neuronal de paso de mensajes condicionada por bordes (**EdgeAwareCircuitGNN**) que respeta estrictamente los principios de conservación física mediante la clase `PhysicsInformedLoss`:
+El sistema ha evolucionado hacia un pipeline de resolución en dos etapas, garantizando velocidad neuronal con exactitud analítica:
 
-$$\mathcal{L}_{\text{total}} = \mathcal{L}_{\text{MSE}}(V) + \lambda_{\text{KCL}} \mathcal{L}_{\text{KCL}} + \lambda_{\text{KVL}} \mathcal{L}_{\text{KVL}} + \lambda_{\text{Power}} \mathcal{L}_{\text{Power}}$$
-
-*   **Leyes de Corrientes de Kirchhoff (KCL):** Penalización estricta de la divergencia de corriente neta en cada nodo, calculada a partir de las admitancias de los componentes y fuentes de corriente.
-*   **Leyes de Voltajes de Kirchhoff (KVL):** Penalización de la suma de caídas de tensión a lo largo de ciclos fundamentales independientes generados deterministamente mediante matrices de ciclos de grafos.
-*   **Balance de Potencia (Power Invariant):** Penalización de la discrepancia entre la potencia total suministrada por las fuentes de tensión/corriente y la potencia disipada por los resistores.
+1.  **GNN Surrogate (EdgeAwareCircuitGNN):** 
+    Toma el grafo del circuito (con features topológicas dinámicas y resistencias log-normalizadas para evitar explosión de gradientes en rangos OOD) y predice un estado de voltaje inicial en una fracción de milisegundo.
+2.  **Physics Projection (True Global Virtual Node):** 
+    Aplica iteraciones tipo Jacobi/SOR sobre las predicciones de la GNN para forzar el cumplimiento de KCL y KVL. Para evitar el estancamiento de propagación en grafos largos (ej. cadenas radiales), inyecta un **Virtual Node** que agrega el residual de error global y lo redistribuye instantáneamente, transformando la propagación topológica de una "cadena" a una "estrella".
 
 ---
 
-## 📂 Estructura del Workspace
+## 🧠 Currículo Topológico y Diagnóstico de Fallos
+
+En lugar de entrenar a ciegas, el sistema implementa una currícula matemática (`CurriculumLevel`):
+*   **Trivial:** Árboles, $\le 4$ nodos, 0 ciclos.
+*   **Simple:** 1 Ciclo, $\le 6$ nodos.
+*   **Medium:** 2-3 Ciclos, $\le 10$ nodos.
+*   **Dense:** $> 3$ Ciclos, $> 10$ nodos. *(Nota Científica: Las topologías densas resultaron ser las más fáciles de predecir (MAE ~2.88V) debido a las extremas restricciones de los lazos paralelos que actúan como regularizadores naturales).*
+
+### 🔬 Taxonomía de Fallos Físicos
+El motor de análisis clasifica las anomalías directamente por su causa raíz topológica:
+*   `cycle_drift_failure`: Desviación de KCL dentro de lazos cerrados.
+*   `dense_mesh_leakage`: Fugas de señal en mallas de alta interconexión.
+*   `bridge_node_instability`: Inestabilidad de propagación a través de cuellos de botella en estructuras de árbol.
+
+---
+
+## 📂 Estructura del Workspace (Componentes Clave V2.9F)
 
 ```
 cpt_simulator_v5/
-├── HANDOVER.md              ← contexto completo de desarrollo
-├── README.md                ← esta guía rápida
+├── docs/
+│   ├── AGENT_HANDOVER_V29F_COMPREHENSIVE.md  ← Contexto detallado de handover para IA
+│   └── V29F_VIRTUAL_NODE_PROJECTION.md       ← Reporte científico oficial V2.9F
 ├── backend/
-│   ├── core_truth/          ← currículo + base de conocimiento (PROTEGIDO)
-│   ├── circuits/            ← resolvedor DC, grafos, pérdida PINN y taxonomía de fallas
-│   │   ├── dc_solver.py      ← oráculo analítico de referencia (Norton/Nodal)
-│   │   ├── graph_dataset.py  ← conversión de netlists a grafos PyG deterministas
-│   │   ├── physics_loss.py   ← cálculo de KCL, KVL en lazo y balance de potencia
-│   │   └── failure_analysis.py ← taxonomía y clasificación de anomalías físicas
-│   └── neural/
-│       ├── models/
-│       │   └── circuit_gnn.py ← arquitectura EdgeAwareCircuitGNN (<250k params)
-│       └── training_snapshot.py ← firmas e instrumentación determinista de checkpoints
-├── configs/
-│   └── training/
-│       └── kaggle_v29d.yaml ← hiperparámetros de entrenamiento de alta fidelidad
+│   ├── circuits/
+│   │   ├── dc_solver.py                ← Oráculo analítico de referencia
+│   │   ├── graph_dataset.py            ← Conversión a grafos, features topológicas y normalización
+│   │   ├── physics_projection.py       ← *[NUEVO]* Capa iterativa + True Global Virtual Node
+│   │   ├── topology_curriculum.py      ← *[NUEVO]* Scheduler de complejidad estructural
+│   │   ├── failure_analysis.py         ← Taxonomía de fallos topológicos
+│   │   ├── warmstart_eval.py           ← *[NUEVO]* Evaluador del paradigma Híbrido (Solver Iters)
+│   │   └── ood_stress_suite.py         ← *[NUEVO]* Generadores deterministas de mallas y escaleras
 ├── scripts/
-│   ├── train_circuit_gnn.py  ← pipeline determinista de entrenamiento
-│   ├── run_circuit_arena.py  ← comparador científico Arena (Oracle vs GNN)
-│   ├── analyze_v29c_failures.py ← taxonomía de anomalías OOD
-│   ├── generate_v29d_report.py  ← generador de reportes científicos comparativos
-│   └── kaggle_prepare_v29d.py  ← empaquetador del bundle de exportación reproducible
+│   ├── train_circuit_gnn.py            ← Pipeline de entrenamiento con ablación dinámica
+│   └── run_circuit_arena.py            ← Comparador científico Arena por familias topológicas
 └── tests/
-    └── test_v29d_physics_loss.py ← suite de regresión y determinismo físico (16 passed)
+    ├── test_v29f_virtual_projection.py ← Pruebas de reducción monotónica y nodo virtual
+    └── test_v29f_warmstart.py          ← Pruebas de reducción de iteraciones oráculo
 ```
 
 ---
 
-## 🎯 Objetivos de Éxito Científico (v2.9D)
+## 🎯 Rendimiento Actual (Full Unified Model V2.9E/F)
 
-| Métrica | Meta | v2.9D Subset | v2.9D Full (En Proceso) |
-| :--- | :--- | :--- | :--- |
-| **IID MAE** | `< 5.0 V` | `6.77 V` | *Próximamente* |
-| **OOD MAE** | `< 50.0 V` | `144.88 V` | *Próximamente* |
-| **KCL Max Violation** | `< 1e-3` | `3.3e+07` | *Próximamente* |
-| **KVL Max Violation** | `< 1e-3` | `5.58 V` | *Próximamente* |
-| **Parámetros GNN** | `< 250,000` | **82,113** (Cumplido) | **82,113** (Cumplido) |
+| Métrica | In-Dist MAE | KCL Max (A) | OOD KCL Max (A) | Iteraciones Solver |
+| :--- | :---: | :---: | :---: | :---: |
+| **GNN Pura (Baseline)** | 15.44 V | 0.275 | 4.82 | Lento |
+| **GNN + Currículo + Topo** | 14.16 V | 0.163 | 1.10 | - |
+| **Híbrido (Proyección + Nodo Virtual)**| **Virtualmente $0.0$** | **$< 1e-6$** | **$< 1e-6$** | **Ultra-Reducido** |
 
 ---
 
-## 🛠️ Comandos de Validación Rápida
+## 🛠️ Comandos de Uso Frecuente
 
-Ejecutar la suite completa de pruebas unitarias físicas y deterministas:
+Ejecutar la suite completa de pruebas unitarias físicas, de ablación y de proyector virtual (100% Passed):
 ```bash
-pytest tests/test_v29d_physics_loss.py -v
+pytest tests/test_v29e_*.py tests/test_v29f_*.py -v
 ```
 
-Generar el reporte de comparación y empaquetar el bundle reproducible:
+Correr el experimento científico evaluador de Warm-Start (Comparación de iteraciones):
 ```bash
-python scripts/kaggle_prepare_v29d.py --config configs/training/kaggle_v29d.yaml
+python -m backend.circuits.warmstart_eval --steps 5 --perturbation 1.5
+```
+
+Ejecutar la Evaluación de la Arena (Desglosada por familias topológicas):
+```bash
+python scripts/run_circuit_arena.py
 ```

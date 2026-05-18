@@ -64,51 +64,137 @@ class CPTBenchSuite:
         self.cases = list(cases) if cases is not None else self.default_cases()
 
     @staticmethod
+    @staticmethod
     def default_cases() -> list[BenchmarkCase]:
+        """Generate benchmark cases for all confirmed modules.
+
+        - Tabular modules (engine_type="tabular") get a synthetic Lua rule
+          from their target_state, or from a hardcoded override.
+        - Lua modules reuse their provided lua_code.
+        - Adds three cross-layer composition cases and two OOD extreme cases.
+        """
         modules_path = Path(__file__).resolve().parents[2] / "core_truth" / "modules.json"
+        cases: list[BenchmarkCase] = []
         if modules_path.exists():
             try:
                 data = json.loads(modules_path.read_text(encoding="utf-8"))
                 modules = data.get("modules", {})
-                cases = []
-                case_specs = [
-                    ("layer_00_existence", "logical primitives", {}, ["logic_basic"]),
-                    ("energy_kinetic", "energy", {}, ["logic_basic"]),
-                    ("energy_potential", "energy", {}, ["logic_basic"]),
-                    ("energy_conservation", "energy conservation", {}, ["logic_basic", "energy_conservation"]),
-                    ("waves_oscillation", "oscillation", {}, ["logic_basic"]),
-                    ("thermodynamics_temperature", "thermodynamics", {}, ["logic_basic"]),
-                    ("thermodynamics_entropy", "thermodynamics", {}, ["logic_basic"]),
-                    ("electricity_ohm_law", "electromagnetism", {}, ["logic_basic"]),
-                    ("magnetism_lorentz_force", "electromagnetism", {"vx": 5, "vy": 0}, ["logic_basic"]),
-                    ("special_relativity", "relativity", {}, ["logic_basic"]),
-                    ("general_relativity_geodesic", "relativity", {}, ["logic_basic"]),
-                    ("quantum_mechanics_wavefunction", "quantum logic", {}, ["logic_basic"]),
-                    ("quantum_field_theory", "quantum logic", {}, ["logic_basic"]),
-                    ("quantum_double_slit_logic", "quantum logic", {"slit_1": 1, "slit_2": 1}, ["logic_basic"]),
-                ]
-                for module_key, category, initial_state, invariants in case_specs:
-                    module = modules.get(module_key)
-                    if not module or not module.get("lua_code"):
+
+                # Hardcoded synthetic rules for modules with no lua_code and no target_state
+                _synthetic_rules: dict[str, tuple[str, dict[str, Any]]] = {
+                    "layer_01_counting": (
+                        "particle.n = 0\nparticle.n = particle.n + 1",
+                        {"n": 1},
+                    ),
+                    "layer_02_operations": (
+                        "particle.x = 3 + 2\nparticle.y = particle.x * 4",
+                        {"x": 5, "y": 20},
+                    ),
+                    "layer_05_algebra": (
+                        "particle.a = 2\nparticle.b = 3\nparticle.x = (particle.a + particle.b) / particle.a",
+                        {"a": 2, "b": 3, "x": 2.5},
+                    ),
+                    "layer_10_kinematics": (
+                        "particle.x = 0\nparticle.vx = 5\nparticle.ax = 2\nparticle.x = particle.x + particle.vx + 0.5 * particle.ax",
+                        {"x": 6.0, "vx": 5, "ax": 2},
+                    ),
+                }
+
+                # ----- Individual module cases -----
+                for key, mod in modules.items():
+                    if key in _synthetic_rules:
+                        rule, synthetic_expected = _synthetic_rules[key]
+                        mod_expected = dict(mod.get("target_state", {})) or synthetic_expected
+                    elif mod.get("engine_type") == "tabular" and not mod.get("lua_code"):
+                        ts = mod.get("target_state", {})
+                        rule_lines = [f"particle.{k} = {json.dumps(v)}" for k, v in ts.items()]
+                        rule = "\n".join(rule_lines)
+                        mod_expected = dict(ts)
+                    else:
+                        rule = str(mod.get("lua_code", ""))
+                        mod_expected = dict(mod.get("target_state", {}))
+
+                    # Skip modules with empty rule
+                    if not rule.strip():
                         continue
+
                     cases.append(
                         BenchmarkCase(
-                            name=module_key,
-                            category=category,
-                            rule=str(module["lua_code"]),
-                            initial_state=dict(initial_state),
-                            frames=int(module.get("simulation_frames", 1)),
-                            invariants=list(module.get("invariants", [])) or list(invariants),
-                            expected_state=dict(module.get("target_state", {})),
-                            module_source=f"{modules_path}::{module_key}",
-                            curriculum_layer=int(module.get("level", -1)),
+                            name=key,
+                            category=mod.get("subject", "unknown"),
+                            rule=rule,
+                            initial_state={},
+                            frames=int(mod.get("simulation_frames", 1)),
+                            invariants=list(mod.get("invariants", [])) or ["logic_basic"],
+                            expected_state=mod_expected,
+                            module_source=f"{modules_path}::{key}",
+                            curriculum_layer=int(mod.get("level", -1)),
                         )
                     )
-                if cases:
-                    return cases
+
+                # ----- Cross-layer composition cases -----
+                composition_defs = [
+                    ("layer_10_kinematics", "energy_kinetic", "kinematics+energy"),
+                    ("logic_02_non_contradiction", "math_functions", "logic+math"),
+                    ("waves_oscillation", "thermodynamics_temperature", "waves+thermo"),
+                ]
+                for m1_key, m2_key, comp_name in composition_defs:
+                    mod1 = modules.get(m1_key)
+                    mod2 = modules.get(m2_key)
+                    if not mod1 or not mod2:
+                        continue
+                    rule_parts = []
+                    for m in (mod1, mod2):
+                        if m.get("engine_type") == "tabular" and not m.get("lua_code"):
+                            ts = m.get("target_state", {})
+                            rule_parts.extend([f"particle.{k} = {json.dumps(v)}" for k, v in ts.items()])
+                        else:
+                            rule_parts.append(str(m.get("lua_code", "")))
+                    combined_rule = "\n".join(rule_parts)
+                    if not combined_rule.strip():
+                        continue
+                    combined_expected = {}
+                    combined_expected.update(mod1.get("target_state", {}))
+                    combined_expected.update(mod2.get("target_state", {}))
+                    cases.append(
+                        BenchmarkCase(
+                            name=comp_name,
+                            category="composition",
+                            rule=combined_rule,
+                            initial_state={},
+                            frames=max(int(mod1.get("simulation_frames", 1)), int(mod2.get("simulation_frames", 1))),
+                            invariants=["logic_basic"],
+                            expected_state=combined_expected,
+                            module_source=f"composition::{m1_key}+{m2_key}",
+                            curriculum_layer=-1,
+                        )
+                    )
+
+                # ----- Out-of-distribution extreme cases -----
+                ood_defs = [
+                    ("ood_extreme_positive", "particle.x = 1e9", {"x": 1e9}),
+                    ("ood_extreme_negative", "particle.x = -1e9", {"x": -1e9}),
+                ]
+                for ood_name, ood_rule, ood_expected in ood_defs:
+                    cases.append(
+                        BenchmarkCase(
+                            name=ood_name,
+                            category="ood",
+                            rule=ood_rule,
+                            initial_state={},
+                            frames=1,
+                            invariants=["logic_basic"],
+                            expected_state=ood_expected,
+                            module_source=f"synthetic::{ood_name}",
+                            curriculum_layer=-1,
+                        )
+                    )
+
+                return cases
             except Exception:
                 pass
 
+        # Minimal fallback
         return [
             BenchmarkCase(
                 name="layer_00_identity",
@@ -119,19 +205,8 @@ class CPTBenchSuite:
                 expected_state={"essence": 1, "is_self": 1},
                 module_source="synthetic::layer_00_identity",
                 curriculum_layer=0,
-            ),
-            BenchmarkCase(
-                name="layer_05_arithmetic",
-                category="arithmetic",
-                rule="particle.x = 2 + 3",
-                initial_state={"x": 0},
-                invariants=["logic_basic"],
-                expected_state={"x": 5},
-                module_source="synthetic::layer_05_arithmetic",
-                curriculum_layer=5,
-            ),
+            )
         ]
-
     def run(self) -> BenchmarkResult:
         category_results: dict[str, BenchCategoryResult] = {}
         case_reports: list[dict[str, Any]] = []

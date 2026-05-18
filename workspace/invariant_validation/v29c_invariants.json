@@ -1,0 +1,9 @@
+{
+  "iid_kcl_violation": 0.2057875394821167,
+  "iid_kvl_violation": 20.007099151611328,
+  "iid_power_violation": 2.444069572431505,
+  "ood_kcl_violation": 48938748.0,
+  "ood_kvl_violation": 2382.861328125,
+  "ood_power_violation": 3007677696.000151,
+  "replay_max_abs_diff": 0.0
+}

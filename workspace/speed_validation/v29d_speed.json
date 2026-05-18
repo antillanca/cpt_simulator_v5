@@ -1,0 +1,9 @@
+{
+  "num_runs": 1000,
+  "oracle_mean_sec": 4.4e-05,
+  "oracle_p95_sec": 6e-05,
+  "speedup": 0.01,
+  "surrogate_mean_sec": 0.005843,
+  "surrogate_p95_sec": 0.0323,
+  "warmup_runs": 1
+}

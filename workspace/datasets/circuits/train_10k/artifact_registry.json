@@ -1,0 +1,24 @@
+{
+  "records": [
+    {
+      "archived_at": null,
+      "artifact_id": "050583a1354135c9",
+      "artifact_type": "circuit_oracle_dataset",
+      "compatibility_status": "compatible",
+      "created_at": 0.0,
+      "fingerprint": "628fca891db80381d6e0a11c96c32c158802385f6c8655f84589dea6c88931b7",
+      "last_accessed_at": null,
+      "metadata": {
+        "num_circuits": 10000,
+        "rows": 7292,
+        "seed": 42
+      },
+      "parent_fingerprints": [],
+      "pinned": false,
+      "retention_status": "active",
+      "schema_version": "2.8.0"
+    }
+  ],
+  "registry_fingerprint": "93f916423632aa135010df1f12b153662acbe73aa32bad85168b56abac13ae4d",
+  "schema_version": "2.7.8"
+}

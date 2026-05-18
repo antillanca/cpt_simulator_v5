@@ -137,18 +137,6 @@ release:       # onda-validate + click-freeze + click-build + click-tag + click-
 
 ## Configuración por Proyecto (.click-onda.yml)
 
-### SimpleRestoBar
-```yaml
-project: simplerestobar
-stack: laravel-vue-docker
-onda:
-  dev_command: cd simplerestobar-install/dev && docker compose up -d
-  hot_reload: true
-click:
-  build_command: cd simplerestobar-install/docker && docker compose build
-  tag_format: "v{version}"
-  deploy_target: sbc
-```
 
 ### Simulador CPT
 ```yaml

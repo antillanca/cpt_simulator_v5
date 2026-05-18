@@ -1,0 +1,24 @@
+{
+  "benchmark_fingerprint": "3ff4dcb6e9d589e4e0d4cc7f4032a7426187bb56ddc23bf873cc7b783dffa9b9",
+  "curriculum_coverage": [],
+  "dataset_version": "2.9c",
+  "fingerprint": "72886f0a10e1c2d8b824c0df0384e7a329da10c31a8927b8c5da936f2e8702e2",
+  "generation_seed": 42,
+  "generator_version": "v29c-subset",
+  "module_hash": "3ff4dcb6e9d589e4e0d4cc7f4032a7426187bb56ddc23bf873cc7b783dffa9b9",
+  "module_versions": {
+    "circuit_dataset_subset": "2.9c"
+  },
+  "modules_used": [
+    "circuit_dataset_subset"
+  ],
+  "parameter_sweeps": {},
+  "record_count": 512,
+  "schema_version": "2.7.0",
+  "shard_list": [
+    "workspace/datasets/circuits/train_10k_subset_v29c.jsonl"
+  ],
+  "snapshot_hash": "3ff4dcb6e9d589e4e0d4cc7f4032a7426187bb56ddc23bf873cc7b783dffa9b9",
+  "timestamp": "2026-05-17T00:00:00",
+  "timestamp_unix": 0.0
+}

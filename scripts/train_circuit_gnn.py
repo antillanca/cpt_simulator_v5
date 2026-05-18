@@ -45,6 +45,7 @@ from backend.neural.checkpoints.schema import build_checkpoint_payload
 from backend.neural.checkpoints.validator import validate_checkpoint_payload
 from backend.neural.training_snapshot import TrainingSnapshot, fingerprint_jsonl, fingerprint_mapping
 from backend.neural.models.circuit_gnn import CircuitGNN, EdgeAwareCircuitGNN
+from backend.circuits.topology_curriculum import CurriculumLevel, TopologyCurriculum, determine_level
 DEFAULT_CONFIG_PATH = PROJECT_ROOT / "configs" / "training" / "kaggle_v29b.yaml"
 DEFAULT_DATASET = "workspace/datasets/circuits/train_10k/circuits.jsonl"
 DEFAULT_OUTPUT = "workspace/checkpoints/circuit_gnn_v29d.pt"
@@ -275,6 +276,71 @@ def load_training_data(
     return graphs
 
 
+def load_blended_training_data(
+    projected_jsonl_path: Path,
+    max_voltage: float = 1e6,
+) -> List[TrainingGraph]:
+    """Load projected-targets JSONL and convert to TrainingGraphs.
+
+    In blended_projection mode, the training target is the blended_solution
+    field (alpha * oracle + (1-alpha) * projected). The graph structure is
+    still built from oracle solutions (for correct adjacency), but
+    target_voltages is replaced with the blended solution.
+
+    Also stores oracle_voltages on each TrainingGraph for optional
+    oracle-MAE tracking during training.
+    """
+    graphs: List[TrainingGraph] = []
+    skipped = 0
+
+    with open(projected_jsonl_path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            row = json.loads(line)
+            netlist = row["netlist"]
+            name = row.get("circuit_name", "unnamed")
+            try:
+                circuit = parse_netlist(netlist, name=name)
+                if not _is_connected_circuit(circuit):
+                    skipped += 1
+                    continue
+                solution = solve_dc_circuit(circuit)
+                max_abs_v = max((abs(v) for v in solution.node_voltages.values()), default=0.0)
+                if max_abs_v > max_voltage:
+                    skipped += 1
+                    continue
+                g = circuit_to_graph(circuit, solution)
+                if g.node_features.size(0) == 0:
+                    continue
+
+                # Replace target_voltages with blended solution
+                blended_dict = row["blended_solution"]
+                node_names = g.node_names
+                blended_v = torch.tensor(
+                    [blended_dict.get(n, 0.0) for n in node_names], dtype=torch.float32
+                )
+                # Override the graph's target_voltages with blended values
+                object.__setattr__(g, "target_voltages", blended_v)
+
+                # Store oracle voltages for reference MAE computation
+                oracle_dict = row["oracle_solution"]
+                oracle_v = torch.tensor(
+                    [oracle_dict.get(n, 0.0) for n in node_names], dtype=torch.float32
+                )
+
+                vmax = get_vmax(circuit)
+                tg = TrainingGraph(graph=g, circuit=circuit, vmax=vmax)
+                tg.oracle_voltages = oracle_v  # type: ignore[attr-defined]
+                graphs.append(tg)
+            except Exception:
+                continue
+
+    print(f"Loaded {len(graphs)} blended graphs (skipped {skipped})")
+    return graphs
+
+
 def deterministic_split(
     data: List[TrainingGraph], train_frac: float = 0.8
 ) -> Tuple[List[TrainingGraph], List[TrainingGraph]]:
@@ -290,6 +356,7 @@ def train_one_epoch(
     train_data: List[TrainingGraph],
     optimizer: torch.optim.Optimizer,
     loss_fn: PhysicsInformedLoss,
+    ablation: str,
     use_edge_features: bool = False,
 ) -> Dict[str, float]:
     """Train one epoch, processing one graph at a time for determinism."""
@@ -311,9 +378,19 @@ def train_one_epoch(
 
         optimizer.zero_grad()
         node_features = g.node_features.to(device)
-        edge_index = g.edge_index.to(device)
         edge_features = g.edge_features.to(device)
+        edge_index = g.edge_index.to(device)
         target_voltages = g.target_voltages.to(device)
+
+        # Apply ablation slicing
+        if ablation in ("baseline", "norm_only"):
+            node_features = node_features[:, :8]
+        if ablation == "baseline":
+            edge_features = edge_features[:, :4]
+        elif ablation == "norm_only":
+            edge_features = edge_features[:, :5]
+        elif ablation == "topo_only":
+            edge_features = torch.cat([edge_features[:, :4], edge_features[:, 5:7]], dim=1)
 
         if use_edge_features:
             pred = model(node_features, edge_index, edge_features)
@@ -351,9 +428,15 @@ def evaluate(
     model: torch.nn.Module,
     eval_data: List[TrainingGraph],
     loss_fn: PhysicsInformedLoss,
+    ablation: str,
     use_edge_features: bool = False,
+    track_oracle_mae: bool = False,
 ) -> Dict[str, float]:
-    """Evaluate model on a set of graphs. Returns metrics in VOLTAGE space."""
+    """Evaluate model on a set of graphs. Returns metrics in VOLTAGE space.
+
+    When track_oracle_mae=True and TrainingGraph has oracle_voltages attr,
+    also computes MAE vs oracle solution (for blended_projection mode).
+    """
     model.eval()
     device = next(model.parameters()).device
     total_mae = 0.0
@@ -364,6 +447,8 @@ def evaluate(
     total_kvl = 0.0
     total_power = 0.0
     total_loss = 0.0
+    total_oracle_mae = 0.0
+    oracle_count = 0
     count = 0
 
     with torch.no_grad():
@@ -373,9 +458,19 @@ def evaluate(
                 continue
 
             node_features = g.node_features.to(device)
-            edge_index = g.edge_index.to(device)
             edge_features = g.edge_features.to(device)
+            edge_index = g.edge_index.to(device)
             true_voltage = g.target_voltages.to(device)
+
+            # Apply ablation slicing
+            if ablation in ("baseline", "norm_only"):
+                node_features = node_features[:, :8]
+            if ablation == "baseline":
+                edge_features = edge_features[:, :4]
+            elif ablation == "norm_only":
+                edge_features = edge_features[:, :5]
+            elif ablation == "topo_only":
+                edge_features = torch.cat([edge_features[:, :4], edge_features[:, 5:7]], dim=1)
 
             if use_edge_features:
                 pred_norm = model(node_features, edge_index, edge_features)
@@ -388,6 +483,13 @@ def evaluate(
             mae = diff.abs().mean().item()
             rmse = diff.pow(2).mean().sqrt().item()
             max_err = diff.abs().max().item()
+
+            # Optional oracle MAE tracking
+            if track_oracle_mae and hasattr(td, "oracle_voltages"):
+                oracle_v = td.oracle_voltages.to(device)
+                oracle_mae = (pred_voltage - oracle_v).abs().mean().item()
+                total_oracle_mae += oracle_mae
+                oracle_count += 1
 
             v_loss = loss_fn.compute_voltage_loss(pred_voltage, true_voltage).item()
             kcl = loss_fn.compute_kcl_loss(pred_voltage, g, circuit=td.circuit).item()
@@ -406,7 +508,7 @@ def evaluate(
             count += 1
 
     n = max(count, 1)
-    return {
+    result = {
         "loss": total_loss / n,
         "voltage_loss": total_voltage_loss / n,
         "kcl_penalty": total_kcl / n,
@@ -417,25 +519,51 @@ def evaluate(
         "max_error": total_max_err,
         "count": count,
     }
+    if track_oracle_mae and oracle_count > 0:
+        result["oracle_mae"] = total_oracle_mae / oracle_count
+    return result
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Train CircuitGNN surrogate.")
-    parser.add_argument("--config", default=str(DEFAULT_CONFIG_PATH))
-    parser.add_argument("--dataset", default=None)
-    parser.add_argument("--epochs", type=int, default=None)
-    parser.add_argument("--lr", type=float, default=None)
-    parser.add_argument("--weight-decay", type=float, default=None)
-    parser.add_argument("--batch-size", type=int, default=None)
-    parser.add_argument("--hidden-dim", type=int, default=None)
-    parser.add_argument("--seed", type=int, default=None)
-    parser.add_argument("--output", default=None)
-    parser.add_argument("--model-type", choices=["basic", "edge_aware"], default=None)
-    parser.add_argument("--train-frac", type=float, default=None)
-    parser.add_argument("--lambda-kcl", type=float, default=None)
-    parser.add_argument("--lambda-kvl", type=float, default=None)
-    parser.add_argument("--lambda-power", type=float, default=None)
+    parser.add_argument("--config", default=str(DEFAULT_CONFIG_PATH), help="Path to training config yaml")
+    parser.add_argument("--dataset", default=None, help="Override dataset path")
+    parser.add_argument("--epochs", type=int, default=None, help="Number of training epochs")
+    parser.add_argument("--lr", type=float, default=None, help="Learning rate")
+    parser.add_argument("--weight-decay", type=float, default=None, help="Weight decay for optimizer")
+    parser.add_argument("--batch-size", type=int, default=None, help="Batch size (not used in current deterministic loop but kept for compatibility)")
+    parser.add_argument("--hidden-dim", type=int, default=None, help="Hidden dimension size for the GNN")
+    parser.add_argument("--seed", type=int, default=None, help="Random seed for reproducibility")
+    parser.add_argument("--output", default=None, help="Path to save checkpoint")
+    parser.add_argument("--model-type", choices=["basic", "edge_aware"], default=None, help="Model architecture type")
+    parser.add_argument("--train-frac", type=float, default=None, help="Fraction of data to use for training")
+    parser.add_argument("--lambda-kcl", type=float, default=None, help="Weight for KCL loss term")
+    parser.add_argument("--lambda-kvl", type=float, default=None, help="Weight for KVL loss term")
+    parser.add_argument("--lambda-power", type=float, default=None, help="Weight for power loss term")
+    parser.add_argument("--ablation", choices=["baseline", "norm_only", "topo_only", "curr_only", "full"], default="full", help="Ablation mode to toggle feature sets.")
+    parser.add_argument("--target-mode", choices=["oracle", "blended_projection"], default="oracle", help="Training target: oracle (default) or blended_projection (v2.10 projected targets)")
+    parser.add_argument("--blended-dataset", default="workspace/datasets/circuits/projected_targets_v210.jsonl", help="Path to projected-targets JSONL (used when --target-mode=blended_projection)")
     args = parser.parse_args()
+
+    # ---------------------------------------------------------------------
+    # 1️⃣  Ablation handling – determine which feature columns to keep.
+    # ---------------------------------------------------------------------
+    ablation = args.ablation
+    # Helper to compute effective dimensions based on ablation
+    def _effective_dims(mode: str) -> tuple[int, int]:
+        # Node dimensions
+        node_dim = 8
+        if mode in ("topo_only", "full"):
+            node_dim += 5
+        # Edge dimensions
+        edge_dim = 4
+        if mode in ("norm_only", "full"):
+            edge_dim += 1  # log‑resistance column
+        if mode in ("topo_only", "full"):
+            edge_dim += 2  # edge‑in‑cycle flag + cycle count
+        return node_dim, edge_dim
+
+    NODE_DIM, EDGE_DIM = _effective_dims(ablation)
 
     profile = load_training_profile(args.config) if args.config else {}
     config = _merge_profile(args, profile)
@@ -444,6 +572,10 @@ def main() -> int:
         "lambda_kvl": float(args.lambda_kvl if args.lambda_kvl is not None else 5.0),
         "lambda_power": float(args.lambda_power if args.lambda_power is not None else 1.0),
     }
+
+    # ---------------------------------------------------------------------
+    # 2️⃣  Load data – we will later slice tensors to the computed dims.
+    # ---------------------------------------------------------------------
     seed = int(config["seed"])
     dataset_path = resolve_dataset_path(config["dataset"]["train_path"])
     output_path = Path(config.get("output", DEFAULT_OUTPUT))
@@ -460,7 +592,18 @@ def main() -> int:
     print(f"Output checkpoint: {output_path}")
 
     print(f"Loading dataset: {dataset_path}")
-    all_data = load_training_data(dataset_path)
+    target_mode = args.target_mode
+    print(f"Target mode: {target_mode}")
+
+    if target_mode == "blended_projection":
+        blended_path = PROJECT_ROOT / args.blended_dataset
+        if not blended_path.exists():
+            print(f"ERROR: blended dataset not found: {blended_path}")
+            print(f"  Run: python scripts/generate_projected_targets.py")
+            return 1
+        all_data = load_blended_training_data(blended_path)
+    else:
+        all_data = load_training_data(dataset_path)
 
     if not all_data:
         print("ERROR: No valid graphs loaded")
@@ -488,14 +631,14 @@ def main() -> int:
     max_params = int(config["model"]["max_params"])
     if use_edge:
         model = EdgeAwareCircuitGNN(
-            node_dim=8,
-            edge_dim=4,
+            node_dim=NODE_DIM,
+            edge_dim=EDGE_DIM,
             hidden_dim=hidden_dim,
         )
     else:
         model = CircuitGNN(
-            node_dim=8,
-            edge_dim=4,
+            node_dim=NODE_DIM,
+            edge_dim=EDGE_DIM,
             hidden_dim=hidden_dim,
         )
 
@@ -539,10 +682,22 @@ def main() -> int:
     print(f"\nTraining for {int(config['training']['epochs'])} epochs...")
     for epoch in range(int(config["training"]["epochs"])):
         t0 = time.perf_counter()
-        train_metrics = train_one_epoch(model, train_data, optimizer, loss_fn, use_edge_features=use_edge)
+        
+        # Apply curriculum if enabled
+        if ablation in ("curr_only", "full"):
+            total_epochs = int(config["training"]["epochs"])
+            level_idx = min(3, int(4 * epoch / total_epochs))
+            max_level = CurriculumLevel(level_idx)
+            # train_data is a list of TrainingGraph, but TopologyCurriculum works on CircuitGraph.
+            # We need to adapt it slightly. Wait, we can just filter by g.graph
+            current_train_data = [d for d in train_data if determine_level(d.graph) <= max_level]
+        else:
+            current_train_data = train_data
+
+        train_metrics = train_one_epoch(model, current_train_data, optimizer, loss_fn, ablation, use_edge_features=use_edge)
         train_elapsed = time.perf_counter() - t0
         eval_t0 = time.perf_counter()
-        eval_metrics = evaluate(model, eval_data, loss_fn, use_edge_features=use_edge)
+        eval_metrics = evaluate(model, eval_data, loss_fn, ablation, use_edge_features=use_edge, track_oracle_mae=(target_mode == "blended_projection"))
         eval_elapsed = time.perf_counter() - eval_t0
         scheduler.step(eval_metrics["loss"])
         total_elapsed = time.perf_counter() - start_time
@@ -568,6 +723,8 @@ def main() -> int:
             "train_time_sec": round(train_elapsed, 6),
             "eval_time_sec": round(eval_elapsed, 6),
         }
+        if "oracle_mae" in eval_metrics:
+            entry["eval_oracle_mae_V"] = round(eval_metrics["oracle_mae"], 6)
         history.append(entry)
         print(
             f"Epoch {epoch+1:3d}/{int(config['training']['epochs'])}: "
@@ -604,7 +761,7 @@ def main() -> int:
     model.load_state_dict(best_state_dict)
     model.eval()
 
-    final_eval_metrics = evaluate(model, eval_data, loss_fn, use_edge_features=use_edge)
+    final_eval_metrics = evaluate(model, eval_data, loss_fn, ablation, use_edge_features=use_edge)
     final_total_elapsed = time.perf_counter() - start_time
     final_samples_sec = len(train_data) * int(config["training"]["epochs"]) / max(final_total_elapsed, 1e-12)
 
@@ -655,12 +812,13 @@ def main() -> int:
     checkpoint_payload = build_checkpoint_payload(
         model_type=model_type,
         model_config={
-            "node_dim": 8,
-            "edge_dim": 4,
+            "node_dim": NODE_DIM,
+            "edge_dim": EDGE_DIM,
             "hidden_dim": hidden_dim,
             "max_params": max_params,
             "use_edge_features": use_edge,
             "num_params": n_params,
+            "ablation": ablation,
         },
         training_config={
             "seed": seed,
@@ -704,7 +862,8 @@ def main() -> int:
             "config_fingerprint": config_fingerprint,
             "physics": dict(config["physics"]),
             "snapshot_fingerprint": snapshot.fingerprint(),
-            "parent_oracle_version": "v2.8",
+            "parent_oracle_version": "v2.10" if target_mode == "blended_projection" else "v2.8",
+            "target_mode": target_mode,
         },
     )
     errors = validate_checkpoint_payload(checkpoint_payload, allow_legacy=False)
@@ -718,7 +877,7 @@ def main() -> int:
 
     metrics_path = output_path.with_suffix(".metrics.json")
     metrics_payload = {
-        "schema_version": "2.9d",
+        "schema_version": "2.10" if target_mode == "blended_projection" else "2.9d",
         "model_type": model_type,
         "device": str(device),
         "num_params": n_params,
@@ -734,7 +893,8 @@ def main() -> int:
         "final_eval_metrics": final_eval_metrics,
         "train_count": len(train_data),
         "eval_count": len(eval_data),
-        "parent_oracle_version": "v2.8",
+        "parent_oracle_version": "v2.10" if target_mode == "blended_projection" else "v2.8",
+        "target_mode": target_mode,
         "reproducible": True,
     }
     metrics_path.write_text(json.dumps(metrics_payload, indent=2, sort_keys=True, ensure_ascii=False), encoding="utf-8")

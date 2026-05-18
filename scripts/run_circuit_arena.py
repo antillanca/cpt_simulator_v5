@@ -36,6 +36,7 @@ from backend.circuits.graph_dataset import CircuitGraph, circuit_to_graph
 from backend.circuits.models import Circuit, CircuitSolution
 from backend.circuits.ood_generator import generate_ood_circuits
 from backend.circuits.parser import parse_netlist
+from backend.circuits.projection_effort import compute_projection_effort
 from backend.circuits.surrogate_eval import SurrogateEvalResult, denormalize_voltages, evaluate_surrogate, get_vmax
 from backend.governance.artifact_registry import ArtifactRegistry
 from backend.neural.models.circuit_gnn import CircuitGNN, EdgeAwareCircuitGNN
@@ -147,6 +148,7 @@ def measure_speed(
     use_edge: bool,
     voltage_transform: str = "per_circuit_vmax",
     num_runs: int = 1000,
+    ablation: str = "full",
 ) -> dict:
     """Measure inference speed for oracle and surrogate."""
     random.seed(42)
@@ -173,10 +175,22 @@ def measure_speed(
             circuit = circuits[i]
             g = graphs[i]
             vmax = get_vmax(circuit)
+            node_features = g.node_features
+            edge_features = g.edge_features
+
+            if ablation in ("baseline", "norm_only"):
+                node_features = node_features[:, :8]
+            if ablation == "baseline":
+                edge_features = edge_features[:, :4]
+            elif ablation == "norm_only":
+                edge_features = edge_features[:, :5]
+            elif ablation == "topo_only":
+                edge_features = torch.cat([edge_features[:, :4], edge_features[:, 5:7]], dim=1)
+
             if use_edge:
-                pred_norm = model(g.node_features, g.edge_index, g.edge_features)
+                pred_norm = model(node_features, g.edge_index, edge_features)
             else:
-                pred_norm = model(g.node_features, g.edge_index)
+                pred_norm = model(node_features, g.edge_index)
             if voltage_transform == "per_circuit_vmax":
                 _ = denormalize_voltages(pred_norm, vmax)
 
@@ -198,10 +212,22 @@ def measure_speed(
         vmax = get_vmax(circuit)
         t0 = time.perf_counter()
         with torch.no_grad():
+            node_features = g.node_features
+            edge_features = g.edge_features
+
+            if ablation in ("baseline", "norm_only"):
+                node_features = node_features[:, :8]
+            if ablation == "baseline":
+                edge_features = edge_features[:, :4]
+            elif ablation == "norm_only":
+                edge_features = edge_features[:, :5]
+            elif ablation == "topo_only":
+                edge_features = torch.cat([edge_features[:, :4], edge_features[:, 5:7]], dim=1)
+
             if use_edge:
-                pred_norm = model(g.node_features, g.edge_index, g.edge_features)
+                pred_norm = model(node_features, g.edge_index, edge_features)
             else:
-                pred_norm = model(g.node_features, g.edge_index)
+                pred_norm = model(node_features, g.edge_index)
             if voltage_transform == "per_circuit_vmax":
                 _ = denormalize_voltages(pred_norm, vmax)
         surrogate_times.append(time.perf_counter() - t0)
@@ -232,6 +258,7 @@ def run_arena(
     ood_graphs: list[CircuitGraph],
     ood_circuits: list[Circuit],
     use_edge: bool = True,
+    ablation: str = "full",
 ) -> dict:
     """Run full arena evaluation."""
     results: dict[str, Any] = {}
@@ -258,6 +285,24 @@ def run_arena(
             "count": count,
         }
 
+    def _split_by_family(graphs, circuits):
+        from backend.circuits.topology_curriculum import determine_level, CurriculumLevel
+        fam_graphs = {"trivial": [], "simple": [], "medium": [], "dense": []}
+        fam_circuits = {"trivial": [], "simple": [], "medium": [], "dense": []}
+        for g, c in zip(graphs, circuits):
+            lvl = determine_level(g)
+            if lvl == CurriculumLevel.LEVEL_0_TRIVIAL:
+                key = "trivial"
+            elif lvl == CurriculumLevel.LEVEL_1_SIMPLE:
+                key = "simple"
+            elif lvl == CurriculumLevel.LEVEL_2_MEDIUM:
+                key = "medium"
+            else:
+                key = "dense"
+            fam_graphs[key].append(g)
+            fam_circuits[key].append(c)
+        return fam_graphs, fam_circuits
+
     print(f"\n=== GNN EVAL ({len(eval_graphs)} circuits) ===")
     gnn_eval_1 = evaluate_surrogate(
         model,
@@ -265,6 +310,7 @@ def run_arena(
         eval_circuits,
         use_edge_features=use_edge,
         voltage_transform="per_circuit_vmax",
+        ablation=ablation,
     )
     gnn_eval_2 = evaluate_surrogate(
         model,
@@ -272,6 +318,7 @@ def run_arena(
         eval_circuits,
         use_edge_features=use_edge,
         voltage_transform="per_circuit_vmax",
+        ablation=ablation,
     )
     gnn_ood = evaluate_surrogate(
         model,
@@ -279,11 +326,29 @@ def run_arena(
         ood_circuits,
         use_edge_features=use_edge,
         voltage_transform="per_circuit_vmax",
+        ablation=ablation,
     ) if ood_graphs else None
+
+    # Family evaluation
+    fam_graphs_eval, fam_circuits_eval = _split_by_family(eval_graphs, eval_circuits)
+    fam_graphs_ood, fam_circuits_ood = _split_by_family(ood_graphs, ood_circuits)
+
+    family_results = {}
+    for fam in ["trivial", "simple", "medium", "dense"]:
+        fg = fam_graphs_eval[fam]
+        fc = fam_circuits_eval[fam]
+        fg_ood = fam_graphs_ood[fam]
+        fc_ood = fam_circuits_ood[fam]
+        
+        family_results[fam] = {
+            "in_distribution": _pack_result(evaluate_surrogate(model, fg, fc, use_edge_features=use_edge, voltage_transform="per_circuit_vmax", ablation=ablation)) if fg else _zero_oracle(0),
+            "ood": _pack_result(evaluate_surrogate(model, fg_ood, fc_ood, use_edge_features=use_edge, voltage_transform="per_circuit_vmax", ablation=ablation)) if fg_ood else _zero_oracle(0),
+        }
 
     gnn_metrics = {
         "in_distribution": _pack_result(gnn_eval_1),
         "ood": _pack_result(gnn_ood) if gnn_ood is not None else _zero_oracle(0),
+        "families": family_results,
         "replay_consistency_metrics": {
             "max_abs_diff": round(max(gnn_eval_1.replay_consistency, gnn_eval_2.replay_consistency), 15),
             "rerun_match": _stable_fingerprint(gnn_eval_1.__dict__) == _stable_fingerprint(gnn_eval_2.__dict__),
@@ -295,6 +360,7 @@ def run_arena(
             use_edge,
             voltage_transform="per_circuit_vmax",
             num_runs=min(500, len(eval_graphs)),
+            ablation=ablation,
         ),
     }
     if ood_graphs:
@@ -305,6 +371,7 @@ def run_arena(
             use_edge,
             voltage_transform="per_circuit_vmax",
             num_runs=min(500, len(ood_graphs)),
+            ablation=ablation,
         )
     results["gnn"] = gnn_metrics
 
@@ -367,9 +434,37 @@ def run_arena(
     return results
 
 
+def _load_model_from_checkpoint(checkpoint_path: str) -> tuple[torch.nn.Module, dict, dict]:
+    """Load a model from checkpoint, return (model, ckpt_dict, model_config)."""
+    ckpt = torch.load(checkpoint_path, map_location="cpu", weights_only=False)
+    model_type = ckpt.get("model_type", "edge_aware")
+    model_config = ckpt.get("model_config", {}) if isinstance(ckpt.get("model_config", {}), dict) else {}
+    hidden_dim = int(model_config.get("hidden_dim", 64))
+    use_edge = model_type == "edge_aware"
+    model_state_dict = ckpt.get("model_state_dict", ckpt.get("state_dict"))
+    if model_state_dict is None:
+        raise KeyError(f"checkpoint {checkpoint_path} missing model_state_dict/state_dict")
+
+    node_dim = int(model_config.get("node_dim", 8))
+    edge_dim = int(model_config.get("edge_dim", 4))
+
+    if use_edge:
+        model = EdgeAwareCircuitGNN(node_dim=node_dim, edge_dim=edge_dim, hidden_dim=hidden_dim)
+    else:
+        model = CircuitGNN(node_dim=node_dim, edge_dim=edge_dim, hidden_dim=hidden_dim)
+    model.load_state_dict(model_state_dict)
+    model.eval()
+
+    return model, ckpt, model_config
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Circuit Arena: Oracle vs Surrogate")
     parser.add_argument("--checkpoint", default="workspace/checkpoints/circuit_gnn.pt")
+    parser.add_argument("--checkpoints", nargs="+", default=None,
+                        help="Multiple checkpoint paths for v2.10 comparison (e.g. v29d.pt v29f.pt v210.pt)")
+    parser.add_argument("--checkpoint-labels", nargs="+", default=None,
+                        help="Labels for --checkpoints (same order, e.g. v29d v29f v210)")
     parser.add_argument("--dataset", default="workspace/datasets/circuits/train_10k/circuits.jsonl")
     parser.add_argument("--iid-dataset", default=None)
     parser.add_argument("--ood-dataset", default="workspace/datasets/circuits/ood_circuits.jsonl")
@@ -377,42 +472,33 @@ def main() -> int:
     parser.add_argument("--report-dir", default=str(REPORT_DIR.relative_to(PROJECT_ROOT)))
     parser.add_argument("--train-frac", type=float, default=0.8)
     parser.add_argument("--output", default=None)
+    parser.add_argument("--save-traces", action="store_true",
+                        help="Save per-circuit projection traces to v210_traces.jsonl (FASE 5)")
     args = parser.parse_args()
 
     if args.iid_dataset is not None:
         args.dataset = args.iid_dataset
-
-    # Load checkpoint
-    print(f"Loading checkpoint: {args.checkpoint}")
-    ckpt = torch.load(args.checkpoint, map_location="cpu", weights_only=False)
-    model_type = ckpt.get("model_type", "edge_aware")
-    model_config = ckpt.get("model_config", {}) if isinstance(ckpt.get("model_config", {}), dict) else {}
-    hidden_dim = int(model_config.get("hidden_dim", 64))
-    use_edge = model_type == "edge_aware"
-    model_state_dict = ckpt.get("model_state_dict", ckpt.get("state_dict"))
-    if model_state_dict is None:
-        raise KeyError("checkpoint missing model_state_dict/state_dict")
 
     # Set deterministic seeds for inference
     random.seed(42)
     np.random.seed(42)
     torch.manual_seed(42)
 
-    if use_edge:
-        model = EdgeAwareCircuitGNN(node_dim=8, edge_dim=4, hidden_dim=hidden_dim)
+    # Build checkpoint list: multi-checkpoint mode or single
+    if args.checkpoints:
+        ckpt_paths = args.checkpoints
+        ckpt_labels = args.checkpoint_labels or [Path(p).stem for p in ckpt_paths]
+        if len(ckpt_labels) != len(ckpt_paths):
+            print("ERROR: --checkpoint-labels must match --checkpoints count")
+            return 1
     else:
-        model = CircuitGNN(node_dim=8, edge_dim=4, hidden_dim=hidden_dim)
-    model.load_state_dict(model_state_dict)
-    model.eval()
+        ckpt_paths = [args.checkpoint]
+        ckpt_labels = [Path(args.checkpoint).stem.split("_")[-1] if "_" in Path(args.checkpoint).stem else "single"]
 
-    print(f"Model: {model_type}, params={model_config.get('num_params', '?')}")
-    print(f"Trained for {ckpt.get('extra', {}).get('epochs_trained', '?')} epochs")
-
-    # Load data
+    # Load data (shared across all checkpoints)
     print(f"\nLoading in-distribution dataset: {args.dataset}")
     all_graphs, all_circuits = load_in_dist_data(Path(args.dataset))
 
-    # Deterministic train/eval split (same as training)
     pairs = list(zip(all_graphs, all_circuits))
     pairs.sort(key=lambda x: x[0].fingerprint)
     n = len(pairs)
@@ -424,24 +510,94 @@ def main() -> int:
     train_circuits = [p[1] for p in train_pairs]
     eval_graphs = [p[0] for p in eval_pairs]
     eval_circuits = [p[1] for p in eval_pairs]
-    print(f"  Total: {n}, Train: {len(train_graphs)}, Eval: {len(eval_graphs)}")
+    print(f" Total: {n}, Train: {len(train_graphs)}, Eval: {len(eval_graphs)}")
 
-    # Load OOD
     print(f"Loading OOD dataset: {args.ood_dataset}")
     ood_graphs, ood_circuits = load_ood_data(Path(args.ood_dataset))
-    print(f"  OOD: {len(ood_graphs)} circuits")
+    print(f" OOD: {len(ood_graphs)} circuits")
 
-    # Run arena
-    results = run_arena(
-        model, train_graphs, train_circuits,
-        eval_graphs, eval_circuits,
-        ood_graphs, ood_circuits,
-        use_edge=use_edge,
-    )
+    # --- Multi-checkpoint arena + projection-effort + traces ---
+    comparison_results = {}
+    all_traces: list[dict] = []
 
-    # Add metadata
-    results["metadata"].update(
-        {
+    for ckpt_path, label in zip(ckpt_paths, ckpt_labels):
+        print(f"\n{'='*60}")
+        print(f"ARENA: {label} ({ckpt_path})")
+        print(f"{'='*60}")
+
+        model, ckpt, model_config = _load_model_from_checkpoint(ckpt_path)
+        model_type = ckpt.get("model_type", "edge_aware")
+        use_edge = model_type == "edge_aware"
+        ablation = model_config.get("ablation", "baseline")
+        hidden_dim = int(model_config.get("hidden_dim", 64))
+
+        print(f"Model: {model_type}, params={model_config.get('num_params', '?')}")
+        print(f"Trained for {ckpt.get('extra', {}).get('epochs_trained', '?')} epochs")
+        target_mode = ckpt.get("extra", {}).get("target_mode", "oracle")
+
+        # Reset seeds for determinism per-checkpoint
+        random.seed(42)
+        np.random.seed(42)
+        torch.manual_seed(42)
+
+        results = run_arena(
+            model, train_graphs, train_circuits,
+            eval_graphs, eval_circuits,
+            ood_graphs, ood_circuits,
+            use_edge=use_edge,
+            ablation=ablation,
+        )
+
+        # --- Projection-effort metrics (v2.10) ---
+        effort = compute_projection_effort(
+            model, eval_graphs, eval_circuits,
+            use_edge_features=use_edge,
+            ablation=ablation,
+        )
+        results["projection_effort"] = effort
+        print(f"\n--- Projection Effort ({label}) ---")
+        print(f"  Mean iterations: {effort['mean_iterations']:.1f}")
+        print(f"  Median iterations: {effort['median_iterations']:.1f}")
+        print(f"  Mean residual after 1 step: {effort['mean_residual_after_1_step']:.6e}")
+        print(f"  Mean raw KCL violation: {effort['mean_raw_kcl_violation']:.6e}")
+        print(f"  Mean raw KVL violation: {effort['mean_raw_kvl_violation']:.6e}")
+
+        # --- Projection traces (FASE 5) ---
+        if args.save_traces:
+            from backend.circuits.physics_projection import PhysicsProjection
+            from backend.circuits.surrogate_eval import denormalize_voltages, get_vmax
+            proj = PhysicsProjection(g_virtual=1.0, num_iterations=50, tolerance=1e-9)
+            for i, (graph, circuit) in enumerate(zip(eval_graphs, eval_circuits)):
+                vmax = get_vmax(circuit)
+                with torch.no_grad():
+                    raw_pred = model(
+                        graph.x,
+                        graph.edge_index,
+                        graph.edge_attr if use_edge and graph.edge_attr is not None else None,
+                    )
+                    voltages = denormalize_voltages(raw_pred.squeeze(-1), vmax, "per_circuit_vmax")
+                oracle_sol = solve_dc_circuit(circuit)
+                oracle_v = {k: v for k, v in oracle_sol.node_voltages.items() if k != circuit.ground_node}
+                nodes = list(oracle_v.keys())
+                guess = {n: voltages[j].item() for j, n in enumerate(nodes)}
+                proj_result = proj.project(circuit, guess, oracle_v)
+                trace_entry = {
+                    "checkpoint_label": label,
+                    "circuit_idx": i,
+                    "circuit_fingerprint": graph.fingerprint,
+                    "iterations": proj_result.iterations,
+                    "converged": proj_result.converged,
+                    "final_residual": proj_result.final_residual,
+                    "residual_history": proj_result.residual_history,
+                    "initial_kcl_violation": proj_result.initial_invariants.get("kcl_max", 0.0),
+                    "initial_kvl_violation": proj_result.initial_invariants.get("kvl_max", 0.0),
+                    "final_kcl_violation": proj_result.final_invariants.get("kcl_max", 0.0),
+                    "final_kvl_violation": proj_result.final_invariants.get("kvl_max", 0.0),
+                }
+                all_traces.append(trace_entry)
+
+        # Add metadata
+        results["metadata"].update({
             "checkpoint": {
                 "model_type": model_type,
                 "hidden_dim": hidden_dim,
@@ -456,12 +612,29 @@ def main() -> int:
                 "snapshot_fingerprint": ckpt.get("extra", {}).get("snapshot_fingerprint", ckpt.get("snapshot_hash", "")),
                 "eval_fingerprint": ckpt.get("eval_fingerprint", ""),
                 "parent_oracle_version": ckpt.get("extra", {}).get("parent_oracle_version", "v2.8"),
+                "target_mode": target_mode,
             },
             "train_split": args.train_frac,
             "dataset": str(Path(args.dataset).resolve()),
             "ood_dataset": str(Path(args.ood_dataset).resolve()),
+        })
+
+        results["metadata"]["checkpoint_config"] = ckpt.get("training_config", {})
+        results["metadata"]["checkpoint_model"] = ckpt.get("model_config", {})
+        results["summary"] = {
+            "checkpoint_artifact_fingerprint": ckpt.get("artifact_fingerprint", ""),
+            "dataset_manifest_hash": ckpt.get("dataset_manifest_hash", ""),
+            "snapshot_hash": ckpt.get("snapshot_hash", ""),
+            "evaluation_fingerprint": ckpt.get("eval_fingerprint", ""),
+            "parent_oracle_version": ckpt.get("extra", {}).get("parent_oracle_version", "v2.8"),
+            "target_mode": target_mode,
         }
-    )
+
+        comparison_results[label] = results
+
+    # Use the last (or only) checkpoint's results for the main output
+    primary_label = ckpt_labels[-1]
+    results = comparison_results[primary_label]
 
     results["metadata"]["checkpoint_config"] = ckpt.get("training_config", {})
     results["metadata"]["checkpoint_model"] = ckpt.get("model_config", {})
@@ -556,6 +729,16 @@ def generate_markdown_summary(results: dict) -> str:
     gnn = results.get("gnn", {})
     gnn_ind = gnn.get("in_distribution", {})
     gnn_ood = gnn.get("ood", {})
+    families = gnn.get("families", {})
+    triv_ind = families.get("trivial", {}).get("in_distribution", {})
+    triv_ood = families.get("trivial", {}).get("ood", {})
+    simp_ind = families.get("simple", {}).get("in_distribution", {})
+    simp_ood = families.get("simple", {}).get("ood", {})
+    med_ind = families.get("medium", {}).get("in_distribution", {})
+    med_ood = families.get("medium", {}).get("ood", {})
+    dens_ind = families.get("dense", {}).get("in_distribution", {})
+    dens_ood = families.get("dense", {}).get("ood", {})
+
     mean_base = results.get("mean_baseline", {})
     linear_base = results.get("linear_baseline", {})
     random_base = results.get("random_baseline", {})
@@ -588,6 +771,15 @@ def generate_markdown_summary(results: dict) -> str:
         f"- OOD KVL max violation: {gnn_ood.get('kvl_max_violation', 0):.2e}",
         f"- Deterministic rerun validation: {results.get('deterministic_rerun_validation', {}).get('gnn', False)}",
         f"- Replay consistency fingerprint match: {gnn.get('replay_consistency_metrics', {}).get('rerun_match', False)}",
+        "",
+        "## Per-Topology Family Breakdown",
+        "",
+        "| Topology Family | In-Distribution Count | In-Distribution MAE (V) | In-Distribution KCL Max Violation (A) | OOD Count | OOD MAE (V) | OOD KCL Max Violation (A) |",
+        "|---|---|---|---|---|---|---|",
+        f"| **Trivial** (Tree-like) | {triv_ind.get('count', 0)} | {triv_ind.get('mae', 0):.4f} | {triv_ind.get('kcl_max_violation', 0):.2e} | {triv_ood.get('count', 0)} | {triv_ood.get('mae', 0):.4f} | {triv_ood.get('kcl_max_violation', 0):.2e} |",
+        f"| **Simple** (1 Cycle) | {simp_ind.get('count', 0)} | {simp_ind.get('mae', 0):.4f} | {simp_ind.get('kcl_max_violation', 0):.2e} | {simp_ood.get('count', 0)} | {simp_ood.get('mae', 0):.4f} | {simp_ood.get('kcl_max_violation', 0):.2e} |",
+        f"| **Medium** (2-3 Cycles) | {med_ind.get('count', 0)} | {med_ind.get('mae', 0):.4f} | {med_ind.get('kcl_max_violation', 0):.2e} | {med_ood.get('count', 0)} | {med_ood.get('mae', 0):.4f} | {med_ood.get('kcl_max_violation', 0):.2e} |",
+        f"| **Dense** (>3 Cycles) | {dens_ind.get('count', 0)} | {dens_ind.get('mae', 0):.4f} | {dens_ind.get('kcl_max_violation', 0):.2e} | {dens_ood.get('count', 0)} | {dens_ood.get('mae', 0):.4f} | {dens_ood.get('kcl_max_violation', 0):.2e} |",
         "",
         "## Baselines",
         "",

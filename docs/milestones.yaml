@@ -1,0 +1,99 @@
+milestones:
+  - version: "v2.6"
+    title: "Snapshot Reproducible"
+    status: "complete"
+    summary: "Generación determinista de snapshots, fingerprinting de datasets y benchmarks, aislamiento de tests."
+    technical_impact: "Establece la base de reproducibilidad bit a bit para todos los artefactos futuros."
+    date: "2026-05-15"
+    tags: ["core", "determinismo"]
+    dependencies: []
+    artifacts: ["snapshots/", "benchmarks/"]
+    doc_refs: ["docs/CPT_BENCH.md"]
+
+  - version: "v2.7"
+    title: "Distillation Readiness"
+    status: "complete"
+    summary: "Contratos de exportación de datasets, manifiestos, sharding, harness de evaluación y scaffold de modelos pequeños."
+    technical_impact: "Prepara el pipeline de datos y evaluación para los experimentos de destilación neuronal."
+    date: "2026-05-16"
+    tags: ["datasets", "destilacion"]
+    dependencies: ["v2.6"]
+    artifacts: ["datasets/export_contract.py", "datasets/manifest.py", "neural/models/base.py"]
+    doc_refs: ["docs/V27_DISTILLATION_READINESS.md"]
+
+  - version: "v2.7.5"
+    title: "Tiny Distillation Experiments"
+    status: "complete"
+    summary: "Generación de datasets grandes, bucles de entrenamiento pequeños, arena oracle-vs-model, taxonomía de fallos."
+    technical_impact: "Primera prueba de que un modelo neuronal minúsculo puede aproximar un oráculo determinista en un dominio cerrado."
+    date: "2026-05-16"
+    tags: ["neural", "destilacion", "arena"]
+    dependencies: ["v2.7"]
+    artifacts: ["neural/tiny_experiments.py", "neural/trainers/", "neural/evaluators/"]
+    doc_refs: ["docs/V27_DISTILLATION_READINESS.md"]
+
+  - version: "v2.7.6"
+    title: "Artifact Governance + Reporting"
+    status: "complete"
+    summary: "Contratos de esquema para checkpoints, migraciones, registro de artefactos, reportes compactos y CLI de diff."
+    technical_impact: "Añade la capa de gobernanza que permite versionar y auditar todos los artefactos del proyecto."
+    date: "2026-05-16"
+    tags: ["governance", "reporting"]
+    dependencies: ["v2.7"]
+    artifacts: ["governance/artifact_registry.py", "governance/artifact_inventory.py", "reporting/report_builder.py"]
+    doc_refs: ["docs/ARCHITECTURE_V26.md"]
+
+  - version: "v2.7.7"
+    title: "Artifact Policy + Runbook"
+    status: "complete"
+    summary: "Cargador de políticas, enforcement, runbook operativo, reglas de compatibilidad y reporting policy-aware."
+    technical_impact: "Automatiza el cumplimiento de políticas de ciclo de vida de artefactos, eliminando decisiones manuales."
+    date: "2026-05-16"
+    tags: ["governance", "policy"]
+    dependencies: ["v2.7.6"]
+    artifacts: ["governance/artifact_policy.py", "docs/ARTIFACT_OPERATIONS_RUNBOOK.md"]
+    doc_refs: ["docs/ARTIFACT_OPERATIONS_RUNBOOK.md"]
+
+  - version: "v2.7.8"
+    title: "Retention + Archive Tooling"
+    status: "complete"
+    summary: "Barredor de retención determinista, bundles de archivo, reportes de retención y dry-run de limpieza."
+    technical_impact: "Gestiona el ciclo de vida completo de artefactos, desde activo hasta archivado o eliminado, sin pérdida de trazabilidad."
+    date: "2026-05-16"
+    tags: ["governance", "retention"]
+    dependencies: ["v2.7.7"]
+    artifacts: ["governance/retention_sweeper.py", "governance/archive_tooling.py"]
+    doc_refs: ["docs/ARTIFACT_OPERATIONS_RUNBOOK.md"]
+
+  - version: "v2.7.9"
+    title: "Inventory + Workspace Intelligence"
+    status: "complete"
+    summary: "Índice determinista de inventario, motor de consultas, grafo de linaje, detección de drift y resúmenes de workspace."
+    technical_impact: "Permite consultar y visualizar las relaciones entre todos los artefactos del proyecto sin base de datos externa."
+    date: "2026-05-16"
+    tags: ["governance", "query", "inventory"]
+    dependencies: ["v2.7.8"]
+    artifacts: ["governance/artifact_inventory.py", "governance/query_engine.py", "governance/lineage_graph.py"]
+    doc_refs: ["docs/ARCHITECTURE.md"]
+
+  - version: "v2.7.10"
+    title: "Artifact Search Refinement"
+    status: "complete"
+    summary: "Dependencias inversas, búsqueda por workspace, consultas guardadas, reportes de descubrimiento y análisis de impacto."
+    technical_impact: "Cierra la capa de inteligencia de artefactos con capacidad de navegación operativa completa."
+    date: "2026-05-16"
+    tags: ["governance", "search", "dependencies"]
+    dependencies: ["v2.7.9"]
+    artifacts: ["governance/reverse_dependencies.py", "governance/saved_queries.py", "reporting/discovery_report.py"]
+    doc_refs: ["docs/ARCHITECTURE.md"]
+
+  - version: "v2.8"
+    title: "Neural Surrogate Experiments"
+    status: "planned"
+    summary: "Entrenar un surrogate neuronal pequeño que imite un oráculo determinista en un dominio cerrado (aritmética o cinemática 1D)."
+    technical_impact: "Primer paso hacia la destilación de conocimiento físico en redes neuronales livianas."
+    date: null
+    tags: ["neural", "destilacion"]
+    dependencies: ["v2.7.10"]
+    artifacts: []
+    doc_refs: ["docs/ROADMAP.md"]

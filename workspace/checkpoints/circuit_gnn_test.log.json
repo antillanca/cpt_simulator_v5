@@ -1,0 +1,55 @@
+{
+  "model_type": "edge_aware",
+  "num_params": 21633,
+  "seed": 42,
+  "epochs": 5,
+  "best_eval_scaled_loss": 0.7639774666861425,
+  "voltage_transform": "signed_log1p",
+  "history": [
+    {
+      "epoch": 1,
+      "train_scaled_loss": 1.056976,
+      "eval_scaled_loss": 0.814174,
+      "eval_mae_V": 7.541818,
+      "eval_rmse_V": 8.145674,
+      "eval_max_error_V": 511.421844,
+      "elapsed_sec": 51.4
+    },
+    {
+      "epoch": 2,
+      "train_scaled_loss": 0.927747,
+      "eval_scaled_loss": 0.781627,
+      "eval_mae_V": 7.484324,
+      "eval_rmse_V": 8.086245,
+      "eval_max_error_V": 508.332977,
+      "elapsed_sec": 49.8
+    },
+    {
+      "epoch": 3,
+      "train_scaled_loss": 0.92101,
+      "eval_scaled_loss": 0.763977,
+      "eval_mae_V": 7.442529,
+      "eval_rmse_V": 8.036202,
+      "eval_max_error_V": 509.862549,
+      "elapsed_sec": 49.43
+    },
+    {
+      "epoch": 4,
+      "train_scaled_loss": 0.90661,
+      "eval_scaled_loss": 0.766223,
+      "eval_mae_V": 7.451342,
+      "eval_rmse_V": 8.04845,
+      "eval_max_error_V": 506.471619,
+      "elapsed_sec": 59.84
+    },
+    {
+      "epoch": 5,
+      "train_scaled_loss": 0.902434,
+      "eval_scaled_loss": 0.782337,
+      "eval_mae_V": 7.470863,
+      "eval_rmse_V": 8.074576,
+      "eval_max_error_V": 507.457214,
+      "elapsed_sec": 62.53
+    }
+  ]
+}

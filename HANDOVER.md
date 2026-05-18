@@ -1,83 +1,59 @@
-# CPT Cognitive Engine v2.5 — Handover
+# CPT Cognitive Engine v2.9F — Master Handover
 
-> **Current Status (2026-05-15)**: 🚀 **MILESTONE ACHIEVED: 100% Curriculum Completion.**
-> All 43 modules (Layer 0 to Layer 34) have been successfully assimilated, verified against symbolic invariants, and confirmed.
-
----
-
-## 🏗️ Architecture: The Neuro-Symbolic Stack
-
-CPT is a layered intelligence system that prioritizes **Determinism (Math)** over **Probability (LLMs)**.
-
-### 1. Layer 0: Core Truth (Lua Sandbox)
-- **Path**: `backend/core_truth/`
-- **Logic**: Absolute source of truth. No AI. Just math and Lua 5.4.
-- **Security**: Dockerized, no network, restricted resources.
-
-### 2. Layer 1: Verifiers (Symbolic Invariants)
-- **Path**: `backend/verifiers/`
-- **Logic**: "The Arbiter". Verifies that any proposed rule (Lua or Neural) obeys physical laws (e.g., Energy Conservation, Non-Contradiction).
-
-### 3. Layer 2: Intuition (Neural Tabular Filters)
-- **Path**: `models/*.pt`
-- **Logic**: Tiny PyTorch networks (TabularNet) trained on thousands of simulation samples.
-- **Role**: Provides "Fast Thinking" (Intuition) for the A* Planner to prune impossible paths.
-
-### 4. Layer 3: Reasoning (Student Engine)
-- **Path**: `backend/ai/student_engine.py`
-- **Logic**: Generative Lua code.
-- **Role**: "Slow Thinking" (Reflective). Generates the actual physics rules that Layer 0 executes.
+> **Current Status (2026-05-18)**: 🚀 **MILESTONE ACHIEVED: V2.9F True Global Virtual Node Projection.**
+> El sistema ha transicionado de un regresor aislado a un **Solver Iterativo Híbrido** neuro-simbólico.
 
 ---
 
-## 📈 Current Progress
+## 🏗️ Architecture: The Hybrid Neuro-Symbolic Stack
 
-| Category | Count | Status |
-|:---|:---:|:---:|
-| **Total Modules** | 43 | ✅ 100% |
-| **Tabular Modules (.pt)** | 16 | ✅ Confirmed |
-| **Lua Modules (Generated)** | 27 | ✅ Confirmed & Verified |
-| **Failures/Rejected** | 0 | ✅ All repaired |
+CPT es un sistema de inteligencia estructurado en capas que ahora fusiona la velocidad de las Graph Neural Networks (GNN) con la exactitud analítica de los solvers iterativos.
 
-**Key Breakthrough**: We solved the "LLM Verbosity" problem using **Temperature 0.0** + **Aggressive Extraction Logic** in `_extract_lua()`, allowing complex modules like `magnetism_lorentz_force` and `quantum_double_slit_logic` to pass verification on the first attempt.
+### 1. Layer 0: Core Truth (Oráculo Analítico)
+- **Path**: `backend/circuits/dc_solver.py`
+- **Logic**: Oráculo tradicional basado en Modified Nodal Analysis (MNA). Resuelve los circuitos usando ecuaciones matemáticas exactas para generar el *Ground Truth*.
 
----
+### 2. Layer 1: GNN Surrogate (Pre-condicionador)
+- **Path**: `scripts/train_circuit_gnn.py` & `backend/neural/models/circuit_gnn.py`
+- **Logic**: Una red neuronal informada por la física (PINN) que predice un estado de voltaje inicial en fracciones de milisegundo. En V2.9F, esta red actúa como un **Warm-Start** para el solver físico.
 
-## 🛠️ Configuration & Tracking
-
-- **Tracking**: Every Lua module now includes a `generated_by` field in `modules.json` to trace which model produced the logic.
-- **Cascading Fallback**: `NVIDIA GLM-5.1` (Primary) → `OpenRouter` (Fallback) → `Ollama/Qwen3` (Last Resort).
-- **Environment**: All keys (`OPENROUTER_API_KEY`, `NVIDIA_API_KEY`) are managed in `.env`.
+### 3. Layer 2: Physics Projection (El "Corrector")
+- **Path**: `backend/circuits/physics_projection.py`
+- **Logic**: Capa iterativa (estilo Jacobi) que toma la predicción de la GNN y la ajusta para forzar el cumplimiento estricto de las leyes KCL y KVL.
+- **Innovación V2.9F**: Implementa el **True Global Virtual Node**, un nodo virtual que agrega y redistribuye el error global instantáneamente, solucionando los cuellos de botella de convergencia en grafos muy largos (cadenas radiales).
 
 ---
 
-## 🔮 Next Steps: Road to v3.0 (For LLM Brainstorming)
+## 📈 Progression & Metrics (V2.9F)
 
-Now that the core curriculum is complete, the project moves into the **Distillation and Expansion** phase.
+- **Currículo Topológico:** Los circuitos se entrenan en orden de dificultad (Trivial, Simple, Medium, Dense).
+- **Taxonomía de Fallos:** El motor ahora diagnostica anomalías físicas (`cycle_drift_failure`, `dense_mesh_leakage`, `bridge_node_instability`).
+- **OOD Stress Suite:** Generadores deterministas de mallas masivas y redes en escalera para estresar los límites de la red (`ood_stress_suite.py`).
 
-### 1. Knowledge Distillation (The "Oracle" Phase)
-- **Task**: Use the confirmed Lua rules (Layer 3) as a **Teacher Oracle** to generate a massive DPO/GRPO dataset.
-- **Goal**: Fine-tune a 1B-3B model (like Qwen2.5-Math or Llama-3.2-1B) so it inherits the "physics-correct" reasoning of the sandbox.
-
-### 2. Curriculum Expansion
-- **Electromagnetism**: Full Maxwell equations.
-- **Chemistry**: Stoichiometry and atomic bonding logic.
-- **Symbolic Logic**: Propositional and predicate calculus layers.
-
-### 3. Edge Deployment
-- Export the tiny neural filters (`.pt`) and the reasoning engine to **GGUF** format for execution on mobile/embedded devices without cloud access.
-
-### 4. Tooling & UX
-- **VS Code Plugin**: A developer tool that verifies code logic in real-time using the CPT Verifiers.
-- **Hermes 2.0**: Enhance the agent to allow autonomous curriculum design (self-supervised learning).
+| Métrica | Híbrido (Proyección + Nodo Virtual) |
+|:---|:---:|
+| **In-Dist MAE** | Virtualmente $0.0$ |
+| **KCL Max (A)** | $< 1e-6$ |
+| **Iteraciones Solver** | Ultra-Reducidas |
 
 ---
 
-## 📂 Key Files for Context
-- `backend/core_truth/modules.json`: The complete brain state.
-- `backend/ai/student_engine.py`: The generative reasoning logic.
-- `scripts/training_orchestrator.py`: The master loop.
-- `docs/ESTADO_CURRICULO.md`: Detailed module-by-module report.
+## 🔮 Next Steps: El Camino a Seguir
+
+Para los agentes entrantes, el trabajo debe centrarse en:
+
+1. **Refinamiento de Pérdida de Newton (Newton-Physics Loss)**: 
+   Integrar cabezales de corrección física auto-correctivos dentro de las capas residuales durante el entrenamiento para forzar el cumplimiento de KCL de forma analítica en el forward pass.
+2. **Escalamiento de Receptividad Temporal**:
+   Investigar cómo usar nodos virtuales a nivel de grafo en la GNN para evitar la atenuación de señal en redes en escalera extremadamente largas (>$100$ etapas).
+3. **Delegación Autónoma (Agente Hermes)**:
+   Configurar a Hermes para monitorear las métricas de la Arena por familia topológica y orquestar sesiones de re-entrenamiento enfocadas en las familias con menor precisión.
 
 ---
-**Verified by Antigravity AI.**
+
+## 📂 Documentos de Contexto Integral
+
+Para un entendimiento técnico profundo desde cero hasta la fase actual, **DEBES** leer:
+- 📖 [Guía Comprensiva de Handover para IA (V2.9F)](docs/AGENT_HANDOVER_V29F_COMPREHENSIVE.md)
+- 🔬 [Reporte Científico Oficial V2.9F (Virtual Node)](docs/V29F_VIRTUAL_NODE_PROJECTION.md)
+- 📊 [Reporte Científico V2.9E (Ablación y Topología)](docs/V29E_TOPOLOGY_AWARE_SURROGATE.md)

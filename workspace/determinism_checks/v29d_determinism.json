@@ -1,0 +1,6 @@
+{
+  "deterministic": true,
+  "metrics_equal": true,
+  "run_a_fingerprint": "dd15928cb2caafa8141450b58374c52718a682861706ff60434f6112c7834eaa",
+  "run_b_fingerprint": "dd15928cb2caafa8141450b58374c52718a682861706ff60434f6112c7834eaa"
+}

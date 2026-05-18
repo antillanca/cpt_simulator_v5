@@ -6,6 +6,7 @@ serializes replayable reasoning traces extracted from sandbox execution.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import time
 from dataclasses import dataclass, field
@@ -219,4 +220,38 @@ def canonicalize_trace(trace: dict[str, Any] | ReasoningTrace) -> ReasoningTrace
 
 def replay_trace(trace: dict[str, Any] | ReasoningTrace, initial_state: dict[str, Any] | None = None) -> TraceReplayResult:
     return canonicalize_trace(trace).replay(initial_state=initial_state)
+
+
+def trace_fingerprint(trace: dict[str, Any] | ReasoningTrace) -> str:
+    """Deterministic fingerprint for a trace, independent of step ordering."""
+    rt = canonicalize_trace(trace)
+    normalized = json.dumps(rt.to_dict(), sort_keys=True, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(normalized).hexdigest()
+
+
+def assert_replay_consistency(
+    trace: dict[str, Any] | ReasoningTrace,
+    initial_state: dict[str, Any] | None = None,
+    expected_final: dict[str, Any] | None = None,
+) -> TraceReplayResult:
+    """Replay a trace and assert it is consistent.
+
+    Raises TraceValidationError if replay detects state mismatches.
+    Optionally asserts the final state matches expected_final.
+    """
+    rt = canonicalize_trace(trace)
+    rt.validate()
+    result = rt.replay(initial_state=initial_state)
+    if not result.passed:
+        raise TraceValidationError(
+            f"Trace replay failed with {len(result.violations)} violation(s): {result.violations}"
+        )
+    if expected_final is not None:
+        norm_actual = _normalize(result.final_state)
+        norm_expected = _normalize(expected_final)
+        if norm_actual != norm_expected:
+            raise TraceValidationError(
+                f"Replay final state mismatch: actual={norm_actual} expected={norm_expected}"
+            )
+    return result
 

@@ -18,6 +18,7 @@ import torch
 
 from backend.circuits.graph_dataset import CircuitGraph
 from backend.circuits.models import Circuit, CircuitSolution
+from backend.circuits.physics_projection import PhysicsProjection, ProjectionConfig
 from backend.neural.models.circuit_gnn import CircuitGNN, EdgeAwareCircuitGNN
 
 
@@ -64,6 +65,10 @@ class SurrogateEvalResult:
     replay_consistency: float  # max abs diff between two runs
     count: int
     per_circuit_mae: tuple[float, ...] = ()
+    # v2.9F: physics projection metrics (0.0 if projection not applied)
+    mae_corrected: float = 0.0
+    kcl_max_violation_corrected: float = 0.0
+    kvl_max_violation_corrected: float = 0.0
 
 
 # --- KCL/KVL violation computation ---
@@ -134,19 +139,31 @@ def evaluate_surrogate(
     circuits: Sequence[Circuit],
     use_edge_features: bool = True,
     voltage_transform: str = "per_circuit_vmax",
+    ablation: str = "full",
+    physics_projection_config: ProjectionConfig | None = None,
 ) -> SurrogateEvalResult:
     """Evaluate surrogate against oracle on a list of (graph, circuit) pairs.
 
+    If physics_projection_config is provided, applies iterative physics
+    correction to the GNN predictions and reports both raw and corrected
+    metrics.
+
     Returns metrics including MAE, RMSE, max error, KCL/KVL violations,
-    and replay consistency.
+    replay consistency, and (if projection enabled) corrected metrics.
     """
     model.eval()
+    projector = PhysicsProjection(physics_projection_config) if physics_projection_config else None
+
     maes: list[float] = []
     rmses: list[float] = []
     max_errs: list[float] = []
     kcl_violations: list[float] = []
     kvl_violations: list[float] = []
     replay_diffs: list[float] = []
+    # v2.9F: corrected metrics
+    maes_corrected: list[float] = []
+    kcl_violations_corrected: list[float] = []
+    kvl_violations_corrected: list[float] = []
 
     with torch.no_grad():
         for idx, (g, circuit) in enumerate(zip(graphs, circuits)):
@@ -154,18 +171,30 @@ def evaluate_surrogate(
                 continue
 
             vmax = get_vmax(circuit)
+            node_features = g.node_features
+            edge_features = g.edge_features
+
+            # Apply ablation slicing
+            if ablation in ("baseline", "norm_only"):
+                node_features = node_features[:, :8]
+                if ablation == "baseline":
+                    edge_features = edge_features[:, :4]
+                elif ablation == "norm_only":
+                    edge_features = edge_features[:, :5]
+            elif ablation == "topo_only":
+                edge_features = torch.cat([edge_features[:, :4], edge_features[:, 5:7]], dim=1)
 
             # First inference
             if use_edge_features:
-                pred_norm_1 = model(g.node_features, g.edge_index, g.edge_features)
+                pred_norm_1 = model(node_features, g.edge_index, edge_features)
             else:
-                pred_norm_1 = model(g.node_features, g.edge_index)
+                pred_norm_1 = model(node_features, g.edge_index)
 
             # Second inference (replay consistency)
             if use_edge_features:
-                pred_norm_2 = model(g.node_features, g.edge_index, g.edge_features)
+                pred_norm_2 = model(node_features, g.edge_index, edge_features)
             else:
-                pred_norm_2 = model(g.node_features, g.edge_index)
+                pred_norm_2 = model(node_features, g.edge_index)
 
             replay_diff = (pred_norm_1 - pred_norm_2).abs().max().item()
             replay_diffs.append(replay_diff)
@@ -176,7 +205,7 @@ def evaluate_surrogate(
             else:
                 pred_v1 = target_to_voltage(pred_norm_1)
 
-            # Compute voltage errors
+            # Compute voltage errors (raw)
             diff = pred_v1 - g.target_voltages
             mae = diff.abs().mean().item()
             rmse = diff.pow(2).mean().sqrt().item()
@@ -195,7 +224,19 @@ def evaluate_surrogate(
             kcl_violations.append(kcl_v)
             kvl_violations.append(kvl_v)
 
+            # v2.9F: Apply physics projection and compute corrected metrics
+            if projector is not None:
+                pred_v1_corrected = projector.project(g, circuit, pred_v1)
+                diff_c = pred_v1_corrected - g.target_voltages
+                maes_corrected.append(diff_c.abs().mean().item())
+
+                pred_voltage_dict_c = dict(zip(g.node_names, pred_v1_corrected.tolist()))
+                pred_voltage_dict_c[circuit.ground_node] = 0.0
+                kcl_violations_corrected.append(_compute_kcl_violation(circuit, pred_voltage_dict_c))
+                kvl_violations_corrected.append(_compute_kvl_violation(circuit, pred_voltage_dict_c))
+
     n = max(len(maes), 1)
+    has_correction = len(maes_corrected) > 0
     return SurrogateEvalResult(
         mae=sum(maes) / n if maes else 0.0,
         rmse=sum(rmses) / n if rmses else 0.0,
@@ -205,6 +246,9 @@ def evaluate_surrogate(
         replay_consistency=max(replay_diffs) if replay_diffs else 0.0,
         count=len(maes),
         per_circuit_mae=tuple(maes),
+        mae_corrected=sum(maes_corrected) / max(len(maes_corrected), 1) if has_correction else 0.0,
+        kcl_max_violation_corrected=max(kcl_violations_corrected) if kcl_violations_corrected else 0.0,
+        kvl_max_violation_corrected=max(kvl_violations_corrected) if kvl_violations_corrected else 0.0,
     )
 
 

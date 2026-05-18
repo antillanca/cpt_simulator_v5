@@ -1,0 +1,133 @@
+schema_version: "1.0"
+
+defaults:
+  allow_legacy_read: true
+  allow_legacy_write: false
+  require_fingerprint: true
+  require_manifest: true
+  require_snapshot_hash: true
+
+artifacts:
+  checkpoint:
+    required_fields:
+      - schema_version
+      - model_type
+      - model_config
+      - training_config
+      - dataset_manifest_hash
+      - snapshot_hash
+      - weights_hash
+      - artifact_fingerprint
+    retention:
+      keep_latest: 10
+      keep_by_fingerprint: true
+    migration:
+      allow_dry_run: true
+      require_explicit_target_version: true
+
+  dataset:
+    required_fields:
+      - dataset_version
+      - schema_version
+      - snapshot_hash
+      - module_hash
+      - generation_seed
+      - record_count
+      - fingerprint
+    retention:
+      keep_latest: 5
+      keep_by_fingerprint: true
+
+  evaluation_report:
+    required_fields:
+      - artifact_type
+      - schema_version
+      - compatibility_status
+      - policy
+      - summary
+      - per_layer
+      - per_module
+      - failure_summary
+      - ood
+      - dataset_manifest
+      - checkpoint
+      - evaluation
+      - artifacts
+    retention:
+      keep_latest: 20
+      keep_by_fingerprint: true
+
+  manifest:
+    required_fields:
+      - schema_version
+      - fingerprint
+    retention:
+      keep_latest: 10
+      keep_by_fingerprint: true
+
+  benchmark_snapshot:
+    required_fields:
+      - schema_version
+      - fingerprint
+    retention:
+      keep_latest: 10
+      keep_by_fingerprint: true
+
+  artifact_registry:
+    required_fields:
+      - schema_version
+      - registry_fingerprint
+    retention:
+      keep_latest: 1
+      keep_by_fingerprint: true
+
+  inventory_index:
+    required_fields:
+      - schema_version
+      - inventory_fingerprint
+      - policy_fingerprint
+      - source_workspace_hash
+    retention:
+      keep_latest: 1
+      keep_by_fingerprint: true
+
+  workspace_summary:
+    required_fields:
+      - summary_fingerprint
+      - policy_fingerprint
+      - index_fingerprint
+    retention:
+      keep_latest: 5
+      keep_by_fingerprint: true
+
+  lineage_graph:
+    required_fields:
+      - graph_fingerprint
+    retention:
+      keep_latest: 5
+      keep_by_fingerprint: true
+
+compatibility:
+  v26:
+    read: true
+    write: false
+  v27:
+    read: true
+    write: true
+  v275:
+    read: true
+    write: true
+  v276:
+    read: true
+    write: true
+  v278:
+    read: true
+    write: true
+  v279:
+    read: true
+    write: true
+
+enforcement:
+  strict_mode: true
+  fail_on_unknown_artifact: true
+  fail_on_missing_fingerprint: true

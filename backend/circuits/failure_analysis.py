@@ -19,6 +19,9 @@ FAILURE_TYPES = [
     "node_aliasing",
     "conservation_drift",
     "ood_generalization_failure",
+    "cycle_drift_failure",
+    "dense_mesh_leakage",
+    "bridge_node_instability",
 ]
 
 
@@ -195,10 +198,24 @@ def classify_failure(
     power = _stable_float(invariant_metrics.get("power_conservation_violation", 0.0))
     if any(value > 1e-6 for value in (kcl, kvl, power)):
         if failure_type == "ood_generalization_failure":
-            failure_type = "conservation_drift"
+            # Sharp topology failure root causes
+            if kcl > 1e-2:
+                num_resistors = len(circuit.resistors)
+                num_nodes = len(circuit.all_nodes)
+                if num_resistors > num_nodes:
+                    failure_type = "cycle_drift_failure"
+                    reasons.append("KCL drift in closed cycles")
+                elif num_nodes > 10:
+                    failure_type = "dense_mesh_leakage"
+                    reasons.append("high degree node connectivity leakage")
+                else:
+                    failure_type = "bridge_node_instability"
+                    reasons.append("bridge/tree node prediction instability")
+            else:
+                failure_type = "conservation_drift"
         reasons.append("invariant violations exceed tolerance")
 
-    if failure_type == "ood_generalization_failure" and not ood:
+    if failure_type in ("ood_generalization_failure", "cycle_drift_failure", "dense_mesh_leakage", "bridge_node_instability") and not ood:
         failure_type = "conservation_drift" if reasons else "topology_collapse"
 
     if not reasons:

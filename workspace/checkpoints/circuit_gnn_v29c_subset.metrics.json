@@ -1,0 +1,50 @@
+{
+  "best_epoch": 1,
+  "best_eval_metrics": {
+    "count": 102,
+    "kcl_penalty": 0.00036834966538164504,
+    "kvl_penalty": 11.85497661349455,
+    "loss": 1546.1048986286503,
+    "mae": 8.15331975034639,
+    "max_error": 519.1581420898438,
+    "rmse": 9.64597411482942,
+    "voltage_loss": 1544.919364132334
+  },
+  "checkpoint_fingerprint": "05d11acd33873f94140d23ffb20db9547f3fba13328bd6be4ae979c971f19fea",
+  "config_fingerprint": "e28f255bf42b6322616f50b83ac867aa1828c12fddf44240a86a483a8814ab71",
+  "dataset_fingerprint": "3ff4dcb6e9d589e4e0d4cc7f4032a7426187bb56ddc23bf873cc7b783dffa9b9",
+  "device": "cpu",
+  "eval_count": 102,
+  "final_eval_metrics": {
+    "count": 102,
+    "kcl_penalty": 0.00036834966538164504,
+    "kvl_penalty": 11.85497661349455,
+    "loss": 1546.1048986286503,
+    "mae": 8.15331975034639,
+    "max_error": 519.1581420898438,
+    "rmse": 9.64597411482942,
+    "voltage_loss": 1544.919364132334
+  },
+  "history": [
+    {
+      "epoch": 1,
+      "eval_kcl_penalty": 0.00036835,
+      "eval_kvl_penalty": 11.854976613,
+      "eval_loss": 1546.104899,
+      "eval_mae_V": 8.15332,
+      "eval_max_error_V": 519.158142,
+      "eval_rmse_V": 9.645974,
+      "eval_voltage_loss": 1544.919364,
+      "lr": 1e-06,
+      "train_loss": 1736.664311
+    }
+  ],
+  "model_type": "edge_aware",
+  "num_params": 82113,
+  "parent_oracle_version": "v2.8",
+  "reproducible": true,
+  "schema_version": "2.9b",
+  "seed": 42,
+  "snapshot_fingerprint": "ed65aa12cec04ca456bb3b6434228c2097369a7969a866c341d761f9d2ba894f",
+  "train_count": 408
+}
