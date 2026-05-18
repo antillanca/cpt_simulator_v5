@@ -564,9 +564,15 @@ def main() -> int:
 
         # --- Projection traces (FASE 5) ---
         if args.save_traces:
-            from backend.circuits.physics_projection import PhysicsProjection
+            from backend.circuits.physics_projection import PhysicsProjection, ProjectionConfig
+            from backend.circuits.projection_effort import measure_projection_effort
             from backend.circuits.surrogate_eval import denormalize_voltages, get_vmax
-            proj = PhysicsProjection(g_virtual=1.0, num_iterations=50, tolerance=1e-9)
+
+            trace_config = ProjectionConfig(
+                steps=50, alpha_kcl=0.1, alpha_kvl=0.05,
+                virtual_node_enabled=True, virtual_conductance=1.0, blend_factor=0.5,
+            )
+            trace_proj = PhysicsProjection(trace_config)
             for i, (graph, circuit) in enumerate(zip(eval_graphs, eval_circuits)):
                 vmax = get_vmax(circuit)
                 with torch.no_grad():
@@ -576,23 +582,20 @@ def main() -> int:
                         graph.edge_attr if use_edge and graph.edge_attr is not None else None,
                     )
                     voltages = denormalize_voltages(raw_pred.squeeze(-1), vmax, "per_circuit_vmax")
-                oracle_sol = solve_dc_circuit(circuit)
-                oracle_v = {k: v for k, v in oracle_sol.node_voltages.items() if k != circuit.ground_node}
-                nodes = list(oracle_v.keys())
-                guess = {n: voltages[j].item() for j, n in enumerate(nodes)}
-                proj_result = proj.project(circuit, guess, oracle_v)
+
+                step_metrics = trace_proj.project_step_metrics(graph, circuit, voltages)
+                effort = measure_projection_effort(voltages, graph, circuit, trace_config)
+
                 trace_entry = {
                     "checkpoint_label": label,
                     "circuit_idx": i,
                     "circuit_fingerprint": graph.fingerprint,
-                    "iterations": proj_result.iterations,
-                    "converged": proj_result.converged,
-                    "final_residual": proj_result.final_residual,
-                    "residual_history": proj_result.residual_history,
-                    "initial_kcl_violation": proj_result.initial_invariants.get("kcl_max", 0.0),
-                    "initial_kvl_violation": proj_result.initial_invariants.get("kvl_max", 0.0),
-                    "final_kcl_violation": proj_result.final_invariants.get("kcl_max", 0.0),
-                    "final_kvl_violation": proj_result.final_invariants.get("kvl_max", 0.0),
+                    "iterations_to_converge": effort.iterations_to_converge,
+                    "initial_residual": effort.initial_residual,
+                    "final_residual": effort.final_residual,
+                    "correction_distance": effort.correction_distance,
+                    "residual_decay_rate": effort.residual_decay_rate,
+                    "step_metrics": step_metrics,
                 }
                 all_traces.append(trace_entry)
 
@@ -632,19 +635,30 @@ def main() -> int:
 
         comparison_results[label] = results
 
+    # --- Save projection traces (FASE 5) ---
+    if args.save_traces and all_traces:
+        traces_path = Path(args.output_dir) / "v210_traces.jsonl"
+        traces_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(traces_path, "w") as f:
+            for t in all_traces:
+                f.write(json.dumps(t, ensure_ascii=False) + "\n")
+        print(f"Projection traces saved: {traces_path} ({len(all_traces)} entries)")
+
+    # --- Multi-checkpoint comparison table ---
+    if len(comparison_results) > 1:
+        print(f"\n{'='*60}")
+        print("MULTI-CHECKPOINT COMPARISON (v2.10)")
+        print(f"{'='*60}")
+        print(f"{'Label':<12} {'MAE(V)':<10} {'KCL Max':<12} {'Proj Iters':<12} {'Res After 1':<14}")
+        print("-" * 60)
+        for lbl, res in comparison_results.items():
+            gnn_ind = res.get("gnn", {}).get("in_distribution", {})
+            eff = res.get("projection_effort", {})
+            print(f"{lbl:<12} {gnn_ind.get('mae', 0):<10.6f} {gnn_ind.get('kcl_max_violation', 0):<12.2e} {eff.get('mean_iterations', 0):<12.1f} {eff.get('mean_residual_after_1_step', 0):<14.6e}")
+
     # Use the last (or only) checkpoint's results for the main output
     primary_label = ckpt_labels[-1]
     results = comparison_results[primary_label]
-
-    results["metadata"]["checkpoint_config"] = ckpt.get("training_config", {})
-    results["metadata"]["checkpoint_model"] = ckpt.get("model_config", {})
-    results["summary"] = {
-        "checkpoint_artifact_fingerprint": ckpt.get("artifact_fingerprint", ""),
-        "dataset_manifest_hash": ckpt.get("dataset_manifest_hash", ""),
-        "snapshot_hash": ckpt.get("snapshot_hash", ""),
-        "evaluation_fingerprint": ckpt.get("eval_fingerprint", ""),
-        "parent_oracle_version": ckpt.get("extra", {}).get("parent_oracle_version", "v2.8"),
-    }
 
     checkpoint_path = Path(args.checkpoint)
     tag = checkpoint_path.stem.split("_")[-1] if checkpoint_path.stem else "arena"
@@ -673,9 +687,18 @@ def main() -> int:
     report_md_path = report_dir / f"circuit_arena_report_{tag}.md"
     report_md_path.write_text(md, encoding="utf-8")
 
+    # Save multi-checkpoint comparison if applicable
+    if len(comparison_results) > 1:
+        comparison_path = output_dir / "v210_checkpoint_comparison.json"
+        comparison_path.write_text(
+            json.dumps(comparison_results, indent=2, sort_keys=True, ensure_ascii=False, default=str),
+            encoding="utf-8",
+        )
+        print(f"Comparison saved: {comparison_path}")
+
     # Compact compatibility copies
     raw = {
-        "model_type": model_type,
+        "model_type": results["metadata"]["checkpoint"]["model_type"],
         "eval_count": len(eval_graphs),
         "ood_count": len(ood_graphs),
     }
@@ -691,12 +714,12 @@ def main() -> int:
     registry = ArtifactRegistry.from_file(registry_path) if registry_path.exists() else ArtifactRegistry(path=registry_path)
     registry.register(
         artifact_type="evaluation_report",
-        schema_version="2.9b",
+        schema_version="2.10",
         fingerprint=_stable_fingerprint(results),
         parent_fingerprints=[
-            ckpt.get("artifact_fingerprint", ""),
-            ckpt.get("snapshot_hash", ""),
-            ckpt.get("dataset_manifest_hash", ""),
+            results["metadata"]["checkpoint"].get("artifact_fingerprint", ""),
+            results["metadata"]["checkpoint"].get("snapshot_hash", ""),
+            results["metadata"]["checkpoint"].get("dataset_manifest_hash", ""),
         ],
         metadata={
             "metrics_path": str(metrics_path),
@@ -708,9 +731,9 @@ def main() -> int:
     )
     registry.register(
         artifact_type="benchmark_snapshot",
-        schema_version="2.9b",
+        schema_version="2.10",
         fingerprint=_stable_fingerprint(raw),
-        parent_fingerprints=[ckpt.get("artifact_fingerprint", "")],
+        parent_fingerprints=[results["metadata"]["checkpoint"].get("artifact_fingerprint", "")],
         metadata=raw,
     )
     registry.save(registry_path)

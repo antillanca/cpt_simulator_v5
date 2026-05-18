@@ -1,57 +1,53 @@
-# CPT v2.9F — Arquitectura Core: Solver Iterativo Híbrido Neuro-Simbólico
+# System Architecture (v2.9F)
 
-> **Resumen**: En la versión V2.9F, el sistema CPT Simulator ha evolucionado de un simple regresor neuronal a un **Solver Iterativo Híbrido**. La arquitectura combina la velocidad de pre-condicionamiento de las Redes Neuronales de Grafos (GNN) con la precisión absoluta de los solvers matemáticos tradicionales (Jacobi-style Physics Projection) mediante el innovador **True Global Virtual Node**.
-
----
-
-## 🏗️ Pila Arquitectónica Híbrida (Neuro-Simbólica)
-
-La arquitectura se divide en tres componentes principales que actúan en cascada para garantizar velocidad sin comprometer las leyes físicas.
-
-### 1. El Oráculo Analítico (Ground Truth)
-- **Componente**: `backend/circuits/dc_solver.py`
-- **Rol**: La fuente absoluta de la verdad. Utiliza Análisis Nodal Modificado (MNA) matemático exacto para resolver los circuitos y generar las etiquetas de entrenamiento.
-- **Característica**: $O(N^3)$, seguro, pero computacionalmente lento para grafos masivos.
-
-### 2. El Subrogado Neuronal (Pre-condicionador)
-- **Componente**: `backend/neural/models/circuit_gnn.py` (EdgeAwareCircuitGNN)
-- **Rol**: Una Graph Neural Network (GNN) entrenada bajo restricciones físicas (PINN) que predice un estado de voltaje inicial en fracciones de milisegundo.
-- **Característica**: En el paradigma V2.9F, esta red actúa como un **Warm-Start** hiper-rápido, no como la respuesta final. Maneja features topológicos dinámicos y resistencias log-normalizadas para evitar explosión de gradientes en OOD.
-
-### 3. La Proyección Física (El "Corrector" Determinista)
-- **Componente**: `backend/circuits/physics_projection.py`
-- **Rol**: Una capa iterativa (estilo Jacobi) determinista que toma la predicción "sucia" de la GNN y la ajusta matemáticamente para forzar el cumplimiento estricto de las leyes de conservación de carga (KCL) y voltaje (KVL).
-- **Innovación Core (V2.9F)**: **True Global Virtual Node**. Agrega y redistribuye el residual de error globalmente en cada paso de proyección, evadiendo el cuello de botella del radio espectral y permitiendo la convergencia instantánea en grafos de alto diámetro (ej. cadenas radiales y escaleras largas).
+This document outlines the core architecture of the CPT Simulator v5, a hybrid iterative solver combining Physics-Informed Graph Neural Networks (PINN-GNN) with deterministic analytical projection.
 
 ---
 
-## 🧠 Flujo de Datos y Diagnóstico de Fallos
+## 1. Hybrid Solver Stack
 
-### 1. Currículo Topológico (`topology_curriculum.py`)
-Los grafos de entrenamiento no se presentan aleatoriamente. Pasan por un orquestador matemático que los segmenta por dificultad:
-- **Trivial**: Árboles cortos.
-- **Simple**: Lazos únicos.
-- **Medium**: Múltiples ciclos interconectados.
-- **Dense**: Mallas complejas densamente conectadas (que, contraintuitivamente, convergen más rápido debido a sus propias restricciones topológicas).
+The system resolves DC circuits by cascading neural pre-conditioning with mathematical projection.
 
-### 2. Taxonomía Estructural (`failure_analysis.py`)
-Cuando un error residual sobrevive a la proyección, el sistema no solo reporta el MSE, sino que clasifica la anomalía físicamente:
-- `cycle_drift_failure` (Falla de balance KCL en ciclos cerrados).
-- `dense_mesh_leakage` (Fuga de gradientes en alta interconectividad).
-- `bridge_node_instability` (Drift de cuellos de botella en árboles).
+### 1.1 Ground Truth Oracle (`backend/circuits/dc_solver.py`)
+- **Role**: Reference analytical solver.
+- **Mechanism**: Implements exact Modified Nodal Analysis (MNA).
+- **Complexity**: $O(N^3)$. Used strictly for dataset generation and final validation, circumventing latency constraints during inference.
 
----
+### 1.2 GNN Surrogate Pre-conditioner (`backend/neural/models/circuit_gnn.py`)
+- **Role**: High-speed initial state estimator.
+- **Architecture**: `EdgeAwareCircuitGNN` optimized via physics-informed loss (KCL/KVL/Power).
+- **Features**: Utilizes topological feature extraction and logarithmic resistance normalization, ensuring stability across Out-Of-Distribution (OOD) resistance ranges ($0.1\Omega$ to $1M\Omega$).
 
-## 🛠️ Entorno de Desarrollo (Tooling)
-
-*   **Entrenamiento**: `scripts/train_circuit_gnn.py` (Maneja las iteraciones, el scheduler del currículo y las funciones de pérdida PINN penalizadas por KCL/KVL/Power).
-*   **Evaluación**: `scripts/run_circuit_arena.py` (Benchmarking científico, segmenta el MAE y los slopes de convergencia según la familia topológica).
-*   **Pruebas (Tests)**: Suite completa bajo `pytest` en `tests/test_v29f_*.py` y `test_v29e_*.py` verificando la estabilidad numérica OOD, monotonía residual y determinismo.
+### 1.3 Deterministic Physics Projection (`backend/circuits/physics_projection.py`)
+- **Role**: Iterative Jacobi-style corrector.
+- **Mechanism**: Computes exact residuals for Kirchhoff's laws and applies corrective updates to the surrogate's output until convergence limits are met.
+- **Key Innovation (Virtual Node)**: Integrates a mathematical global node that aggregates the mean system residual and redistributes it universally. This structural modification reduces the effective communication diameter of any graph topology to 1, neutralizing the spectral radius degradation typical of local iterative solvers on high-diameter graphs.
 
 ---
 
-## 🚀 Roadmap Arquitectónico (Próximos Pasos Post-V2.9F)
+## 2. Topological Curriculum (`topology_curriculum.py`)
 
-1.  **Refinamiento de Newton-Loss**: Embeber cabezales auto-correctivos físicos directamente en las capas residuales de la GNN para forzar el cumplimiento analítico *durante* el forward-pass de entrenamiento.
-2.  **Escalamiento de Receptividad Temporal**: Integrar nodos virtuales globales pero a nivel de grafo de la propia GNN (no solo en la capa de proyección) para manejar redes en escalera de $>100$ etapas.
-3.  **Active Learning Autónomo (Hermes)**: Acoplar la salida del `failure_analysis.py` con el pipeline de generación, para que el sistema automáticamente cree y entrene más circuitos de las familias específicas en las que detecte debilidad, cerrando el bucle de auto-aprendizaje.
+Training data is curated through a deterministic difficulty scheduler rather than uniform random sampling.
+
+- **Trivial**: Tree structures (0 independent cycles, $\le 4$ nodes).
+- **Simple**: Single-loop circuits (1 cycle, $\le 6$ nodes).
+- **Medium**: Moderately coupled loops (2-3 cycles, $\le 10$ nodes).
+- **Dense**: Highly interconnected meshes ($> 3$ cycles). *Note: The dense interconnectivity acts as a natural graph regularizer, often yielding lower Mean Absolute Error (MAE) compared to sparse topologies.*
+
+---
+
+## 3. Structural Failure Taxonomy (`failure_analysis.py`)
+
+Anomalies are diagnosed topologically to guide structural improvements:
+
+- `cycle_drift_failure`: Non-convergent KCL residuals within closed loops.
+- `dense_mesh_leakage`: Signal attenuation across high-degree nodes.
+- `bridge_node_instability`: Convergence drift across critical bottlenecks in tree structures.
+
+---
+
+## 4. Development Roadmap
+
+1.  **Differentiable Physics Layers**: Transition the post-processing Newton/Jacobi iterations into the computational graph during training, allowing the network to backpropagate through the physical correction steps.
+2.  **GNN-level Virtual Nodes**: Implement the global virtual node directly within the message-passing phase of the GNN to counteract signal attenuation in extreme ladder topologies ($>100$ stages).
+3.  **Active Learning Loop**: Couple the topological failure taxonomy output with the dataset generator to autonomously synthesize and over-sample weak topological configurations.

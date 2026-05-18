@@ -1,57 +1,57 @@
-# Estado del Currículo — CPT Simulator v5
+# Curriculum Status — CPT Simulator v5
 
-> **Resumen Ejecutivo**: El currículo del sistema CPT Simulator v5 se divide en dos fases principales. La **Fase 1 (Dominio Simbólico)** está 100% completa. Actualmente el sistema se encuentra cursando la **Fase 2 (Física Estructural y Topológica)**, dominando la resolución híbrida de grafos eléctricos.
+> **Executive Summary**: The CPT Simulator v5 curriculum operates in two distinct phases. Phase 1 (Symbolic Domain Acquisition) is 100% complete. The system is currently executing Phase 2 (Topological and Structural Physics), focusing on the hybrid resolution of complex electrical graphs.
 
 ---
 
-## 🎓 FASE 1: Currículo de Dominio Simbólico (V2.5) — ✅ COMPLETADO
+## 🎓 Phase 1: Symbolic Domain Curriculum (v2.5) — ✅ COMPLETED
 
-Esta fase consistió en enseñar al motor base (vía generación de código Lua validado) las leyes fundamentales del universo físico y matemático.
+This phase involved the acquisition of fundamental mathematical and physical principles via generated, deterministically verified Lua logic.
 
-| Métrica | Valor | Estado |
+| Metric | Value | Status |
 |:---|:---:|:---:|
-| Total de módulos teóricos | **43** | ✅ Asimilado |
-| Confirmados por Invariantes | **43** (100%) | ✅ Verificado |
-| Pendientes | **0** (0%) | - |
+| Total theoretical modules | **43** | ✅ Assimilated |
+| Invariant verifications | **43** (100%) | ✅ Confirmed |
+| Pending modules | **0** (0%) | - |
 
-### Dominios Adquiridos (Resumen)
-- **Matemáticas Clásicas**: Aritmética, Álgebra, Geometría Euclidiana, Trigonometría, Álgebra Lineal, Derivadas/Integrales numéricas.
-- **Física Clásica**: Cinemática, Dinámica de Newton, Osciladores, Conservación de Energía (KE+PE).
-- **Electromagnetismo**: Ley de Ohm, Fuerza de Lorentz, Ecuaciones de Maxwell.
-- **Física Moderna**: Relatividad (Especial/General), Mecánica Cuántica (Función de onda, Doble Rendija), QFT, Expansión Cosmológica.
-- **Sistemas**: Caos y Sistemas Dinámicos, Termodinámica y Entropía.
+### Acquired Domains
+- **Classical Mathematics**: Arithmetic, Algebra, Euclidean Geometry, Trigonometry, Linear Algebra, Numerical Calculus.
+- **Classical Physics**: Kinematics, Newtonian Dynamics, Oscillators, Energy Conservation.
+- **Electromagnetism**: Ohm's Law, Lorentz Force, Maxwell's Equations.
+- **Modern Physics**: Relativity (Special/General), Quantum Mechanics (Wavefunction, Double Slit), QFT.
+- **Systems Analysis**: Chaos Theory, Thermodynamics, Entropy.
 
-*Todos los módulos base residen en `backend/core_truth/` y fueron validados por el motor analítico sin intervención de LLMs.*
+*Note: All foundational modules reside in `backend/core_truth/` and were strictly validated by the analytical engine without probabilistic LLM interference.*
 
 ---
 
-## ⚡ FASE 2: Currículo Topológico y Estructural (V2.9F) — 🔄 ACTIVO
+## ⚡ Phase 2: Topological Graph Curriculum (v2.9F) — 🔄 ACTIVE
 
-Habiendo asimilado las leyes de Ohm y Kirchhoff teóricamente, el sistema ahora entrena un **Subrogado Neuronal (GNN)** acoplado a una capa de **Proyección Física** para resolver circuitos complejos en tiempo real. 
+Having theoretically assimilated circuit laws, the system currently trains a **Graph Neural Network (GNN)** coupled with a **Physics Projection** layer to resolve arbitrary circuit graphs in real-time.
 
-Para evitar el colapso del aprendizaje, los circuitos no se presentan aleatoriamente, sino a través de un riguroso `CurriculumLevel` topológico controlado por `topology_curriculum.py`.
+To prevent training collapse, data is structured via a rigorous `CurriculumLevel` topological scheduler (`topology_curriculum.py`).
 
-### Estado de Niveles Topológicos
+### Topological Progression Status
 
-| Nivel | Nombre | Definición Estructural | Estado de Dominio GNN | Comportamiento del Solver Híbrido |
+| Level | Definition | Structural Parameters | GNN Pre-conditioning Status | Hybrid Solver Behavior |
 |:---:|:---|:---|:---:|:---|
-| **L0** | **Trivial** | Estructuras de árbol, $\le 4$ nodos, $0$ ciclos. | ✅ **Dominado** | Convergencia instantánea. |
-| **L1** | **Simple** | 1 Ciclo independiente, $\le 6$ nodos. | ✅ **Dominado** | El GNN acierta con alta precisión inicial. |
-| **L2** | **Medium** | 2-3 Ciclos, $\le 10$ nodos. | 🟡 **Avanzado** | Estable, la GNN sirve de excelente pre-condicionador. |
-| **L3** | **Dense** | $>3$ Ciclos, $>10$ nodos (Mallas complejas). | 🟢 **Excelente** | Contraintuitivamente, las densas restricciones del grafo regularizan la red, logrando MAEs bajísimos. |
-| **L4** | **Extremo (OOD)**| Cadenas radiales de $+50$ nodos, resistores $1M\Omega$. | 🟡 **Activo** | El **True Global Virtual Node** implementado en V2.9F es crítico aquí para lograr convergencia matemática sorteando la atenuación espectral. |
+| **L0** | **Trivial** | Tree structures, $\le 4$ nodes, $0$ cycles. | ✅ **Mastered** | Instantaneous convergence. |
+| **L1** | **Simple** | 1 independent cycle, $\le 6$ nodes. | ✅ **Mastered** | High precision initial estimation. |
+| **L2** | **Medium** | 2-3 cycles, $\le 10$ nodes. | 🟡 **Advanced** | Stable; GNN acts as an optimal warm-start. |
+| **L3** | **Dense** | $>3$ cycles, $>10$ nodes (complex meshes). | 🟢 **Excellent** | High interconnectivity enforces dense physical constraints, regularizing the network to exceptionally low MAE. |
+| **L4** | **Extreme (OOD)**| Radial chains ($+50$ nodes), $1M\Omega$ resistors. | 🟡 **Active** | The **True Global Virtual Node** (v2.9F) is critical here to ensure mathematical convergence by mitigating spectral radius decay. |
 
-### Hitos de la Fase 2 (V2.9F)
-- [x] Transición de regresión pura a **Solver Iterativo Híbrido**.
-- [x] Proyección Física determinista post-GNN.
-- [x] Inyección del **Virtual Node** para reducir el diámetro de comunicación en redes largas.
-- [x] Diagnóstico automático por Taxonomía de Fallos Estructurales.
+### Phase 2 (v2.9F) Milestones
+- [x] Paradigm shift from pure regression to **Hybrid Iterative Solver**.
+- [x] Implementation of deterministic post-GNN Physics Projection.
+- [x] Integration of the **Virtual Node** to reduce the communication diameter in high-length radial networks.
+- [x] Implementation of automated Structural Failure Taxonomy diagnostics.
 
 ---
 
-## 🔮 FASE 3: Currículo Autónomo (Roadmap)
+## 🔮 Phase 3: Autonomous Active Learning (Roadmap)
 
-La próxima etapa buscará delegar la gestión del currículo topológico al agente supervisor (Hermes). 
-- El agente analizará los resultados de la *Circuit Arena*.
-- Identificará familias estructurales débiles (ej. Redes en Escalera).
-- Generará automáticamente lotes sintéticos específicos para esa familia y los inyectará en el pipeline de entrenamiento (Active Learning).
+The next evolutionary phase involves delegating topological curriculum management to the supervisory autonomous agent.
+- The agent will continuously monitor structural metrics via the Circuit Arena.
+- It will identify topologically weak families (e.g., Extreme Ladder Networks).
+- It will autonomously synthesize and inject targeted synthetic batches into the training pipeline, closing the Active Learning loop.

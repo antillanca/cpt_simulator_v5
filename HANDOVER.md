@@ -1,59 +1,59 @@
-# CPT Cognitive Engine v2.9F — Master Handover
+# CPT Simulator v2.9F — Executive Handover
 
-> **Current Status (2026-05-18)**: 🚀 **MILESTONE ACHIEVED: V2.9F True Global Virtual Node Projection.**
-> El sistema ha transicionado de un regresor aislado a un **Solver Iterativo Híbrido** neuro-simbólico.
+> **Current Status (May 2026)**: 🚀 **MILESTONE ACHIEVED: v2.9F True Global Virtual Node Projection.**
+> The system has transitioned from an isolated neural regressor to a fully integrated **Hybrid Neuro-Symbolic Iterative Solver**.
 
 ---
 
 ## 🏗️ Architecture: The Hybrid Neuro-Symbolic Stack
 
-CPT es un sistema de inteligencia estructurado en capas que ahora fusiona la velocidad de las Graph Neural Networks (GNN) con la exactitud analítica de los solvers iterativos.
+The CPT Simulator is a layered intelligence system that fuses the sub-millisecond inference speed of Graph Neural Networks (GNNs) with the analytical accuracy of traditional mathematical solvers.
 
-### 1. Layer 0: Core Truth (Oráculo Analítico)
+### 1. Layer 0: Core Truth (Analytical Oracle)
 - **Path**: `backend/circuits/dc_solver.py`
-- **Logic**: Oráculo tradicional basado en Modified Nodal Analysis (MNA). Resuelve los circuitos usando ecuaciones matemáticas exactas para generar el *Ground Truth*.
+- **Logic**: A reference solver utilizing exact Modified Nodal Analysis (MNA). Due to its $O(N^3)$ computational cost, it is employed strictly for ground-truth dataset generation and final error validation, bypassing inference latency.
 
-### 2. Layer 1: GNN Surrogate (Pre-condicionador)
+### 2. Layer 1: GNN Surrogate (Pre-Conditioner)
 - **Path**: `scripts/train_circuit_gnn.py` & `backend/neural/models/circuit_gnn.py`
-- **Logic**: Una red neuronal informada por la física (PINN) que predice un estado de voltaje inicial en fracciones de milisegundo. En V2.9F, esta red actúa como un **Warm-Start** para el solver físico.
+- **Logic**: A Physics-Informed Graph Neural Network (PINN). In the v2.9F paradigm, this network acts as a highly optimized **Warm-Start** pre-conditioner rather than a standalone solver, estimating initial node voltages near-instantaneously.
 
-### 3. Layer 2: Physics Projection (El "Corrector")
+### 3. Layer 2: Physics Projection (Deterministic Corrector)
 - **Path**: `backend/circuits/physics_projection.py`
-- **Logic**: Capa iterativa (estilo Jacobi) que toma la predicción de la GNN y la ajusta para forzar el cumplimiento estricto de las leyes KCL y KVL.
-- **Innovación V2.9F**: Implementa el **True Global Virtual Node**, un nodo virtual que agrega y redistribuye el error global instantáneamente, solucionando los cuellos de botella de convergencia en grafos muy largos (cadenas radiales).
+- **Logic**: A Jacobi-style iterative matrix solver that projects the surrogate's output onto the exact mathematical manifold required by Kirchhoff's laws (KCL/KVL).
+- **v2.9F Innovation**: Implements the **True Global Virtual Node**, an aggregated mathematical construct that redistributes global residual error simultaneously. This structural modification circumvents spectral radius limitations, ensuring rapid convergence across high-diameter graphs (e.g., extensive radial chains).
 
 ---
 
-## 📈 Progression & Metrics (V2.9F)
+## 📈 Progression & Metrics (v2.9F)
 
-- **Currículo Topológico:** Los circuitos se entrenan en orden de dificultad (Trivial, Simple, Medium, Dense).
-- **Taxonomía de Fallos:** El motor ahora diagnostica anomalías físicas (`cycle_drift_failure`, `dense_mesh_leakage`, `bridge_node_instability`).
-- **OOD Stress Suite:** Generadores deterministas de mallas masivas y redes en escalera para estresar los límites de la red (`ood_stress_suite.py`).
+- **Topological Curriculum:** Circuits are injected into the training pipeline according to a rigorous structural difficulty scheduler (Trivial, Simple, Medium, Dense).
+- **Failure Taxonomy:** The analytical engine diagnoses physical anomalies based on topological root causes (e.g., `cycle_drift_failure`, `dense_mesh_leakage`, `bridge_node_instability`).
+- **OOD Stress Suite:** Deterministic generators deploy massive, highly interconnected meshes and extreme ladder networks to empirically evaluate the network's boundary limits (`ood_stress_suite.py`).
 
-| Métrica | Híbrido (Proyección + Nodo Virtual) |
+| Metric | Hybrid Pipeline (Projection + Virtual Node) |
 |:---|:---:|
-| **In-Dist MAE** | Virtualmente $0.0$ |
-| **KCL Max (A)** | $< 1e-6$ |
-| **Iteraciones Solver** | Ultra-Reducidas |
+| **In-Dist MAE** | ~0.0 V |
+| **KCL Max Residual (A)** | $< 1e-6$ |
+| **Solver Iterations** | Minimal |
 
 ---
 
-## 🔮 Next Steps: El Camino a Seguir
+## 🔮 Roadmap: Immediate Objectives
 
-Para los agentes entrantes, el trabajo debe centrarse en:
+Incoming agents and engineers should prioritize the following developmental vectors:
 
-1. **Refinamiento de Pérdida de Newton (Newton-Physics Loss)**: 
-   Integrar cabezales de corrección física auto-correctivos dentro de las capas residuales durante el entrenamiento para forzar el cumplimiento de KCL de forma analítica en el forward pass.
-2. **Escalamiento de Receptividad Temporal**:
-   Investigar cómo usar nodos virtuales a nivel de grafo en la GNN para evitar la atenuación de señal en redes en escalera extremadamente largas (>$100$ etapas).
-3. **Delegación Autónoma (Agente Hermes)**:
-   Configurar a Hermes para monitorear las métricas de la Arena por familia topológica y orquestar sesiones de re-entrenamiento enfocadas en las familias con menor precisión.
+1. **Differentiable Newton-Physics Loss**: 
+   Integrate the self-correcting physical projection heads directly into the residual layers of the GNN during training, enforcing analytical KCL compliance explicitly within the forward pass.
+2. **Temporal Receptive Field Scaling**:
+   Investigate the inclusion of global virtual nodes at the GNN message-passing level to combat signal attenuation in extreme, high-stage ladder networks ($>100$ stages).
+3. **Autonomous Active Learning**:
+   Configure the supervisory agent to continuously parse Circuit Arena topological metrics, automatically orchestrating targeted re-training sessions for structurally weak circuit families.
 
 ---
 
-## 📂 Documentos de Contexto Integral
+## 📂 Comprehensive Documentation Base
 
-Para un entendimiento técnico profundo desde cero hasta la fase actual, **DEBES** leer:
-- 📖 [Guía Comprensiva de Handover para IA (V2.9F)](docs/AGENT_HANDOVER_V29F_COMPREHENSIVE.md)
-- 🔬 [Reporte Científico Oficial V2.9F (Virtual Node)](docs/V29F_VIRTUAL_NODE_PROJECTION.md)
-- 📊 [Reporte Científico V2.9E (Ablación y Topología)](docs/V29E_TOPOLOGY_AWARE_SURROGATE.md)
+To acquire the complete, deep technical context required for development, **MUST READ**:
+- 📖 [Comprehensive AI Handover Guide (v2.9F)](docs/AGENT_HANDOVER_V29F_COMPREHENSIVE.md)
+- 🔬 [Official Scientific Report: Virtual Node Projection (v2.9F)](docs/V29F_VIRTUAL_NODE_PROJECTION.md)
+- 📊 [Scientific Report: Topological Ablation (v2.9E)](docs/V29E_TOPOLOGY_AWARE_SURROGATE.md)

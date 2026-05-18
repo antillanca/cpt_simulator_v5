@@ -1,63 +1,44 @@
-# Contexto — Glosario y Decisiones de Diseño (V2.9F)
+# Glossary and Design Constraints (v2.9F)
 
-> **Resumen**: Conceptos clave del ecosistema **CPT Simulator v5**. Define la terminología fundamental (Leyes Ancla, Oráculo, Subrogado Neuronal, Proyección Física) y documenta las decisiones de diseño arquitectónicas actuales.
+This document formalizes the terminology and design constraints underlying the CPT Simulator v5 ecosystem.
 
 ---
 
-## Glosario de Conceptos Clave
+## 1. Core Terminology
 
-### Leyes Ancla (Invariantes Físicos)
-Principios inquebrantables que ninguna red neuronal puede violar en su estado final. Constituyen la "Física fundamental" del dominio:
-- **KCL (Kirchhoff's Current Law)**: Conservación de carga en cada nodo.
-- **KVL (Kirchhoff's Voltage Law)**: Conservación de energía en ciclos cerrados.
-- **Power Conservation**: Equilibrio entre potencia suministrada y disipada.
+### Physical Invariants (Anchor Laws)
+Mathematical principles that must be strictly satisfied by the final simulation output. The primary invariants are:
+- **Kirchhoff's Current Law (KCL)**: Net current divergence at any node must equal zero.
+- **Kirchhoff's Voltage Law (KVL)**: Directed sum of potential differences across any closed cycle must equal zero.
+- **Power Conservation**: Total supplied power must precisely match total dissipated power.
 
-### Oráculo (Ground Truth)
-El solver analítico tradicional (`dc_solver.py` usando MNA). Es matemáticamente perfecto pero lento ($O(N^3)$). Se usa exclusivamente para generar los datos de entrenamiento y validar la exactitud final del sistema. No se usa en inferencia rápida.
+### Analytical Oracle
+The exact Modified Nodal Analysis (MNA) solver (`dc_solver.py`). Due to its $O(N^3)$ complexity, it is utilized exclusively for generating training targets and evaluating empirical error, rather than inference.
 
-### Subrogado Neuronal (Neural Surrogate)
-Una Red Neuronal de Grafos (`EdgeAwareCircuitGNN`) que aprende a imitar al oráculo. Proporciona predicciones ultrarrápidas ($<1$ ms) de los voltajes de un circuito. Por su naturaleza probabilística, sus salidas puras contienen violaciones a las Leyes Ancla.
+### Neural Surrogate
+A Physics-Informed Graph Neural Network (`EdgeAwareCircuitGNN`) trained to estimate node voltages. Due to its probabilistic nature, raw predictions generally exhibit non-zero residual violations of the physical invariants.
 
-### Proyección Física (Physics Projection)
-Capa iterativa determinista (tipo Jacobi) que toma la predicción del subrogado neuronal y la ajusta para forzar matemáticamente el cumplimiento de KCL y KVL.
+### Physics Projection
+A deterministic iterative matrix solver (Jacobi/SOR variant) that corrects the surrogate's predictions, projecting them onto the physical invariant manifold to enforce strict KCL/KVL compliance.
 
 ### True Global Virtual Node
-Un nodo matemático inyectado únicamente durante la Proyección Física. Promedia el error residual de toda la red y lo redistribuye instantáneamente. Su propósito es romper el cuello de botella del diámetro del grafo en topologías largas (como cadenas radiales), permitiendo convergencia global rápida.
+A mathematical augmentation injected exclusively during the Physics Projection phase. It computes the global mean residual and applies a uniform scalar correction to all nodes simultaneously, reducing the effective graph diameter and ensuring rapid global convergence across adverse topologies (e.g., radial chains).
 
-### Warm-Start Híbrido
-El cambio de paradigma de V2.9F. Consiste en usar al Subrogado Neuronal no como la respuesta final, sino como el punto de partida ideal (pre-condicionador) para el solver de Proyección Física, reduciendo drásticamente las iteraciones necesarias para encontrar la solución perfecta.
-
-### Hermes (Agente de Supervisión)
-El agente IA que vigila el sistema. Su rol es analizar las métricas de rendimiento (ej. fallos en ciertas topologías) y orquestar re-entrenamientos autónomos. No modifica las Leyes Ancla.
+### Hybrid Warm-Start
+The v2.9F architectural paradigm. It leverages the Neural Surrogate not as the final output generator, but as an optimal pre-conditioner for the Physics Projection solver, drastically reducing the required iteration count.
 
 ---
 
-## Decisiones de Diseño Tomadas
+## 2. Architectural Design Decisions
 
-### 1. Separación Neuro-Simbólica
-El sistema divide estrictamente la intuición (red neuronal) del razonamiento riguroso (proyección física determinista). La red adivina rápido, la proyección corrige matemáticamente.
+### 1. Neuro-Symbolic Decoupling
+The architecture strictly isolates neural estimation from mathematical verification. The neural network provides a fast, approximate initialization, while the deterministic projection layer enforces absolute physical constraints.
 
-### 2. Currículo Topológico
-El entrenamiento no se hace alimentando circuitos aleatorios. Se sigue una progresión estructurada (`topology_curriculum.py`) desde lo más fácil (Trivial/Árboles) hasta lo más difícil (Mallas Densas), garantizando que la red neuronal adquiera "conceptos" incrementales.
+### 2. Topological Curriculum
+Training is governed by an explicit mathematical progression (`topology_curriculum.py`) rather than stochastic sampling. The model must master trivial tree structures before progressing to high-density meshes, ensuring stable gradient convergence.
 
-### 3. Normalización Logarítmica
-Para poder manejar resistencias que varían en rangos extremos (OOD, desde $0.1\Omega$ hasta $1M\Omega$), los features numéricos en los grafos se normalizan logarítmicamente. Esto evita la explosión de gradientes y la inestabilidad numérica.
+### 3. Logarithmic Feature Normalization
+To prevent gradient overflow when evaluating Out-Of-Distribution (OOD) scenarios involving extreme resistance magnitudes ($0.1\Omega$ to $1M\Omega$), all structural resistance features undergo strict logarithmic normalization before entering the computational graph.
 
-### 4. Diagnóstico Basado en Causa Raíz
-Cuando una inferencia falla, el error no se reporta solo como un número (MSE). El sistema analiza la topología y clasifica el error estructuralmente (`cycle_drift_failure`, `dense_mesh_leakage`, `bridge_node_instability`) facilitando la corrección algorítmica.
-
----
-
-## Estado de Implementación (Fase V2.9F)
-
-### Existe y es funcional
-- `backend/circuits/dc_solver.py` — Oráculo MNA perfecto.
-- `backend/neural/models/circuit_gnn.py` — Subrogado GNN (EdgeAwareCircuitGNN).
-- `backend/circuits/physics_projection.py` — Corrector iterativo con el **True Global Virtual Node**.
-- `backend/circuits/topology_curriculum.py` — Scheduler de dificultad topológica.
-- `scripts/train_circuit_gnn.py` — Pipeline de entrenamiento PINN.
-- `scripts/run_circuit_arena.py` — Evaluador científico segregado por familias de circuitos.
-
-### Próximos Desafíos
-1.  **Refinamiento Diferenciable**: Mover la corrección de Newton/Jacobi hacia adentro del grafo computacional de PyTorch durante el entrenamiento, para que la red neuronal aprenda a predecir derivadas exactas.
-2.  **Autonomía Total**: Conectar el output taxonómico de fallos con el input de generación de Hermes para crear un bucle cerrado de aprendizaje activo infinito (Active Learning).
+### 4. Root-Cause Topological Diagnosis
+Evaluation extends beyond aggregated Mean Squared Error (MSE). The `failure_analysis.py` module classifies non-convergent instances by their underlying structural topology (e.g., `cycle_drift_failure`, `dense_mesh_leakage`), directing targeted dataset generation.
