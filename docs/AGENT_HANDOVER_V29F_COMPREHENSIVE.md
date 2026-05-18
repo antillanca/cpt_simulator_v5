@@ -1,89 +1,143 @@
-# 🧠 AGENT HANDOVER: CPT Simulator v5 (V2.9F Comprehensive Guide)
+# CPT v2.14 — Agent Handover Document
 
-**Date of Handover:** May 17, 2026
-**Target Audience:** Next AI Agent taking over development.
-
-¡Hola, Agente! Este documento está diseñado para darte **todo el contexto desde cero** sobre qué es este proyecto, cómo funciona internamente, dónde están los archivos clave y en qué punto exacto debes continuar trabajando. Lee esto y estarás listo para codificar sin tener que escanear todo el repositorio.
+## Current Version: v2.14
+## Status: COMPLETE — All 11 phases delivered, 214/214 tests passing
 
 ---
 
-## 1. 🚀 ¿Qué es el CPT Simulator v5?
+## COMPLETED VERSIONS
 
-El objetivo principal del proyecto es crear un **Subrogado Neuronal (Neural Surrogate)** para simulaciones de circuitos eléctricos de corriente continua (DC). 
+### v2.11 — Core Standardization
+- RuntimeTask, RuntimeResult, RuntimeExecutor
+- Oracle/Surrogate/Projection/Evaluator protocols
+- MNAOracleAdapter, SurrogateRuntime
+- ProjectionRuntime with KCL/KVL enforcement
+- MemoryRuntime with atomic persistence
+- ExecutionTrace + TraceStore
+- DatasetManifest + DatasetRegistry
 
-**El problema:** Los simuladores tradicionales (oráculos como SPICE) resuelven grandes sistemas de matrices (Modified Nodal Analysis - MNA). Esto es lento y computacionalmente costoso $O(N^3)$.
-**La solución:** Entrenar una Graph Neural Network (GNN) que tome un circuito (nodos y componentes) y prediga casi instantáneamente los voltajes de los nodos.
+### v2.12 — Runtime Integration
+- Full pipeline: task → oracle → surrogate → projection → evaluation → memory
+- EvaluationReport with MAE/KCL/KVL metrics
+- E2E test coverage
 
-Sin embargo, las redes neuronales a menudo violan las leyes físicas elementales. Por lo tanto, nuestra arquitectura impone restricciones físicas: **Ley de Corrientes de Kirchhoff (KCL)**, **Ley de Voltajes de Kirchhoff (KVL)** y **Conservación de la Energía (Power)**.
+### v2.13 — Resilient Runtime
+- ExactMatchCache with SHA-256 canonical hashing
+- ExecutionPolicy + RecoveryHandler
+- ConfidenceRuntime (heuristic estimation)
+- CapabilityRouter (5 routing actions)
+- Atomic memory persistence (fsync + os.replace)
+- CompactMemoryStore utility
 
----
-
-## 2. 🧬 La Evolución hasta V2.9F: El Cambio de Paradigma
-
-Hemos pasado por muchas fases de ablación y ajuste. Lo más importante que debes saber de la fase actual (**V2.9F**) es que **hemos cambiado nuestra filosofía científica**.
-
-Ya NO estamos intentando que la GNN prediga voltajes perfectos por sí sola (regresión pura). Ahora concebimos el sistema como un **Solver Iterativo Híbrido (Warm-Start Solver)**.
-1. La **GNN** hace una predicción inicial rápida.
-2. Una capa determinista de **Proyección Física** ajusta esos voltajes iterativamente para forzar el cumplimiento de KCL y KVL.
-3. Descubrimiento V2.9F: Las iteraciones locales (tipo Jacobi/SOR) son muy lentas para propagar correcciones en grafos muy largos (ej. cadenas radiales). Para solucionar esto, inventamos el **True Global Virtual Node**, un nodo virtual en la capa de proyección que promedia el error global y lo redistribuye instantáneamente, reduciendo el "diámetro de comunicación" del grafo.
-
----
-
-## 3. 📂 Arquitectura del Código y Rutas Clave (Dónde está qué)
-
-El repositorio está altamente modularizado. Aquí tienes el mapa mental exacto:
-
-### 🧠 Modelos Core & Grafo
-*   **`backend/circuits/models.py`**: Define las clases puras de Python (`Circuit`, `Resistor`, `VoltageSource`, `CurrentSource`). Los nodos de tierra siempre se normalizan a `"0"`.
-*   **`backend/circuits/graph_dataset.py`**: Convierte los circuitos en grafos de PyTorch Geometric (`CircuitGraph`). Extrae dimensiones de nodos/edges dinámicamente y aplica normalización logarítmica a las resistencias extremas.
-*   **`backend/circuits/dc_solver.py`**: El "Oráculo" tradicional. Resuelve los circuitos usando ecuaciones matemáticas exactas para generar el "Ground Truth" (los voltajes reales a aprender).
-
-### 🎓 Entrenamiento y Currículo (V2.9E)
-*   **`scripts/train_circuit_gnn.py`**: El script principal de entrenamiento. Instancia la `EdgeAwareCircuitGNN`.
-*   **`backend/circuits/topology_curriculum.py`**: Clasifica los circuitos por dificultad (Trivial, Simple, Medium, Dense). El entrenamiento empieza con circuitos fáciles y desbloquea los difíciles progresivamente.
-*   **`backend/circuits/losses.py`** & **`physics_loss.py`**: Definen las funciones de pérdida que penalizan a la red neuronal si sus predicciones violan KCL o KVL.
-
-### 🔬 Proyección Física y Solver (Lo nuevo en V2.9F)
-*   **`backend/circuits/physics_projection.py`**: **CRÍTICO**. Contiene la lógica del solver iterativo (tipo Jacobi) post-GNN y la implementación del `VirtualNodeProjection` que soluciona los cuellos de botella en cadenas radiales.
-*   **`backend/circuits/warmstart_eval.py`**: Un experimento científico que prueba que usar las predicciones de la GNN reduce drásticamente el número de iteraciones necesarias para que un oráculo tradicional converja.
-
-### 🧪 Evaluación y Diagnósticos
-*   **`scripts/run_circuit_arena.py`**: El "Arena" de evaluación. Compara modelos base contra la GNN en métricas In-Distribution (IID) y Out-Of-Distribution (OOD). Produce reportes segmentados por familia topológica.
-*   **`backend/circuits/failure_analysis.py`** & **`structural_failure_analysis.py`**: Diagnostican exactamente por qué falló una predicción (ej. `cycle_drift_failure`, `dense_mesh_leakage`).
-*   **`backend/circuits/ood_stress_suite.py`**: Generadores deterministas de circuitos pesadillescos (mallas masivas, escaleras larguísimas) para estresar los límites de la red.
+### v2.14 — Retrieval Memory, Semantic Warm-Start & Cost Estimation
+- RetrievalMemory (deterministic, SHA-256 indexed, atomic persistence)
+- EmbeddingRuntime (GNN latent extraction, inference-only)
+- FaissRuntime (IndexFlatIP, NaN rejection, exact cache priority)
+- WarmstartRuntime (accepted only if residual improves)
+- CostEstimator (heuristic, 5 difficulty levels)
+- ProjectionExperienceMemory (convergence behavior storage)
+- CapabilityRouter v2.14 (7 routing actions, retrieval + cost aware)
+- Benchmark v2.14 (11 new metrics)
 
 ---
 
-## 4. 🛠️ Comandos Esenciales de Trabajo
+## ACTIVE STATE
 
-Como agente, querrás validar constantemente que tus cambios no rompen la física ni la lógica implementada. Todo está bajo cobertura de tests:
-
-**Para correr toda la suite de pruebas V2.9E y V2.9F (Lo más importante):**
-```bash
-pytest tests/test_v29e_*.py tests/test_v29f_*.py -v
-```
-
-**Para correr el experimento de Warm-Start (reducción de iteraciones):**
-```bash
-python -m backend.circuits.warmstart_eval --steps 5 --perturbation 1.5
-```
-
-**Para correr la evaluación completa (Arena):**
-```bash
-python scripts/run_circuit_arena.py
-```
+- **Directory**: `/home/john/www/cpt_simulator_v5`
+- **Git**: branch `master`, commit `191795d`
+- **Tests**: 214/214 passing (0 failures)
+  - test_v211: core standardization
+  - test_v212: runtime integration
+  - test_v213: resilient runtime
+  - test_v214: retrieval memory + warmstart + cost
+- **FAISS**: installed (v1.13.2, CPU)
+- **Hash Schema**: "v1" (via task_hashing.py)
 
 ---
 
-## 5. 🎯 ¿Qué sigue? (Tu Misión / Próximos Pasos)
+## MEMORY LAYERS (STRICTLY SEPARATED)
 
-El entorno V2.9F está **completamente implementado, testeado y estable**. Tu misión, al tomar el control, debe orientarse a las siguientes tareas estratégicas:
+| Layer      | Package          | Contents                                      |
+|------------|------------------|-----------------------------------------------|
+| Knowledge  | `core_spec`      | Frozen specs, failure taxonomy, contracts     |
+| Memory     | `core_runtime`   | Exact executions, JSONL traces, deterministic |
+| Experience | `runtime`        | Embeddings, similarity retrieval, warm-start  |
 
-1.  **Refinamiento de Pérdida de Newton (Newton-Physics Loss)**:
-    Actualmente el proyector de física (`physics_projection.py`) es determinista y ocurre *después* de la predicción de la GNN. El siguiente paso es crear "Cabezales de Corrección Física" auto-correctivos (capas residuales) que intenten forzar KCL analíticamente **dentro del propio pipeline de entrenamiento** (durante el forward pass) de forma diferenciable.
-2.  **Escalamiento de Receptividad Temporal para Escaleras Extremas**:
-    Las redes en escalera muy largas (ej. $>100$ etapas) aún sufren atenuación de señal en el paso de mensajes de la GNN. Podrías investigar cómo introducir "nodos virtuales" (virtual nodes) **a nivel de grafo en la GNN** (no solo en la capa de proyección) o conexiones *highway* para que la información fluya extremo a extremo en menos capas.
-3.  **Delegación Autónoma (Agente Hermes)**:
-    El sistema ya cuenta con reportes taxonómicos de fallo súper ricos (`failure_analysis.py`). Se debe configurar al agente "Hermes" para que lea esos fallos en tiempo real y orqueste sesiones automáticas de re-entrenamiento enfocadas *únicamente* en las familias de circuitos donde el subrogado está fallando (Active Learning automatizado).
+---
 
-**¡Bienvenido a bordo! El estado actual es prístino y científicamente validado. Confía en las pruebas automatizadas y en este documento como tu única fuente de verdad funcional.**
+## KEY ARCHITECTURAL DECISIONS
+
+1. **Exact cache ALWAYS first** — FAISS retrieval only after cache miss
+2. **Projection is final authority** — warmstart NEVER bypasses projection
+3. **Degraded executions NEVER stored in retrieval** — no contamination
+4. **NaN embeddings NEVER added to FAISS** — safety guarantee
+5. **All routing 100% deterministic** — no ML routing yet
+6. **Float32 canonicalization before hashing** — determinism across hardware
+7. **Atomic persistence everywhere** — temp → fsync → replace
+
+---
+
+## ROUTING ACTIONS (v2.14)
+
+| Priority | Action               | Condition                          |
+|----------|----------------------|------------------------------------|
+| 1        | exact_cache_hit      | SHA-256 cache match                |
+| 2        | degraded_execution   | Runtime failure detected           |
+| 3        | oracle_verification  | Repeated failure topology (≥3)     |
+| 4        | increased_budget     | OOD, no warmstart                  |
+| 5        | warmstart_projection | High similarity (≥0.5)             |
+| 6        | semantic_retrieval   | Moderate similarity (≥0.3)         |
+| 7        | standard_projection  | Default                            |
+
+---
+
+## FILES (v2.14 additions)
+
+### New (backend/runtime/)
+- `__init__.py` — Package exports
+- `retrieval_memory.py` — RetrievalEntry, RetrievalMemory
+- `embedding_runtime.py` — EmbeddingResult, extract_graph_embedding
+- `faiss_runtime.py` — FaissRuntime, TopKSimilarityResult
+- `warmstart_runtime.py` — WarmstartRuntime, WarmStartResult
+- `cost_estimator.py` — CostEstimator, ExecutionCostEstimate
+- `projection_experience.py` — ProjectionExperienceMemory, ProjectionExperienceEntry
+
+### Updated
+- `core_runtime/capability_router.py` — 7 routing actions (was 5)
+- `core_runtime/__init__.py` — Updated exports
+- `scripts/run_runtime_benchmark.py` — v2.14 metrics
+- `tests/test_v213_resilient_runtime.py` — Action name migration
+
+### Docs
+- `docs/V214_RETRIEVAL_MEMORY_RUNTIME.md` — Full architecture doc
+
+### Tests
+- `tests/test_v214_retrieval_memory.py` — 73 new tests
+
+---
+
+## REMAINING WORK (Future Roadmap)
+
+| Phase | Feature                        | Depends On                    |
+|-------|--------------------------------|-------------------------------|
+| v2.15 | LoRA experts per topology      | ProjectionExperience data     |
+| v2.16 | Replay learning from experience| Warmstart + Experience data   |
+| v2.17 | Adaptive projection schedulers | Cost estimation feedback      |
+| v2.18 | Multi-domain runtime           | Domain-agnostic architecture  |
+| v2.19 | FAISS IVF index (scaling)      | Large-scale retrieval (>100K) |
+| v2.20 | Continual learning loop        | All of the above              |
+
+---
+
+## CONSTRAINTS FOR FUTURE AGENTS
+
+1. DO NOT modify GNN architecture or projection equations
+2. DO NOT mix Knowledge/Memory/Experience layers
+3. DO NOT introduce stochastic inference (no dropout at runtime)
+4. DO NOT replace exact cache with FAISS (they coexist)
+5. DO NOT cache degraded executions as valid hits
+6. ALL retrieval decisions MUST remain deterministic
+7. Maintain frozen=True on all result dataclasses
+8. Use SHA-256 for all hashing (no MD5, no SHA-1)
+9. Atomic persistence: temp → fsync → os.replace
+10. Test before commit: 214/214 must pass
