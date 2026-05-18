@@ -1,241 +1,133 @@
-# 🛡️ CPT Cognitive Engine v2.5 — Documento de Contexto Maestro
+# CPT Simulator v2.9F — Master Handover Document
 
-> **Propósito de este documento**: Transferir el contexto completo del proyecto a cualquier IA o desarrollador que lo retome. Al leerlo, debe ser posible entender qué hace el sistema, por qué se diseñó así, cuál es su estado actual y cuál es el siguiente paso.
-
----
-
-## 🎯 ¿Qué es el CPT Cognitive Engine?
-
-CPT es un **motor de razonamiento neuro-simbólico** construido desde cero. No es un LLM ajustado. Es un sistema que construye conocimiento de manera incremental, partiendo de axiomas matemáticos y físicos verificables, y los combina con redes neuronales diminutas para producir intuiciones rápidas y seguras.
-
-### El Problema que Resuelve
-
-Los LLMs grandes alucina porque internalizaron estadística del lenguaje, no física ni lógica verificable. CPT resuelve esto al revés:
-
-1. **Primero construye la física**: Un sandbox determinista ejecuta las leyes reales del universo.
-2. **Luego entrena intuiciones encima**: Redes neuronales pequeñas aprenden patrones de las simulaciones físicas.
-3. **La IA solo puede razonar dentro de lo que la física permite**: Si la red sugiere algo físicamente imposible, el verificador lo rechaza antes de que ocurra.
-
-### El Objetivo Final
-
-Crear un modelo exportable en formato **`.gguf`** (compatible con llama.cpp, ejecutable en teléfonos y hardware embebido) que no alucine porque su conocimiento proviene de simulaciones matemáticas exactas, no de texto de internet.
+> **Purpose**: Transfer comprehensive project context to any incoming developer or AI agent. This document outlines the system architecture, design rationale, current state, and immediate next steps for the CPT Simulator v5.
 
 ---
 
-## 🏗️ Arquitectura en Capas (CPT v2.5)
+## 🎯 Project Scope
 
-El sistema tiene una jerarquía estricta de confianza. Las capas inferiores son absolutamente autoritativas:
+The CPT Simulator is a hybrid iterative solver designed for DC electrical circuit simulation. It implements a Physics-Informed Graph Neural Network (PINN-GNN) as a fast pre-conditioner (warm-start) for a deterministic analytical solver, effectively bypassing the $O(N^3)$ computational cost of traditional Modified Nodal Analysis (MNA) while guaranteeing strict adherence to physical conservation laws.
 
-```
-┌──────────────────────────────────────────────────┐
-│  4. Hermes / LLMs externos   (tooling solamente) │  ← Sugiere, nunca aprueba
-├──────────────────────────────────────────────────┤
-│  3. StudentEngine / Planificador A*              │  ← Razona dentro de límites
-├──────────────────────────────────────────────────┤
-│  2. Filtros Neuronales Tabulares (PyTorch .pt)   │  ← Intuición rápida, validada
-├──────────────────────────────────────────────────┤
-│  1. Verifiers / Invariantes Simbólicos           │  ← Árbitro matemático
-├──────────────────────────────────────────────────┤
-│  0. Core Truth / Sandbox Lua  ← FUENTE DE VERDAD │  ← Absolutamente determinista
-└──────────────────────────────────────────────────┘
-```
+### The Problem
 
-### Capa 0: Core Truth (`backend/core_truth/`)
-- **Qué es**: Motor de simulación determinista escrito en Lua 5.4, ejecutado dentro de contenedores Docker sin red ni permisos de escritura.
-- **Qué contiene**: El simulador de partículas, el currículo de conocimiento (`modules.json`), y el punto de entrada para ejecutar reglas físicas verificadas.
-- **Regla clave**: **Nada por encima puede modificar esta capa sin revisión humana.**
-- **Archivos clave**: `backend/core_truth/sandbox.py`, `backend/core_truth/modules.json`, `sandbox/lua/sandbox_runner.lua`
+Traditional iterative solvers (such as Jacobi or Successive Over-Relaxation) suffer from catastrophic slowdowns on high-diameter graphs (e.g., long radial chains or extensive ladder networks) because their spectral radius approaches 1. Conversely, pure neural network regressors cannot guarantee strict physical invariants (KCL/KVL) without extensive and often unstable penalty tuning.
 
-### Capa 1: Verifiers (`backend/verifiers/`)
-- **Qué es**: Sistema de invariantes físicos. Verifica que cualquier traza de simulación cumple con leyes como la conservación de energía o del momentum.
-- **Invariantes disponibles**: `energy_conservation`, `momentum_conservation`, `logic_basic`
-- **Uso**: `verify_simulation(trace, invariant_set)` → devuelve `{passed, violations, metrics}`
-- **Regla clave**: Ningún modelo neural o regla Lua es aceptado sin pasar primero por aquí.
+### The Solution (v2.9F Paradigm)
 
-### Capa 2: Filtros Neuronales Tabulares (`models/*.pt`)
-- **Qué son**: Redes neuronales mínimas de PyTorch (arquitectura `input → 32 → 16 → 1`), una por dominio de conocimiento.
-- **Cómo se entrenan**: El sandbox genera millones de escenarios. Los datos se suben a Kaggle para entrenamiento en la nube. El `.pt` resultante se descarga.
-- **Modelos ya entrenados**:
-  - `logic_tabular_filter.pt` — Principios lógicos aristotélicos
-  - `geometry_tabular_filter.pt` — Geometría euclidiana
-  - `numeric_tabular_filter.pt` — Aritmética y representación numérica
-  - `proportion_tabular_filter.pt` — Ratios y porcentajes
-  - `algebra_tabular_filter.pt` — Álgebra básica
-  - `function_tabular_filter.pt` — Funciones matemáticas
-  - `vector_tabular_filter.pt` — Vectores y descomposición
-  - `trig_tabular_filter.pt` — Trigonometría
-  - `newton_tabular_filter.pt` — Mecánica newtoniana
-  - `action_tabular_filter.pt` — Navegación y movimiento básico
-
-### Capa 3: Planificador A* y StudentEngine
-- **Planificador A***: Usa los filtros neurales como heurística de poda. Si el filtro considera una acción física inviable, se descarta antes de explorarla.
-- **StudentEngine** (`backend/ai/student_engine.py`): Un agente local (Qwen3 via Ollama) que propone código Lua para módulos de alta abstracción. Usa un ciclo de intento-error-reintento (máx 5 intentos). **Toda propuesta de código pasa por el Sandbox y los Verifiers antes de aceptarse.**
-
-### 🤖 El Papel de Hermes (Tooling Asistido e Interactivo)
-Hermes actúa como asistente de tooling experto. Para garantizar la seguridad sin sacrificar la agilidad, hemos implementado un sistema de **Aprobación Interactiva por Telegram**:
-- Si Hermes detecta un error y propone un parche en un archivo protegido, el orquestador enviará una notificación con botones de **[Aprobar]** y **[Rechazar]**.
-- El orquestador esperará tu respuesta (polling de 60s) antes de proceder.
-- Una vez aprobado desde Telegram, Hermes aplica el parche y el entrenamiento continúa automáticamente.
-- Hermes NO puede modificar `core_truth`, `verifiers` ni `invariants`. Tampoco puede hacer merge automático.
-- `backend/tooling/permissions.py` implementa una lista explícita de acciones permitidas y denegadas. Los parches que afectan rutas protegidas requieren la variable de entorno `CPT_HERMES_HUMAN_APPROVAL=1`.
-- **Modelo usado**: `meta-llama/llama-3.3-70b-instruct:free` via OpenRouter (gratuito).
+The v2.9F architecture resolves this dichotomy through a hybrid approach:
+1. **Neural Pre-Conditioning**: The GNN predicts a highly accurate initial voltage state in sub-millisecond time.
+2. **Deterministic Physics Projection**: An iterative correction layer forces the neural prediction to comply with Kirchhoff's laws.
+3. **True Global Virtual Node**: A mathematical construct injected during projection that simultaneously aggregates and redistributes global residual error, reducing the effective graph communication diameter to 1 and ensuring rapid convergence regardless of the underlying topology.
 
 ---
 
-## 🔄 El Orquestador de Entrenamiento (`scripts/training_orchestrator.py`)
+## 🏗️ Architecture Stack
 
-El entrenamiento es completamente autónomo. El orquestador sigue este ciclo:
+The system implements a strict, multi-stage resolution pipeline:
 
-```
-┌─ Leer modules.json ──────────────────────────────────────────┐
-│                                                               │
-│  ¿Hay módulos "pending"?  →  NO  →  🏁 CURRRÍCULO COMPLETO   │
-│           │                                                   │
-│           ↓ SÍ                                               │
-│                                                               │
-│  ¿engine_type == "tabular"?                                  │
-│    → Ejecutar fábrica DPO (planner/*_automation.py)          │
-│    → Subir dataset a Kaggle, entrenar, descargar .pt         │
-│    → Correr verificación de invariantes en Sandbox           │
-│    → ✅ CONFIRMAR módulo  |  ❌ Llamar a Hermes              │
-│                                                               │
-│  ¿engine_type == "lua"?                                      │
-│    → StudentEngine genera código Lua (hasta 5 intentos)      │
-│    → Ejecutar en Sandbox, recolectar traza                   │
-│    → Verificar contra invariants[] del módulo                │
-│    → ✅ CONFIRMAR módulo  |  ❌ Llamar a Hermes              │
-│                                                               │
-│  Hermes: propone parche → PAUSA → Espera aprobación humana   │
-└───────────────────────────────────────────────────────────────┘
-```
+### 1. Ground Truth Oracle (`backend/circuits/dc_solver.py`)
+- **Role**: The absolute baseline for correctness. It uses exact analytical MNA to solve circuits.
+- **Usage**: Used exclusively during dataset generation and final validation, not during inference.
 
-**Notificaciones**: Cada evento relevante (inicio, confirmación, error, intervención de Hermes) se envía como alerta a Telegram via `backend/notifier.py`.
+### 2. GNN Surrogate (`backend/neural/models/circuit_gnn.py`)
+- **Role**: An `EdgeAwareCircuitGNN` trained under PINN constraints.
+- **Features**: Processes dynamic topological features and applies logarithmic normalization to resistance values to ensure numerical stability and prevent gradient explosion in Out-Of-Distribution (OOD) scenarios.
+
+### 3. Physics Projection Layer (`backend/circuits/physics_projection.py`)
+- **Role**: A deterministic, Jacobi-style iterative corrector.
+- **Mechanism**: Takes the surrogate's output and iteratively minimizes KCL/KVL residuals.
+- **Virtual Node Integration**: Employs the `VirtualNodeProjection` to guarantee uniform global convergence.
 
 ---
 
-## 📊 Estado Actual del Currículo (May 2025)
+## 🧠 Topological Curriculum and Diagnostics
 
-- **Total de módulos**: 43
-- **Confirmados** ✅: 36 (84%)
-- **Pendientes** ⏳: 6 (14%)
+### Structural Progression (`topology_curriculum.py`)
+Training data is not uniformly sampled. The system follows a deterministic topological curriculum to prevent learning collapse:
+- **Trivial**: Tree structures, $\le 4$ nodes, 0 independent cycles.
+- **Simple**: 1 independent cycle, $\le 6$ nodes.
+- **Medium**: 2-3 cycles, $\le 10$ nodes.
+- **Dense**: $> 3$ cycles, $> 10$ nodes.
 
-### Módulos pendientes (bloqueando el avance):
-|| Nivel | Módulo | Materia | Problema conocido ||
-||:---:|:---|:---|:---||
-|| 13 | `waves_frequency_amplitude` | Ondas | Sin código Lua ||
-|| 14 | `magnetism_lorentz_force` | Magnetismo | Fuerza de Lorentz incorrecta (1 rechazo) ||
-|| 23 | `lagrangian_mechanics` | Lagrangiano | Sin código Lua ||
-|| 25 | `electromagnetism_maxwell` | EM | Error de compilación Lua (1 rechazo) ||
-|| 28 | `quantum_mechanics_wavefunction` | Cuántica | Sin código Lua ||
-|| 34 | `quantum_double_slit_logic` | Cuántica | Sin código Lua ||
-
-**Recientes**: `energy_potential`, `energy_conservation` (nivel 12) y `waves_oscillation` (nivel 13) confirmados por owl-alpha.
+### Failure Taxonomy (`failure_analysis.py`)
+Residual errors are structurally classified rather than simply aggregated as Mean Squared Error (MSE):
+- `cycle_drift_failure`: KCL violations localized within closed loops.
+- `dense_mesh_leakage`: Signal attenuation across highly interconnected nodes.
+- `bridge_node_instability`: Iterative divergence across critical path bottlenecks.
 
 ---
 
-## 🗺️ ROADMAP
+## 📊 Current State (May 2026)
 
-### Fase actual — Fase 1: Completar el Motor de Verdad
-Completar los 9 módulos Lua pendientes. Una vez que `energy_conservation` pase los verificadores, el agente dominará desde lógica aristotélica hasta mecánica ondulatoria.
+The project has successfully transitioned from Phase 1 (Symbolic domain knowledge acquisition) to Phase 2 (Structural topological mastery).
 
-### Fase 1.5 — Expansión del Currículo
-Ampliar `modules.json` con nuevas disciplinas que heredan de las bases existentes:
-- **Programación**: Variables, bucles, algoritmos (hereda de Álgebra e Inglés)
-- **Electrónica**: Compuertas, transistores, circuitos (hereda de Electromagnetismo y Lógica)
-
-### Fase 2 — Generación de Dataset Sintético
-El motor CPT actúa como "oráculo": un LLM le hace preguntas condicionales y CPT responde ejecutando simulaciones. Se genera un dataset masivo de razonamiento paso a paso con alta pureza factual.
-
-### Fase 3 — Destilación a `.gguf`
-Fine-tuning (LoRA/SFT) de un modelo base de 1B–3B parámetros usando el dataset de la Fase 2. Exportar en formato `.gguf` para correr en llama.cpp, teléfonos o hardware embebido. El modelo final tiene el razonamiento físico internalizado en sus pesos, sin necesidad de un simulador en tiempo real.
+| Metric | Baseline GNN | Hybrid Pipeline (GNN + Virtual Node) |
+| :--- | :---: | :---: |
+| **In-Dist MAE** | ~15.44 V | **~0.0 V** |
+| **KCL Max Residual** | ~0.275 A | **$< 1e-6$ A** |
+| **Solver Iterations** | High | **Minimal** |
 
 ---
 
-## 📂 Mapa de Archivos Críticos
+## 🗺️ Roadmap & Immediate Next Steps
+
+Incoming agents and developers should focus on the following core challenges:
+
+1. **Differentiable Newton-Physics Loss**:
+   Embed the physics correction heads directly into the GNN's residual layers during the forward pass. This forces the network to learn exact analytical derivatives during training, moving the correction from a post-processing step to an intrinsic neural property.
+
+2. **Temporal Receptive Field Scaling**:
+   Investigate the injection of global virtual nodes *within the GNN message-passing phase* (not just the projection layer) to combat signal attenuation in extreme ladder networks ($>100$ stages).
+
+3. **Autonomous Active Learning via Hermes**:
+   Integrate the topological failure taxonomy output with the dataset generator. The Hermes agent should monitor the `run_circuit_arena.py` metrics and automatically orchestrate targeted training sessions for the weakest topological families.
+
+---
+
+## 📂 Critical File Map
 
 ```
 cpt_simulator_v5/
-│
 ├── backend/
-│   ├── core_truth/              ← 🔒 PROTEGIDO — Fuente de verdad
-│   │   ├── modules.json         ← Currículo completo (43 módulos)
-│   │   └── sandbox.py           ← API Python del sandbox Docker/Lua
-│   ├── verifiers/               ← 🔒 PROTEGIDO — Árbitros matemáticos
-│   │   ├── simulation.py        ← verify_simulation(trace, invariant_set)
-│   │   └── invariants/          ← energy, momentum, logic
-│   ├── tooling/                 ← Hermes y permisos
-│   │   ├── hermes.py            ← IntelligentToolingAssistant
-│   │   └── permissions.py       ← PermissionPolicy (allowlist/denylist)
-│   ├── ai/
-│   │   ├── student_engine.py    ← Qwen3 local → propone Lua → valida
-│   │   └── tutor_engine.py      ← Cascada de LLMs avanzados (OpenRouter)
-│   └── notifier.py              ← Alertas a Telegram
+│   ├── circuits/
+│   │   ├── dc_solver.py                ← Analytical oracle
+│   │   ├── graph_dataset.py            ← Feature engineering & log-normalization
+│   │   ├── physics_projection.py       ← Virtual Node Projection layer
+│   │   ├── topology_curriculum.py      ← Difficulty scheduler
+│   │   ├── failure_analysis.py         ← Topological error classifier
+│   │   └── warmstart_eval.py           ← Hybrid solver evaluation
+│   └── neural/
+│       └── models/
+│           └── circuit_gnn.py          ← PINN-GNN Architecture
 │
 ├── scripts/
-│   └── training_orchestrator.py ← 🎛️ Director maestro del entrenamiento
+│   ├── train_circuit_gnn.py            ← Training orchestrator
+│   └── run_circuit_arena.py            ← Scientific benchmarking suite
 │
-├── planner/
-│   └── *_automation.py          ← Fábricas DPO por dominio (Kaggle)
+├── docs/
+│   ├── AGENT_HANDOVER_V29F_COMPREHENSIVE.md  ← Extended context for AI
+│   └── V29F_VIRTUAL_NODE_PROJECTION.md       ← Official scientific report
 │
-├── models/
-│   └── *.pt                     ← Filtros neurales entrenados
-│
-├── sandbox/lua/
-│   └── sandbox_runner.lua       ← Intérprete Lua hardened (Docker)
-│
-└── docs/
-    ├── ARCHITECTURE_V25.md      ← Separación de capas y modelo de confianza
-    ├── CHANGELOG_HERMES.md      ← Registro de intervenciones de Hermes
-    └── ESTADO_CURRICULO.md      ← Estado de los 43 módulos
+└── tests/
+    ├── test_v29f_virtual_projection.py ← Projection stability verification
+    └── test_v29f_warmstart.py          ← Warm-start reduction tests
 ```
 
 ---
 
-## ⚙️ Variables de Entorno Requeridas
+## ⚙️ Operational Commands
 
+**Execute validation and stability test suites:**
 ```bash
-# Credenciales de Kaggle para entrenar modelos en la nube
-KAGGLE_USERNAME=...
-KAGGLE_KEY=...
-
-# API de OpenRouter para Hermes y el TutorEngine (usar modelos free primero)
-OPENROUTER_API_KEY=...
-
-# Bot de Telegram para notificaciones
-TELEGRAM_BOT_TOKEN=...
-TELEGRAM_CHAT_ID=...
-
-# Para aprobar parches sensibles de Hermes manualmente
-CPT_HERMES_HUMAN_APPROVAL=0   # Cambiar a "1" para autorizar un parche
+pytest tests/test_v29e_*.py tests/test_v29f_*.py -v
 ```
 
----
-
-## 🚦 Cómo Continuar el Entrenamiento
-
+**Run the warm-start scientific evaluation:**
 ```bash
-# Desde el directorio raíz del proyecto
-cd /home/john/www/cpt_simulator_v5
-
-# Ejecutar en background con logs
-nohup python3 scripts/training_orchestrator.py > training_full.log 2>&1 &
-
-# Monitorear en tiempo real
-tail -f training_full.log
-
-# Ver el estado del currículo
-cat docs/ESTADO_CURRICULO.md
-
-# Revisar intervenciones de Hermes
-cat docs/CHANGELOG_HERMES.md
+python -m backend.circuits.warmstart_eval --steps 5 --perturbation 1.5
 ```
 
----
-
-## 🧠 Principios de Diseño (NO negociables)
-
-1. **El Sandbox es la única verdad**. Si el sandbox dice que algo viola la física, se rechaza sin excepción.
-2. **Los LLMs son herramientas, no autoridades**. Proponen, el verificador matemático aprueba.
-3. **Todo modelo neural debe superar invariantes antes de ser confirmado**. No existe "funciona porque no crasheó".
-4. **Los parches de IA a código sensible requieren aprobación humana explícita**. Sin merge automático.
-5. **El entrenamiento es incremental y dependiente**. No se puede aprender mecánica cuántica sin dominar antes la conservación de energía.
+**Execute the segregated Circuit Arena benchmark:**
+```bash
+python scripts/run_circuit_arena.py
+```
