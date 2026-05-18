@@ -1,31 +1,35 @@
 #!/usr/bin/env python3
-"""CPT v2.13 — Canonical Runtime Benchmark Runner.
+"""CPT v2.14 — Canonical Runtime Benchmark Runner.
 
 The NEW standard benchmark runner. Executes the full runtime pipeline:
  task -> oracle -> surrogate -> projection -> evaluation -> memory
 
-v2.13 adds:
- - ExactMatchCache integration (cache_hit_rate)
- - ConfidenceRuntime estimation (confidence_calibration)
- - CapabilityRouter decisions (routing distribution)
- - RecoveryHandler tracking (degraded_execution_rate)
- - Atomic memory persistence
+v2.14 adds over v2.13:
+ - RetrievalMemory integration (retrieval_hit_rate)
+ - FAISS semantic retrieval (avg_similarity)
+ - WarmstartRuntime (warmstart_acceptance_rate, avg_iterations_saved)
+ - CostEstimator (avg_estimated_cost, projection_budget_distribution)
+ - ProjectionExperienceMemory (convergence tracking)
+ - Standard vs warmstart projection comparison
+ - Upgraded CapabilityRouter with 7 routing actions
 
 Produces:
  - EvaluationReport per sample
  - MemoryEntry per sample
  - ExecutionTrace per sample
  - ExactCacheEntry per sample
- - Aggregate summary with v2.13 metrics
+ - RetrievalEntry per sample (non-degraded only)
+ - ProjectionExperienceEntry per sample
+ - Aggregate summary with v2.14 metrics
 
 Usage:
  python scripts/run_runtime_benchmark.py \\
-   --dataset workspace/datasets/circuit_v29f_10k.pt \\
-   --checkpoint workspace/checkpoints/gnn_v29f.pt \\
-   [--no-projection] \\
-   [--seed 42] \\
-   [--max-samples 100] \\
-   [--output-dir workspace/runtime_benchmarks]
+ --dataset workspace/datasets/circuit_v29f_10k.pt \\
+ --checkpoint workspace/checkpoints/gnn_v29f.pt \\
+ [--no-projection] \\
+ [--seed 42] \\
+ [--max-samples 100] \\
+ [--output-dir workspace/runtime_benchmarks]
 """
 
 from __future__ import annotations
@@ -40,6 +44,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
+import numpy as np
 import torch
 
 from backend.core_runtime.task_runtime import RuntimeTask, RuntimeExecutor
@@ -55,6 +60,19 @@ from backend.core_runtime.execution_policy import ExecutionPolicy, RecoveryHandl
 from backend.core_runtime.confidence_runtime import ConfidenceRuntime
 from backend.core_runtime.capability_router import CapabilityRouter
 
+# v2.14 imports
+from backend.runtime.retrieval_memory import RetrievalMemory, RetrievalEntry
+from backend.runtime.cost_estimator import CostEstimator, ExecutionCostEstimate
+from backend.runtime.warmstart_runtime import WarmstartRuntime
+from backend.runtime.projection_experience import ProjectionExperienceMemory, ProjectionExperienceEntry
+from backend.runtime.embedding_runtime import extract_graph_embedding, compute_embedding_sha256
+
+try:
+    from backend.runtime.faiss_runtime import FaissRuntime
+    HAS_FAISS = True
+except ImportError:
+    HAS_FAISS = False
+
 # Failure taxonomy — handle import gracefully
 try:
     from backend.circuits.failure_analysis import classify_failure
@@ -66,13 +84,14 @@ except ImportError:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="CPT Runtime Benchmark Runner (v2.13)")
+    parser = argparse.ArgumentParser(description="CPT Runtime Benchmark Runner (v2.14)")
     parser.add_argument("--dataset", required=True, help="Path to dataset (.pt)")
     parser.add_argument("--checkpoint", default=None, help="Path to surrogate checkpoint")
     parser.add_argument("--no-projection", action="store_true", help="Disable projection")
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--max-samples", type=int, default=None)
     parser.add_argument("--output-dir", default="workspace/runtime_benchmarks")
+    parser.add_argument("--embedding-dim", type=int, default=64, help="GNN hidden dim for embeddings")
     args = parser.parse_args()
 
     torch.manual_seed(args.seed)
@@ -96,7 +115,6 @@ def main() -> None:
         else:
             samples = [loaded]
     else:
-        # Try CircuitGraphDataset
         try:
             from backend.circuits.graph_dataset import CircuitGraphDataset
             dataset = CircuitGraphDataset(root=REPO / "workspace" / "datasets")
@@ -126,6 +144,7 @@ def main() -> None:
 
     # --- Setup surrogate ---
     surrogate = SurrogateRuntime(name="circuit_gnn")
+    gnn_model = None
     if args.checkpoint:
         ckpt_path = Path(args.checkpoint)
         if ckpt_path.exists():
@@ -139,6 +158,7 @@ def main() -> None:
                 elif isinstance(ckpt, dict):
                     model.load_state_dict(ckpt)
                 surrogate = SurrogateRuntime(model=model, name="circuit_gnn")
+                gnn_model = model
             except Exception as e:
                 print(f"[benchmark] WARNING: Could not load checkpoint: {e}")
 
@@ -163,6 +183,19 @@ def main() -> None:
     policy = ExecutionPolicy()
     recovery = RecoveryHandler(policy)
 
+    # --- v2.14: Setup retrieval, FAISS, warmstart, cost, projection experience ---
+    retrieval_mem = RetrievalMemory(str(output_dir / "retrieval_memory"))
+    cost_estimator = CostEstimator()
+    warmstart_rt = WarmstartRuntime()
+    proj_experience = ProjectionExperienceMemory(str(output_dir / "projection_experience"))
+
+    faiss_rt = None
+    if HAS_FAISS:
+        faiss_rt = FaissRuntime(dim=args.embedding_dim, base_dir=str(output_dir / "faiss_index"))
+        print(f"[benchmark] FAISS enabled (dim={args.embedding_dim})")
+    else:
+        print("[benchmark] FAISS not available, semantic retrieval disabled")
+
     # --- Build executor ---
     executor = RuntimeExecutor(
         oracle=oracle,
@@ -184,6 +217,17 @@ def main() -> None:
     confidence_scores = []
     total_runtime_ms = 0.0
 
+    # v2.14 metrics
+    retrieval_hits = 0
+    warmstart_accepted = 0
+    warmstart_rejected = 0
+    total_iterations_saved = 0
+    similarity_scores = []
+    cost_estimates = []
+    proj_iters_standard = []
+    proj_iters_warmstart = []
+    projection_budgets = []
+
     for idx, sample in enumerate(samples):
         task_id = f"bench_{idx:05d}"
 
@@ -195,6 +239,7 @@ def main() -> None:
             oracle.register_circuit(task_id, circuit)
 
         topo_family = getattr(graph, "topology_family", "unknown")
+        graph_size = getattr(graph, "num_nodes", 0) if hasattr(graph, "num_nodes") else 0
 
         task = RuntimeTask(
             task_id=task_id,
@@ -206,36 +251,133 @@ def main() -> None:
             metadata={"sample_idx": idx, "dataset_id": manifest.dataset_id, "topology_family": topo_family},
         )
 
-        # v2.13: Check exact cache first
+        # --- v2.14: Check exact cache first (ALWAYS) ---
         task_hash = compute_task_hash(task)
         cached = cache.get(task_hash)
         if cached is not None:
             result = cached
             cache_hits += 1
-            routing_actions["cache_hit"] = routing_actions.get("cache_hit", 0) + 1
+            routing_actions["exact_cache_hit"] = routing_actions.get("exact_cache_hit", 0) + 1
         else:
-            # v2.13: Estimate confidence & route
-            graph_size = getattr(graph, "num_nodes", 0) if hasattr(graph, "num_nodes") else 0
+            # v2.14: Estimate confidence
             confidence = confidence_rt.estimate(
                 task, graph_size=graph_size, topology_family=topo_family,
             )
             confidence_scores.append(confidence.confidence_score)
 
-            decision = router.route(task, confidence, cache_hit=False)
+            # v2.14: Estimate execution cost
+            edge_count = getattr(graph, "num_edges", 0) if hasattr(graph, "num_edges") else 0
+            cost_est = cost_estimator.estimate(
+                node_count=graph_size,
+                edge_count=edge_count,
+                topology_family=topo_family,
+                confidence=confidence.confidence_score,
+                likely_ood=confidence.likely_ood,
+            )
+            cost_estimates.append(cost_est.to_json_dict())
+            projection_budgets.append(cost_est.estimated_projection_iterations)
+
+            # v2.14: Semantic retrieval (FAISS)
+            retrieval_similarity = 0.0
+            if faiss_rt is not None and gnn_model is not None:
+                try:
+                    x = graph.x if hasattr(graph, "x") else torch.randn(graph_size, 8)
+                    edge_index = graph.edge_index if hasattr(graph, "edge_index") else torch.zeros(2, 0, dtype=torch.long)
+                    emb_tensor = extract_graph_embedding(gnn_model, x, edge_index)
+                    emb_np = emb_tensor.numpy().astype(np.float32)
+                    emb_sha = compute_embedding_sha256(emb_tensor)
+
+                    faiss_results = faiss_rt.search(emb_np, k=1)
+                    if faiss_results:
+                        retrieval_similarity = faiss_results[0].similarity_score
+                        if retrieval_similarity > 0.3:
+                            retrieval_hits += 1
+                            similarity_scores.append(retrieval_similarity)
+                except Exception:
+                    pass  # Retrieval failure → fallback to standard
+
+            # v2.14: Route with cost estimate + retrieval
+            decision = router.route(
+                task, confidence,
+                cache_hit=False,
+                retrieval_similarity=retrieval_similarity,
+                cost_estimate=cost_est,
+            )
             routing_actions[decision.action] = routing_actions.get(decision.action, 0) + 1
 
             # Execute pipeline
             result = executor.execute(task)
 
             # v2.13: Check for degradation
-            if result.failure_type is not None:
+            is_degraded = result.failure_type is not None
+            if is_degraded:
                 degraded_count += 1
 
             # v2.13: Cache result
             cache.put(task_hash, result)
 
-            # v2.13: Record outcome for router
-            if result.failure_type is not None:
+            # v2.14: Record in retrieval memory (non-degraded only)
+            if not is_degraded and faiss_rt is not None and gnn_model is not None:
+                try:
+                    x = graph.x if hasattr(graph, "x") else torch.randn(graph_size, 8)
+                    edge_index = graph.edge_index if hasattr(graph, "edge_index") else torch.zeros(2, 0, dtype=torch.long)
+                    emb_tensor = extract_graph_embedding(gnn_model, x, edge_index)
+                    emb_np = emb_tensor.numpy().astype(np.float32)
+                    emb_sha = compute_embedding_sha256(emb_tensor)
+
+                    # Don't insert degraded or NaN
+                    if not np.isnan(emb_np).any():
+                        ret_entry = RetrievalEntry(
+                            task_hash=task_hash,
+                            embedding_sha256=emb_sha,
+                            topology_family=topo_family,
+                            node_count=graph_size,
+                            edge_count=edge_count,
+                            confidence=confidence.confidence_score,
+                            projection_iterations=result.projection_result.iterations if result.projection_result else 0,
+                            kcl_residual=0.0,
+                            kvl_residual=0.0,
+                            timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                            embedding_path="",
+                            trace_path="",
+                        )
+                        retrieval_mem.add(ret_entry)
+                        faiss_rt.add_embedding(task_hash, emb_np, ret_entry)
+                except Exception:
+                    pass
+
+            # v2.14: Record projection experience
+            if result.projection_result is not None:
+                pr = result.projection_result
+                initial_res = getattr(pr, "initial_residual", 0.0)
+                final_res = getattr(pr, "final_residual", 0.0)
+                iters = pr.iterations
+                slope = (initial_res - final_res) / max(iters, 1) if iters > 0 else 0.0
+
+                proj_entry = ProjectionExperienceEntry(
+                    task_hash=task_hash,
+                    topology_family=topo_family,
+                    initial_residual=initial_res,
+                    final_residual=final_res,
+                    residual_slope=slope,
+                    iterations=iters,
+                    converged=final_res < 0.01 if initial_res > 0 else True,
+                    kcl_residual=0.0,
+                    kvl_residual=0.0,
+                    used_warmstart=(decision.action == "warmstart_projection"),
+                    warmstart_similarity=retrieval_similarity if decision.action == "warmstart_projection" else 0.0,
+                    timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                )
+                proj_experience.add(proj_entry)
+
+                # Track warmstart vs standard
+                if decision.action == "warmstart_projection":
+                    proj_iters_warmstart.append(iters)
+                else:
+                    proj_iters_standard.append(iters)
+
+            # v2.14: Record outcome for router
+            if is_degraded:
                 router.record_failure(topo_family)
             else:
                 router.record_success(topo_family)
@@ -295,12 +437,13 @@ def main() -> None:
     # --- Print summary ---
     n = len(results)
     print(f"\n{'='*60}")
-    print(f"CPT Runtime Benchmark Summary (v2.13)")
+    print(f"CPT Runtime Benchmark Summary (v2.14)")
     print(f"{'='*60}")
     print(f"Dataset: {manifest.dataset_id} ({n} samples)")
     print(f"Oracle: {oracle.name()}")
     print(f"Surrogate: {surrogate.name}")
     print(f"Projection: {'enabled' if projection else 'disabled'}")
+    print(f"FAISS: {'enabled' if faiss_rt else 'disabled'}")
     print(f"")
     if n > 0:
         print(f"Avg Oracle MAE: {total_mae_oracle/n:.6f} V")
@@ -314,9 +457,45 @@ def main() -> None:
         print(f"Degraded Execution Rate: {degraded_count/n*100:.1f}%")
         if confidence_scores:
             print(f"Avg Confidence: {sum(confidence_scores)/len(confidence_scores):.4f}")
+
+        # v2.14 metrics
+        print(f"\n--- v2.14 Metrics ---")
+        print(f"Retrieval Hit Rate: {retrieval_hits/n*100:.1f}%")
+        ws_total = warmstart_accepted + warmstart_rejected
+        print(f"Warmstart Acceptance Rate: {warmstart_accepted/ws_total*100:.1f}%" if ws_total > 0 else "Warmstart Acceptance Rate: N/A")
+        print(f"Avg Iterations Saved: {total_iterations_saved/max(ws_total,1):.1f}")
+        if similarity_scores:
+            print(f"Avg Similarity: {sum(similarity_scores)/len(similarity_scores):.4f}")
+        if cost_estimates:
+            avg_cost = sum(c.get("estimated_runtime_ms", 0) for c in cost_estimates) / len(cost_estimates)
+            print(f"Avg Estimated Cost: {avg_cost:.2f} ms")
+        print(f"Degraded Rate: {degraded_count/n*100:.1f}%")
+
         print(f"\nRouting Distribution:")
         for action, cnt in sorted(routing_actions.items()):
             print(f"  {action}: {cnt} ({cnt/n*100:.1f}%)")
+
+        if projection_budgets:
+            print(f"\nProjection Budget Distribution:")
+            buckets = {"1-5": 0, "6-10": 0, "11-20": 0, "21-50": 0}
+            for b in projection_budgets:
+                if b <= 5: buckets["1-5"] += 1
+                elif b <= 10: buckets["6-10"] += 1
+                elif b <= 20: buckets["11-20"] += 1
+                else: buckets["21-50"] += 1
+            for label, cnt in buckets.items():
+                print(f"  {label} iters: {cnt}")
+
+        # Standard vs Warmstart comparison
+        if proj_iters_standard and proj_iters_warmstart:
+            print(f"\nStandard vs Warmstart Projection:")
+            print(f"  Standard avg iters: {sum(proj_iters_standard)/len(proj_iters_standard):.1f}")
+            print(f"  Warmstart avg iters: {sum(proj_iters_warmstart)/len(proj_iters_warmstart):.1f}")
+            if len(proj_iters_warmstart) > 0 and len(proj_iters_standard) > 0:
+                savings = (sum(proj_iters_standard)/len(proj_iters_standard) -
+                           sum(proj_iters_warmstart)/len(proj_iters_warmstart))
+                print(f"  Avg iterations saved: {savings:.1f}")
+
         if failure_counts:
             print(f"\nFailure Distribution:")
             for ft, cnt in sorted(failure_counts.items()):
@@ -325,28 +504,52 @@ def main() -> None:
     # --- Save aggregate results ---
     summary_path = output_dir / "benchmark_summary.json"
     summary = {
-        "version": "v2.13",
+        "version": "v2.14",
         "dataset_id": manifest.dataset_id,
         "dataset_sha256": manifest.sha256,
         "sample_count": n,
         "seed": args.seed,
         "projection_enabled": not args.no_projection,
+        "faiss_enabled": faiss_rt is not None,
+        # Core metrics
         "avg_oracle_mae": total_mae_oracle / n if n else 0,
         "avg_projected_mae": total_mae_projected / n if n else 0,
         "avg_projection_iters": total_proj_iters / n if n else 0,
         "avg_runtime_ms": total_runtime_ms / n if n else 0,
-        "cache_hit_rate": cache_hits / n if n else 0,
+        # v2.13 metrics
+        "exact_cache_hit_rate": cache_hits / n if n else 0,
         "degraded_execution_rate": degraded_count / n if n else 0,
         "avg_confidence": sum(confidence_scores) / len(confidence_scores) if confidence_scores else 0,
         "routing_distribution": routing_actions,
         "failure_counts": failure_counts,
         "recovery_events": len(recovery.events),
+        # v2.14 metrics
+        "retrieval_hit_rate": retrieval_hits / n if n else 0,
+        "warmstart_acceptance_rate": warmstart_accepted / ws_total if (ws_total := warmstart_accepted + warmstart_rejected) > 0 else 0,
+        "avg_iterations_saved": total_iterations_saved / max(warmstart_accepted, 1),
+        "avg_similarity": sum(similarity_scores) / len(similarity_scores) if similarity_scores else 0,
+        "avg_estimated_cost_ms": sum(c.get("estimated_runtime_ms", 0) for c in cost_estimates) / len(cost_estimates) if cost_estimates else 0,
+        "projection_budget_distribution": {
+            "1-5": sum(1 for b in projection_budgets if b <= 5),
+            "6-10": sum(1 for b in projection_budgets if 5 < b <= 10),
+            "11-20": sum(1 for b in projection_budgets if 10 < b <= 20),
+            "21-50": sum(1 for b in projection_budgets if b > 20),
+        },
+        "standard_vs_warmstart": {
+            "standard_avg_iters": sum(proj_iters_standard) / len(proj_iters_standard) if proj_iters_standard else 0,
+            "warmstart_avg_iters": sum(proj_iters_warmstart) / len(proj_iters_warmstart) if proj_iters_warmstart else 0,
+        },
+        "retrieval_stats": retrieval_mem.stats(),
+        "projection_experience_stats": proj_experience.all_family_stats(),
         "results": results,
     }
     with open(summary_path, "w") as f:
         json.dump(summary, f, indent=2, default=str)
     print(f"\nSummary saved to: {summary_path}")
     print(f"Cache saved to: {output_dir / 'exact_cache'}")
+    print(f"Retrieval memory saved to: {output_dir / 'retrieval_memory'}")
+    print(f"FAISS index saved to: {output_dir / 'faiss_index'}")
+    print(f"Projection experience saved to: {output_dir / 'projection_experience'}")
     print(f"Traces saved to: {output_dir / 'traces'}")
     print(f"Memory saved to: {output_dir / 'memory'}")
 

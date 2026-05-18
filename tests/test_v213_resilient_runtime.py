@@ -433,20 +433,20 @@ class TestCapabilityRouter:
     def test_cache_hit(self):
         router = CapabilityRouter()
         decision = router.route(self._make_task(), self._make_confidence(), cache_hit=True)
-        assert decision.action == "cache_hit"
+        assert decision.action == "exact_cache_hit"
         assert decision.projection_budget == 0
         assert not decision.force_oracle
 
     def test_high_confidence(self):
         router = CapabilityRouter()
         decision = router.route(self._make_task(), self._make_confidence(score=0.9))
-        assert decision.action == "standard"
+        assert decision.action == "standard_projection"
         assert decision.projection_budget <= 5  # budget_low
 
     def test_ood_escalation(self):
         router = CapabilityRouter()
         decision = router.route(self._make_task(), self._make_confidence(score=0.2, ood=True))
-        assert decision.action == "ood_escalation"
+        assert decision.action == "increased_budget"
         assert decision.force_oracle is True
         assert decision.projection_budget >= 15
 
@@ -676,11 +676,11 @@ class TestE2EIntegration:
         # High confidence → standard, small budget
         high = ConfidenceEstimate(confidence_score=0.9, estimated_projection_iterations=2, likely_ood=False)
         d = router.route(task, high)
-        assert d.action == "standard"
+        assert d.action == "standard_projection"
         assert d.projection_budget <= 5
 
         # Low confidence + OOD → escalation
         low = ConfidenceEstimate(confidence_score=0.2, estimated_projection_iterations=20, likely_ood=True)
         d = router.route(task, low)
-        assert d.action == "ood_escalation"
+        assert d.action == "increased_budget"
         assert d.force_oracle is True

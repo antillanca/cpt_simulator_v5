@@ -6,6 +6,7 @@ This package implements the canonical execution pipeline:
 v2.12: RuntimeTask, RuntimeResult, RuntimeExecutor, Protocols
 v2.13: ExactMatchCache, CanonicalHashing, ExecutionPolicy,
        ConfidenceEstimation, CapabilityRouter, AtomicMemory
+v2.14: Upgraded CapabilityRouter (retrieval, warmstart, cost-aware)
 """
 
 from backend.core_runtime.task_runtime import (
