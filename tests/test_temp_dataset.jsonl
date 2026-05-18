@@ -1,0 +1,3 @@
+{"circuit_name": "c1", "netlist": "I1 N1 0 0.002\nR1 N1 0 1000\n"}
+{"circuit_name": "c2", "netlist": "V1 N1 0 5\nR1 N1 N2 1000\nR2 N2 0 2000\nR3 N1 0 3000\n"}
+{"circuit_name": "c3", "netlist": "V1 N1 0 5\nR1 N1 0 1000\nR2 N1 0 2000\n"}

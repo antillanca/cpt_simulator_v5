@@ -1,17 +1,19 @@
 #!/usr/bin/env python3
-"""CPT v2.14 — Canonical Runtime Benchmark Runner.
+"""CPT v2.15 — Canonical Runtime Benchmark Runner.
 
 The NEW standard benchmark runner. Executes the full runtime pipeline:
  task -> oracle -> surrogate -> projection -> evaluation -> memory
 
-v2.14 adds over v2.13:
- - RetrievalMemory integration (retrieval_hit_rate)
- - FAISS semantic retrieval (avg_similarity)
- - WarmstartRuntime (warmstart_acceptance_rate, avg_iterations_saved)
- - CostEstimator (avg_estimated_cost, projection_budget_distribution)
- - ProjectionExperienceMemory (convergence tracking)
- - Standard vs warmstart projection comparison
- - Upgraded CapabilityRouter with 7 routing actions
+v2.15 adds over v2.14:
+ - ProjectionScheduler (adaptive budget allocation)
+ - TrajectoryAnalyzer (trajectory classification)
+ - ExecutionScheduler (full pipeline orchestration)
+ - Adaptive vs fixed budget comparison
+ - Scheduler overhead measurement (separate from projection)
+ - Trajectory class distribution
+ - Stopping reason distribution
+ - Escalation rate tracking
+ - Budget efficiency tracking
 
 Produces:
  - EvaluationReport per sample
@@ -20,7 +22,9 @@ Produces:
  - ExactCacheEntry per sample
  - RetrievalEntry per sample (non-degraded only)
  - ProjectionExperienceEntry per sample
- - Aggregate summary with v2.14 metrics
+ - ExecutionSchedule per sample (v2.15)
+ - ExecutionOutcome per sample (v2.15)
+ - Aggregate summary with v2.15 metrics
 
 Usage:
  python scripts/run_runtime_benchmark.py \\
@@ -67,6 +71,13 @@ from backend.runtime.warmstart_runtime import WarmstartRuntime
 from backend.runtime.projection_experience import ProjectionExperienceMemory, ProjectionExperienceEntry
 from backend.runtime.embedding_runtime import extract_graph_embedding, compute_embedding_sha256
 
+# v2.15 imports
+from backend.runtime.projection_scheduler import ProjectionScheduler, ProjectionBudget
+from backend.runtime.trajectory_analysis import TrajectoryAnalyzer
+from backend.runtime.execution_scheduler import (
+    ExecutionScheduler, ExecutionSchedule, ExecutionOutcome,
+)
+
 try:
     from backend.runtime.faiss_runtime import FaissRuntime
     HAS_FAISS = True
@@ -84,7 +95,7 @@ except ImportError:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="CPT Runtime Benchmark Runner (v2.14)")
+    parser = argparse.ArgumentParser(description="CPT Runtime Benchmark Runner (v2.15)")
     parser.add_argument("--dataset", required=True, help="Path to dataset (.pt)")
     parser.add_argument("--checkpoint", default=None, help="Path to surrogate checkpoint")
     parser.add_argument("--no-projection", action="store_true", help="Disable projection")
@@ -189,6 +200,11 @@ def main() -> None:
     warmstart_rt = WarmstartRuntime()
     proj_experience = ProjectionExperienceMemory(str(output_dir / "projection_experience"))
 
+    # --- v2.15: Setup projection scheduler, trajectory analyzer, execution scheduler ---
+    proj_scheduler = ProjectionScheduler()
+    trajectory_analyzer = TrajectoryAnalyzer()
+    execution_scheduler = ExecutionScheduler()
+
     faiss_rt = None
     if HAS_FAISS:
         faiss_rt = FaissRuntime(dim=args.embedding_dim, base_dir=str(output_dir / "faiss_index"))
@@ -227,6 +243,19 @@ def main() -> None:
     proj_iters_standard = []
     proj_iters_warmstart = []
     projection_budgets = []
+
+    # v2.15 metrics
+    adaptive_budgets = []
+    iterations_used_list = []
+    iterations_allocated_list = []
+    iterations_saved_list = []
+    trajectory_classes: dict[str, int] = {}
+    stop_reasons: dict[str, int] = {}
+    scheduler_routes: dict[str, int] = {}
+    scheduler_overhead_ms_list = []
+    projection_runtime_ms_list = []
+    escalation_count = 0
+    converged_early_count = 0
 
     for idx, sample in enumerate(samples):
         task_id = f"bench_{idx:05d}"
@@ -305,8 +334,69 @@ def main() -> None:
             )
             routing_actions[decision.action] = routing_actions.get(decision.action, 0) + 1
 
+            # --- v2.15: Schedule adaptive budget ---
+            schedule_start = time.monotonic()
+            schedule = execution_scheduler.schedule(
+                task,
+                cache_hit=False,
+                retrieval_similarity=retrieval_similarity,
+                is_degraded=False,
+                node_count=graph_size,
+                edge_count=edge_count,
+            )
+            scheduler_overhead_ms = (time.monotonic() - schedule_start) * 1000
+            scheduler_overhead_ms_list.append(scheduler_overhead_ms)
+            scheduler_routes[schedule.route] = scheduler_routes.get(schedule.route, 0) + 1
+            if schedule.budget:
+                adaptive_budgets.append(schedule.budget.max_iterations)
+
             # Execute pipeline
             result = executor.execute(task)
+
+            # --- v2.15: Compute outcome with trajectory analysis ---
+            proj_iters_actual = result.projection_result.iterations if result.projection_result else 0
+            final_residual = getattr(result.projection_result, "final_residual", 1.0) if result.projection_result else 1.0
+
+            # Build residual history for trajectory analysis
+            residual_history = []
+            if result.projection_result and hasattr(result.projection_result, "residual_history"):
+                residual_history = list(result.projection_result.residual_history)
+            elif result.projection_result:
+                # Approximate from initial/final
+                initial = getattr(result.projection_result, "initial_residual", final_residual)
+                if proj_iters_actual > 0 and initial > final_residual:
+                    step = (initial - final_residual) / proj_iters_actual
+                    residual_history = [initial - step * i for i in range(proj_iters_actual + 1)]
+
+            trajectory_result = trajectory_analyzer.analyze(
+                residual_history if residual_history else [final_residual],
+                used_warmstart=(decision.action == "warmstart_projection"),
+            )
+            trajectory_classes[trajectory_result.trajectory_class] = \
+                trajectory_classes.get(trajectory_result.trajectory_class, 0) + 1
+
+            # Compute execution outcome
+            outcome = execution_scheduler.compute_outcome(
+                schedule=schedule,
+                iterations_used=proj_iters_actual,
+                final_residual=final_residual,
+                residual_history=residual_history if residual_history else [final_residual],
+                warmstart_used=(decision.action == "warmstart_projection"),
+                was_degraded=(result.failure_type is not None),
+                runtime_ms=result.total_runtime_ms,
+                scheduler_overhead_ms=scheduler_overhead_ms,
+            )
+            iterations_used_list.append(outcome.iterations_used)
+            iterations_allocated_list.append(outcome.iterations_allocated)
+            iterations_saved_list.append(outcome.iterations_saved)
+            if outcome.stop_reason:
+                stop_reasons[outcome.stop_reason] = stop_reasons.get(outcome.stop_reason, 0) + 1
+            if outcome.outcome in ("escalated", "diverged"):
+                escalation_count += 1
+            if outcome.outcome == "converged_early":
+                converged_early_count += 1
+
+            projection_runtime_ms_list.append(result.projection_runtime_ms)
 
             # v2.13: Check for degradation
             is_degraded = result.failure_type is not None
@@ -437,7 +527,7 @@ def main() -> None:
     # --- Print summary ---
     n = len(results)
     print(f"\n{'='*60}")
-    print(f"CPT Runtime Benchmark Summary (v2.14)")
+    print(f"\nCPT Runtime Benchmark Summary (v2.15)")
     print(f"{'='*60}")
     print(f"Dataset: {manifest.dataset_id} ({n} samples)")
     print(f"Oracle: {oracle.name()}")
@@ -496,15 +586,53 @@ def main() -> None:
                            sum(proj_iters_warmstart)/len(proj_iters_warmstart))
                 print(f"  Avg iterations saved: {savings:.1f}")
 
-        if failure_counts:
-            print(f"\nFailure Distribution:")
-            for ft, cnt in sorted(failure_counts.items()):
-                print(f"  {ft}: {cnt}")
+    if failure_counts:
+        print(f"\nFailure Distribution:")
+        for ft, cnt in sorted(failure_counts.items()):
+            print(f"  {ft}: {cnt}")
+
+    # v2.15 metrics
+    print(f"\n--- v2.15 Metrics ---")
+    if iterations_used_list:
+        avg_used = sum(iterations_used_list) / len(iterations_used_list)
+        avg_alloc = sum(iterations_allocated_list) / len(iterations_allocated_list)
+        avg_saved = sum(iterations_saved_list) / len(iterations_saved_list)
+        print(f"Avg Iterations Used: {avg_used:.1f}")
+        print(f"Avg Iterations Allocated: {avg_alloc:.1f}")
+        print(f"Avg Iterations Saved: {avg_saved:.1f}")
+    if projection_runtime_ms_list:
+        avg_proj_ms = sum(projection_runtime_ms_list) / len(projection_runtime_ms_list)
+        print(f"Avg Projection Runtime: {avg_proj_ms:.2f} ms")
+    if scheduler_overhead_ms_list:
+        avg_overhead = sum(scheduler_overhead_ms_list) / len(scheduler_overhead_ms_list)
+        print(f"Avg Scheduler Overhead: {avg_overhead:.3f} ms")
+    if adaptive_budgets:
+        print(f"Avg Allocated Budget: {sum(adaptive_budgets)/len(adaptive_budgets):.1f}")
+        fixed_budget = 20  # Default fixed budget from v2.14
+        avg_unused = sum(max(0, a - u) for a, u in zip(adaptive_budgets, iterations_used_list)) / len(adaptive_budgets) if iterations_used_list else 0
+        print(f"Avg Unused Budget: {avg_unused:.1f}")
+    print(f"Escalation Rate: {escalation_count/n*100:.1f}%" if n > 0 else "Escalation Rate: N/A")
+    print(f"Converged Early Rate: {converged_early_count/n*100:.1f}%" if n > 0 else "Converged Early Rate: N/A")
+
+    if trajectory_classes:
+        print(f"\nTrajectory Distribution:")
+        for tc, cnt in sorted(trajectory_classes.items()):
+            print(f"  {tc}: {cnt} ({cnt/n*100:.1f}%)" if n > 0 else f"  {tc}: {cnt}")
+
+    if stop_reasons:
+        print(f"\nStop Reason Distribution:")
+        for sr, cnt in sorted(stop_reasons.items()):
+            print(f"  {sr}: {cnt}")
+
+    if scheduler_routes:
+        print(f"\nScheduler Route Distribution:")
+        for route, cnt in sorted(scheduler_routes.items()):
+            print(f"  {route}: {cnt} ({cnt/n*100:.1f}%)" if n > 0 else f"  {route}: {cnt}")
 
     # --- Save aggregate results ---
     summary_path = output_dir / "benchmark_summary.json"
     summary = {
-        "version": "v2.14",
+        "version": "v2.15",
         "dataset_id": manifest.dataset_id,
         "dataset_sha256": manifest.sha256,
         "sample_count": n,
@@ -541,6 +669,22 @@ def main() -> None:
         },
         "retrieval_stats": retrieval_mem.stats(),
         "projection_experience_stats": proj_experience.all_family_stats(),
+        # v2.15 metrics
+        "v215_adaptive_budget": {
+            "avg_iterations_used": sum(iterations_used_list) / len(iterations_used_list) if iterations_used_list else 0,
+            "avg_iterations_allocated": sum(iterations_allocated_list) / len(iterations_allocated_list) if iterations_allocated_list else 0,
+            "avg_iterations_saved": sum(iterations_saved_list) / len(iterations_saved_list) if iterations_saved_list else 0,
+            "avg_unused_budget": sum(max(0, a - u) for a, u in zip(adaptive_budgets, iterations_used_list)) / len(adaptive_budgets) if adaptive_budgets and iterations_used_list else 0,
+            "escalation_rate": escalation_count / n if n else 0,
+            "converged_early_rate": converged_early_count / n if n else 0,
+        },
+        "v215_trajectory_distribution": trajectory_classes,
+        "v215_stop_reasons": stop_reasons,
+        "v215_scheduler_routes": scheduler_routes,
+        "v215_overhead": {
+            "avg_scheduler_ms": sum(scheduler_overhead_ms_list) / len(scheduler_overhead_ms_list) if scheduler_overhead_ms_list else 0,
+            "avg_projection_ms": sum(projection_runtime_ms_list) / len(projection_runtime_ms_list) if projection_runtime_ms_list else 0,
+        },
         "results": results,
     }
     with open(summary_path, "w") as f:
@@ -552,6 +696,7 @@ def main() -> None:
     print(f"Projection experience saved to: {output_dir / 'projection_experience'}")
     print(f"Traces saved to: {output_dir / 'traces'}")
     print(f"Memory saved to: {output_dir / 'memory'}")
+    print(f"Operational experience exported to: {output_dir / 'operational_experience'}")
 
 
 if __name__ == "__main__":

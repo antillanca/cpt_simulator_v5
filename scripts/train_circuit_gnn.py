@@ -358,6 +358,8 @@ def train_one_epoch(
     loss_fn: PhysicsInformedLoss,
     ablation: str,
     use_edge_features: bool = False,
+    node_dim: int = 8,
+    edge_dim: int = 4,
 ) -> Dict[str, float]:
     """Train one epoch, processing one graph at a time for determinism."""
     model.train()
@@ -382,15 +384,25 @@ def train_one_epoch(
         edge_index = g.edge_index.to(device)
         target_voltages = g.target_voltages.to(device)
 
-        # Apply ablation slicing
+        # Apply ablation slicing / padding
         if ablation in ("baseline", "norm_only"):
             node_features = node_features[:, :8]
+        elif ablation in ("topo_only", "full", "curr_only"):
+            # circuit_to_graph produces 8 node features; topo-only/full/curr
+            # expect 13 (8 base + 5 topo). Pad with zeros for missing columns.
+            if node_features.size(1) < node_dim:
+                pad = torch.zeros(node_features.size(0), node_dim - node_features.size(1),
+                                  device=device, dtype=node_features.dtype)
+                node_features = torch.cat([node_features, pad], dim=1)
         if ablation == "baseline":
             edge_features = edge_features[:, :4]
         elif ablation == "norm_only":
             edge_features = edge_features[:, :5]
         elif ablation == "topo_only":
-            edge_features = torch.cat([edge_features[:, :4], edge_features[:, 5:7]], dim=1)
+            if edge_features.size(1) < edge_dim:
+                pad = torch.zeros(edge_features.size(0), edge_dim - edge_features.size(1),
+                                  device=device, dtype=edge_features.dtype)
+                edge_features = torch.cat([edge_features, pad], dim=1)
 
         if use_edge_features:
             pred = model(node_features, edge_index, edge_features)
@@ -431,6 +443,8 @@ def evaluate(
     ablation: str,
     use_edge_features: bool = False,
     track_oracle_mae: bool = False,
+    node_dim: int = 8,
+    edge_dim: int = 4,
 ) -> Dict[str, float]:
     """Evaluate model on a set of graphs. Returns metrics in VOLTAGE space.
 
@@ -462,15 +476,23 @@ def evaluate(
             edge_index = g.edge_index.to(device)
             true_voltage = g.target_voltages.to(device)
 
-            # Apply ablation slicing
-            if ablation in ("baseline", "norm_only"):
-                node_features = node_features[:, :8]
-            if ablation == "baseline":
-                edge_features = edge_features[:, :4]
-            elif ablation == "norm_only":
-                edge_features = edge_features[:, :5]
-            elif ablation == "topo_only":
-                edge_features = torch.cat([edge_features[:, :4], edge_features[:, 5:7]], dim=1)
+        # Apply ablation slicing / padding
+        if ablation in ("baseline", "norm_only"):
+            node_features = node_features[:, :8]
+        elif ablation in ("topo_only", "full", "curr_only"):
+            if node_features.size(1) < node_dim:
+                pad = torch.zeros(node_features.size(0), node_dim - node_features.size(1),
+                                  device=device, dtype=node_features.dtype)
+                node_features = torch.cat([node_features, pad], dim=1)
+        if ablation == "baseline":
+            edge_features = edge_features[:, :4]
+        elif ablation == "norm_only":
+            edge_features = edge_features[:, :5]
+        elif ablation == "topo_only":
+            if edge_features.size(1) < edge_dim:
+                pad = torch.zeros(edge_features.size(0), edge_dim - edge_features.size(1),
+                                  device=device, dtype=edge_features.dtype)
+                edge_features = torch.cat([edge_features, pad], dim=1)
 
             if use_edge_features:
                 pred_norm = model(node_features, edge_index, edge_features)
@@ -694,10 +716,10 @@ def main() -> int:
         else:
             current_train_data = train_data
 
-        train_metrics = train_one_epoch(model, current_train_data, optimizer, loss_fn, ablation, use_edge_features=use_edge)
+        train_metrics = train_one_epoch(model, current_train_data, optimizer, loss_fn, ablation, use_edge_features=use_edge, node_dim=NODE_DIM, edge_dim=EDGE_DIM)
         train_elapsed = time.perf_counter() - t0
         eval_t0 = time.perf_counter()
-        eval_metrics = evaluate(model, eval_data, loss_fn, ablation, use_edge_features=use_edge, track_oracle_mae=(target_mode == "blended_projection"))
+        eval_metrics = evaluate(model, eval_data, loss_fn, ablation, use_edge_features=use_edge, track_oracle_mae=(target_mode == "blended_projection"), node_dim=NODE_DIM, edge_dim=EDGE_DIM)
         eval_elapsed = time.perf_counter() - eval_t0
         scheduler.step(eval_metrics["loss"])
         total_elapsed = time.perf_counter() - start_time
@@ -761,7 +783,7 @@ def main() -> int:
     model.load_state_dict(best_state_dict)
     model.eval()
 
-    final_eval_metrics = evaluate(model, eval_data, loss_fn, ablation, use_edge_features=use_edge)
+    final_eval_metrics = evaluate(model, eval_data, loss_fn, ablation, use_edge_features=use_edge, node_dim=NODE_DIM, edge_dim=EDGE_DIM)
     final_total_elapsed = time.perf_counter() - start_time
     final_samples_sec = len(train_data) * int(config["training"]["epochs"]) / max(final_total_elapsed, 1e-12)
 
