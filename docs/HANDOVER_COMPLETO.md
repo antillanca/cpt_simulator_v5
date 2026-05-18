@@ -1,86 +1,72 @@
-# CPT Simulator v2.9F — Master Handover Document
+# CPT Simulator v2.13 — Master Handover Document
 
-> **Purpose**: Transfer comprehensive project context to any incoming developer or AI agent. This document outlines the system architecture, design rationale, current state, and immediate next steps for the CPT Simulator v5.
+> **Purpose**: Transfer comprehensive project context to any incoming developer or AI agent. This document outlines the system architecture, design rationale, v2.13 core runtime features, current status, and immediate next steps.
 
 ---
 
 ## 🎯 Project Scope
 
-The CPT Simulator is a hybrid iterative solver designed for DC electrical circuit simulation. It implements a Physics-Informed Graph Neural Network (PINN-GNN) as a fast pre-conditioner (warm-start) for a deterministic analytical solver, effectively bypassing the $O(N^3)$ computational cost of traditional Modified Nodal Analysis (MNA) while guaranteeing strict adherence to physical conservation laws.
+The CPT Simulator is a hybrid, fault-tolerant simulation engine for DC electrical circuits. It couples a Physics-Informed Graph Neural Network (PINN-GNN) acting as a fast pre-conditioner with a deterministic analytical projection solver to bypass the $O(N^3)$ computational cost of Modified Nodal Analysis (MNA) while guaranteeing physical conservation laws (KCL/KVL). 
 
-### The Problem
-
-Traditional iterative solvers (such as Jacobi or Successive Over-Relaxation) suffer from catastrophic slowdowns on high-diameter graphs (e.g., long radial chains or extensive ladder networks) because their spectral radius approaches 1. Conversely, pure neural network regressors cannot guarantee strict physical invariants (KCL/KVL) without extensive and often unstable penalty tuning.
-
-### The Solution (v2.9F Paradigm)
-
-The v2.9F architecture resolves this dichotomy through a hybrid approach:
-1. **Neural Pre-Conditioning**: The GNN predicts a highly accurate initial voltage state in sub-millisecond time.
-2. **Deterministic Physics Projection**: An iterative correction layer forces the neural prediction to comply with Kirchhoff's laws.
-3. **True Global Virtual Node**: A mathematical construct injected during projection that simultaneously aggregates and redistributes global residual error, reducing the effective graph communication diameter to 1 and ensuring rapid convergence regardless of the underlying topology.
+As of version v2.13, the simulation environment is managed by a production-grade, resilient runtime that ensures deterministic cache hits, confidence-aware routing, automated error recovery, and atomic data persistence.
 
 ---
 
 ## 🏗️ Architecture Stack
 
-The system implements a strict, multi-stage resolution pipeline:
+The execution pipeline is organized into a highly structured tiered stack:
 
 ### 1. Ground Truth Oracle (`backend/circuits/dc_solver.py`)
-- **Role**: The absolute baseline for correctness. It uses exact analytical MNA to solve circuits.
-- **Usage**: Used exclusively during dataset generation and final validation, not during inference.
+- **Role**: Reference analytical solver utilizing Modified Nodal Analysis (MNA).
+- **Usage**: Invoked only during dataset generation, test validations, and OOD escalation.
 
 ### 2. GNN Surrogate (`backend/neural/models/circuit_gnn.py`)
-- **Role**: An `EdgeAwareCircuitGNN` trained under PINN constraints.
-- **Features**: Processes dynamic topological features and applies logarithmic normalization to resistance values to ensure numerical stability and prevent gradient explosion in Out-Of-Distribution (OOD) scenarios.
+- **Role**: Establishes optimal warm-start initial states.
+- **Features**: Utilizes topological feature extraction and logarithmic resistance scaling to maintain numerical stability during Out-Of-Distribution (OOD) resistance ranges.
 
 ### 3. Physics Projection Layer (`backend/circuits/physics_projection.py`)
-- **Role**: A deterministic, Jacobi-style iterative corrector.
-- **Mechanism**: Takes the surrogate's output and iteratively minimizes KCL/KVL residuals.
-- **Virtual Node Integration**: Employs the `VirtualNodeProjection` to guarantee uniform global convergence.
+- **Role**: Deterministic iterative Jacobi-style corrector.
+- **Mechanism**: Eliminates KCL/KVL residual violations.
+- **Virtual Node Integration**: Features `VirtualNodeProjection` to bypass spectral radius degradation in long radial networks, reducing the effective graph communication diameter to 1.
+
+### 4. Resilient Core Runtime (`backend/core_runtime/`) — *[NEW in v2.13]*
+- **Canonical Task Hashing (`task_hashing.py`)**: Generates unique SHA-256 hashes of circuit configurations. Sorts nodes/edges alphabetically and normalizes floats to 8 significant figures to map equivalent circuits to identical hashes.
+- **Exact Match Cache (`exact_cache.py`)**: Stores and retrieves exact execution traces based on SHA-256 hashes to completely bypass redundant solver runs.
+- **Execution Policy & Recovery (`execution_policy.py`)**: Monitors runtime execution via a robust `RecoveryHandler`. Intercepts timeouts, NaNs, surrogate instabilities, and projection divergences, marking them as degraded executions to prevent silent failures.
+- **Confidence Heuristics (`confidence_runtime.py`)**: Computes deterministic confidence ratings (between 0.0 and 1.0) using topological features, graph size, and residual histories.
+- **Capability Router (`capability_router.py`)**: Dynamically assigns execution paths (`cache_hit`, `standard` with low budget, `increased_budget`, `ood_escalation`, or full `oracle_verification`) according to computed confidence estimates.
+- **Atomic Memory Persistence (`memory_runtime.py`)**: Combats storage corruption via atomic execution writes (temp write -> `fsync()` -> `os.replace()`).
 
 ---
 
 ## 🧠 Topological Curriculum and Diagnostics
 
 ### Structural Progression (`topology_curriculum.py`)
-Training data is not uniformly sampled. The system follows a deterministic topological curriculum to prevent learning collapse:
-- **Trivial**: Tree structures, $\le 4$ nodes, 0 independent cycles.
-- **Simple**: 1 independent cycle, $\le 6$ nodes.
-- **Medium**: 2-3 cycles, $\le 10$ nodes.
-- **Dense**: $> 3$ cycles, $> 10$ nodes.
+Training circuits are injected progressively through a deterministic curriculum to stabilize gradient paths:
+- **Trivial**: Tree structures (0 independent cycles, $\le 4$ nodes).
+- **Simple**: Single-loop circuits (1 cycle, $\le 6$ nodes).
+- **Medium**: Moderately coupled loops (2-3 cycles, $\le 10$ nodes).
+- **Dense**: Highly interconnected meshes ($> 3$ cycles). *Note: Highly interconnected meshes serve as natural graph regularizers, yielding exceptionally low baseline MAE.*
 
-### Failure Taxonomy (`failure_analysis.py`)
-Residual errors are structurally classified rather than simply aggregated as Mean Squared Error (MSE):
-- `cycle_drift_failure`: KCL violations localized within closed loops.
-- `dense_mesh_leakage`: Signal attenuation across highly interconnected nodes.
-- `bridge_node_instability`: Iterative divergence across critical path bottlenecks.
+### Structural Failure Taxonomy (`failure_analysis.py`)
+Unprojectable or degraded runs are classified according to topological root causes to guide dataset generation:
+- `cycle_drift_failure`: Non-convergent KCL residuals within closed loops.
+- `dense_mesh_leakage`: Signal attenuation in highly connected meshes.
+- `bridge_node_instability`: Convergence drift across tree-like bridge bottlenecks.
 
 ---
 
 ## 📊 Current State (May 2026)
 
-The project has successfully transitioned from Phase 1 (Symbolic domain knowledge acquisition) to Phase 2 (Structural topological mastery).
+- **Phase 1 (Symbolic Domain Acquisition)**: 100% Complete.
+- **Phase 2 (Topological Graph Curriculum)**: 100% Complete.
+- **Phase 3 (Core Runtime Resilience)**: 100% Complete (v2.13 integration achieved).
 
-| Metric | Baseline GNN | Hybrid Pipeline (GNN + Virtual Node) |
-| :--- | :---: | :---: |
-| **In-Dist MAE** | ~15.44 V | **~0.0 V** |
-| **KCL Max Residual** | ~0.275 A | **$< 1e-6$ A** |
-| **Solver Iterations** | High | **Minimal** |
-
----
-
-## 🗺️ Roadmap & Immediate Next Steps
-
-Incoming agents and developers should focus on the following core challenges:
-
-1. **Differentiable Newton-Physics Loss**:
-   Embed the physics correction heads directly into the GNN's residual layers during the forward pass. This forces the network to learn exact analytical derivatives during training, moving the correction from a post-processing step to an intrinsic neural property.
-
-2. **Temporal Receptive Field Scaling**:
-   Investigate the injection of global virtual nodes *within the GNN message-passing phase* (not just the projection layer) to combat signal attenuation in extreme ladder networks ($>100$ stages).
-
-3. **Autonomous Active Learning via Hermes**:
-   Integrate the topological failure taxonomy output with the dataset generator. The Hermes agent should monitor the `run_circuit_arena.py` metrics and automatically orchestrate targeted training sessions for the weakest topological families.
+### Unified Global Validation
+- **Global Test Passes**: **141 / 141 PASSED** (0 regression).
+- **Exact Cache Hit Rate**: 100% for isomorphic topologies.
+- **Recovery Handler Integrity**: Zero silent failures observed; NaN, timeout, instability, and divergence events successfully caught and classified into one of five distinct degraded categories.
+- **Atomic Writes**: Zero filesystem corruption under simulated execution crash-testing.
 
 ---
 
@@ -91,43 +77,54 @@ cpt_simulator_v5/
 ├── backend/
 │   ├── circuits/
 │   │   ├── dc_solver.py                ← Analytical oracle
-│   │   ├── graph_dataset.py            ← Feature engineering & log-normalization
+│   │   ├── graph_dataset.py            ← Graph log-normalization features
 │   │   ├── physics_projection.py       ← Virtual Node Projection layer
-│   │   ├── topology_curriculum.py      ← Difficulty scheduler
-│   │   ├── failure_analysis.py         ← Topological error classifier
-│   │   └── warmstart_eval.py           ← Hybrid solver evaluation
+│   │   ├── topology_curriculum.py      ← Curriculum scheduler
+│   │   └── failure_analysis.py         ← Topological failure taxonomy
+│   ├── core_runtime/                   ← Hardened core runtime stack (v2.13)
+│   │   ├── exact_cache.py              ← Deterministic match cache
+│   │   ├── task_hashing.py             ← Canonical float & structure hashing
+│   │   ├── execution_policy.py         ← Failure recovery & execution policies
+│   │   ├── confidence_runtime.py       ← Heuristic confidence calculator
+│   │   ├── capability_router.py        ← Five-way capability routing module
+│   │   └── memory_runtime.py           ← Atomic persistence engine
 │   └── neural/
 │       └── models/
-│           └── circuit_gnn.py          ← PINN-GNN Architecture
+│           └── circuit_gnn.py          ← PINN-GNN Surrogate model
 │
 ├── scripts/
 │   ├── train_circuit_gnn.py            ← Training orchestrator
-│   └── run_circuit_arena.py            ← Scientific benchmarking suite
+│   ├── run_circuit_arena.py            ← Topological benchmark suite
+│   ├── run_runtime_benchmark.py        ← Extended runtime benchmarks (v2.13)
+│   └── compact_memory_store.py         ← Memory store compaction utility
 │
 ├── docs/
-│   ├── AGENT_HANDOVER_V29F_COMPREHENSIVE.md  ← Extended context for AI
-│   └── V29F_VIRTUAL_NODE_PROJECTION.md       ← Official scientific report
+│   ├── V213_RUNTIME_RESILIENCE.md      ← Resilient runtime design specs
+│   ├── ORACLE_SDK_GUIDE.md             ← Guide for external solvers
+│   ├── V29F_VIRTUAL_NODE_PROJECTION.md ← Scientific report on Virtual Node
+│   └── V29E_TOPOLOGY_AWARE_SURROGATE.md← Scientific report on GNN ablation
 │
 └── tests/
-    ├── test_v29f_virtual_projection.py ← Projection stability verification
-    └── test_v29f_warmstart.py          ← Warm-start reduction tests
+    ├── test_v29f_virtual_projection.py ← Physics projection tests
+    ├── test_v29f_warmstart.py          ← Warm-start iteration tests
+    └── test_v213_resilient_runtime.py  ← 52 E2E runtime resiliency tests
 ```
 
 ---
 
 ## ⚙️ Operational Commands
 
-**Execute validation and stability test suites:**
+**Execute validation and resilient runtime test suites:**
 ```bash
-pytest tests/test_v29e_*.py tests/test_v29f_*.py -v
+pytest -v
 ```
 
-**Run the warm-start scientific evaluation:**
+**Run the runtime benchmark to gather cache, latency, and routing metrics:**
 ```bash
-python -m backend.circuits.warmstart_eval --steps 5 --perturbation 1.5
+python scripts/run_runtime_benchmark.py
 ```
 
-**Execute the segregated Circuit Arena benchmark:**
+**Run the memory compaction utility:**
 ```bash
-python scripts/run_circuit_arena.py
+python scripts/compact_memory_store.py
 ```

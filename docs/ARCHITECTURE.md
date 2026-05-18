@@ -1,53 +1,100 @@
-# System Architecture (v2.9F)
+# System Architecture (v2.13)
 
-This document outlines the core architecture of the CPT Simulator v5, a hybrid iterative solver combining Physics-Informed Graph Neural Networks (PINN-GNN) with deterministic analytical projection.
+This document formalizes the architectural specifications of the CPT Simulator v5, a resilient, hybrid DC circuit solver combining neural pre-conditioning, physical projection, and a deterministic capability routing runtime.
 
 ---
 
-## 1. Hybrid Solver Stack
+## 1. Hybrid Solver Core
 
-The system resolves DC circuits by cascading neural pre-conditioning with mathematical projection.
+The core simulation pipeline uses a multi-tiered approach to resolve voltages across electrical graphs.
+
+```
+                    ┌────────────────────────┐
+                    │      RuntimeTask       │
+                    └───────────┬────────────┘
+                                │
+                    ┌───────────▼────────────┐
+                    │   ExactMatchCache      │  ← Deterministic SHA-256
+                    └───────────┬────────────┘
+                          Miss  │  Hit
+                                ├──────────────────────────┐
+                                │                          │
+                    ┌───────────▼────────────┐             │
+                    │   ConfidenceRuntime    │             │
+                    └───────────┬────────────┘             │
+                                │                          │
+                    ┌───────────▼────────────┐             │
+                    │    CapabilityRouter    │             │
+                    └───────────┬────────────┘             │
+                                │                          │
+       ┌────────────────────────┼────────────────────────┐ │
+       │                        │                        │ │
+ standard                ood_escalation        oracle_verification
+ (Low Budget)            (High Budget)         (High Budget + Oracle)
+       │                        │                        │ │
+       └────────────────────────┼────────────────────────┘ │
+                                │                          │
+                    ┌───────────▼────────────┐             │
+                    │    RuntimeExecutor     │             │
+                    │  (Surrogate + Proj.)   │             │
+                    └───────────┬────────────┐             │
+                                │                          │
+                    ┌───────────▼────────────┐             │
+                    │    RecoveryHandler     │  ← Checks NaNs / Timeout / Divergence
+                    └───────────┬────────────┘             │
+                                │                          │
+                    ┌───────────▼────────────┐             │
+                    │     MemoryRuntime      │  ← Atomic Write-to-Replace
+                    └───────────┬────────────┘             │
+                                │                          │
+                    ┌───────────▼────────────┐             │
+                    │    ExactMatchCache     │             │
+                    │       .put()           │             │
+                    └───────────┬────────────┘             │
+                                ├──────────────────────────┘
+                                │
+                    ┌───────────▼────────────┐
+                    │     RuntimeResult      │
+                    └────────────────────────┘
+```
 
 ### 1.1 Ground Truth Oracle (`backend/circuits/dc_solver.py`)
-- **Role**: Reference analytical solver.
-- **Mechanism**: Implements exact Modified Nodal Analysis (MNA).
-- **Complexity**: $O(N^3)$. Used strictly for dataset generation and final validation, circumventing latency constraints during inference.
+- **Role**: Reference analytical solver utilizing Modified Nodal Analysis (MNA).
+- **Complexity**: $O(N^3)$. Invoked for ground-truth synthesis, OOD escalation, and strict verification loops.
 
 ### 1.2 GNN Surrogate Pre-conditioner (`backend/neural/models/circuit_gnn.py`)
-- **Role**: High-speed initial state estimator.
-- **Architecture**: `EdgeAwareCircuitGNN` optimized via physics-informed loss (KCL/KVL/Power).
-- **Features**: Utilizes topological feature extraction and logarithmic resistance normalization, ensuring stability across Out-Of-Distribution (OOD) resistance ranges ($0.1\Omega$ to $1M\Omega$).
+- **Role**: Establishes optimal initial state estimates near-instantaneously.
+- **Features**: Physics-Informed Graph Neural Network (PINN-GNN) equipped with topological features and logarithmic resistance scaling to safeguard gradient values under extreme conditions ($0.1\Omega$ to $1M\Omega$).
 
 ### 1.3 Deterministic Physics Projection (`backend/circuits/physics_projection.py`)
-- **Role**: Iterative Jacobi-style corrector.
-- **Mechanism**: Computes exact residuals for Kirchhoff's laws and applies corrective updates to the surrogate's output until convergence limits are met.
-- **Key Innovation (Virtual Node)**: Integrates a mathematical global node that aggregates the mean system residual and redistributes it universally. This structural modification reduces the effective communication diameter of any graph topology to 1, neutralizing the spectral radius degradation typical of local iterative solvers on high-diameter graphs.
+- **Role**: Implements iterative Jacobi-style corrections to eliminate residual violations of physical laws (KCL/KVL).
+- **True Global Virtual Node**: Connects to all nodes to compute and redistribute the global mean residual, compressing the communication diameter to 1 and preventing spectral radius decay in long radial networks.
 
 ---
 
-## 2. Topological Curriculum (`topology_curriculum.py`)
+## 2. Hardened Core Runtime Stack (v2.13)
 
-Training data is curated through a deterministic difficulty scheduler rather than uniform random sampling.
+The v2.13 layer manages the solver components within a robust, fault-tolerant execution container:
 
-- **Trivial**: Tree structures (0 independent cycles, $\le 4$ nodes).
-- **Simple**: Single-loop circuits (1 cycle, $\le 6$ nodes).
-- **Medium**: Moderately coupled loops (2-3 cycles, $\le 10$ nodes).
-- **Dense**: Highly interconnected meshes ($> 3$ cycles). *Note: The dense interconnectivity acts as a natural graph regularizer, often yielding lower Mean Absolute Error (MAE) compared to sparse topologies.*
+### 2.1 Canonical Hashing & Exact Cache
+- **Task Hashing (`task_hashing.py`)**: Computes SHA-256 hashes of circuit configurations. Sorts nodes alphabetically, sequences edges, and rounds floating-point values to 8 significant figures to guarantee that isomorphic circuit structures yield identical keys.
+- **Exact Cache (`exact_cache.py`)**: Intercepts solver calls via `ExactMatchCache` to instantly serve historical matches, bypassing iteration overhead completely.
+
+### 2.2 Execution Policy & Error Recovery
+- **Execution Policy (`execution_policy.py`)**: Enforces timeout, retry, and iteration budget parameters (`ExecutionPolicy`).
+- **Recovery Handler (`execution_policy.py`)**: Intercepts NaNs, time-limit expirations, surrogate instabilities (where predictions wildly deviate from physical outputs), and projection divergences, registering them under explicit degradation flags rather than failing silently.
+
+### 2.3 Confidence Routing
+- **Confidence Estimation (`confidence_runtime.py`)**: Evaluates task complexity (dynamic range, graph size, topological family, raw KCL residual) to determine a deterministic confidence rating.
+- **Capability Router (`capability_router.py`)**: Maps confidence to five execution pathways (`cache_hit`, `standard` with low budget, `increased_budget`, `ood_escalation`, or full `oracle_verification`).
+
+### 2.4 Atomic Memory Persistence (`memory_runtime.py`)
+- **Atomic Writes**: Eliminates file truncation risks. Writes data to a temporary file, calls `os.fsync()` to force disk flush, and invokes `os.replace()` for an atomic rename.
+- **Compaction**: Employs `compact_memory_store.py` to prune obsolete or redundant transaction records.
 
 ---
 
-## 3. Structural Failure Taxonomy (`failure_analysis.py`)
+## 3. Structural Curriculum and Failure Taxonomy
 
-Anomalies are diagnosed topologically to guide structural improvements:
-
-- `cycle_drift_failure`: Non-convergent KCL residuals within closed loops.
-- `dense_mesh_leakage`: Signal attenuation across high-degree nodes.
-- `bridge_node_instability`: Convergence drift across critical bottlenecks in tree structures.
-
----
-
-## 4. Development Roadmap
-
-1.  **Differentiable Physics Layers**: Transition the post-processing Newton/Jacobi iterations into the computational graph during training, allowing the network to backpropagate through the physical correction steps.
-2.  **GNN-level Virtual Nodes**: Implement the global virtual node directly within the message-passing phase of the GNN to counteract signal attenuation in extreme ladder topologies ($>100$ stages).
-3.  **Active Learning Loop**: Couple the topological failure taxonomy output with the dataset generator to autonomously synthesize and over-sample weak topological configurations.
+- **Topological Curriculum (`topology_curriculum.py`)**: Governs gradient progression using a structured curriculum (Trivial trees $\rightarrow$ Simple loops $\rightarrow$ Medium cycles $\rightarrow$ Dense meshes).
+- **Failure Taxonomy (`failure_analysis.py`)**: Diagnoses physical anomalies by structural root cause (`cycle_drift_failure`, `dense_mesh_leakage`, `bridge_node_instability`) rather than plain MSE.

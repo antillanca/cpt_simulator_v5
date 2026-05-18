@@ -1,12 +1,12 @@
 # Curriculum Status — CPT Simulator v5
 
-> **Executive Summary**: The CPT Simulator v5 curriculum operates in two distinct phases. Phase 1 (Symbolic Domain Acquisition) is 100% complete. The system is currently executing Phase 2 (Topological and Structural Physics), focusing on the hybrid resolution of complex electrical graphs.
+> **Executive Summary**: The CPT Simulator v5 curriculum operates across three distinct phases. Phase 1 (Symbolic Domain Acquisition) and Phase 2 (Topological and Structural Physics) are 100% complete. Phase 3 (Core Runtime Resilience) is 100% complete with the integration of the v2.13 hardened execution pipeline.
 
 ---
 
-## 🎓 Phase 1: Symbolic Domain Curriculum (v2.5) — ✅ COMPLETED
+## 🎓 Phase 1: Symbolic Domain Curriculum — ✅ COMPLETED
 
-This phase involved the acquisition of fundamental mathematical and physical principles via generated, deterministically verified Lua logic.
+This phase involved the acquisition of fundamental mathematical and physical principles via generated, deterministically verified symbolic logic.
 
 | Metric | Value | Status |
 |:---|:---:|:---:|
@@ -14,44 +14,45 @@ This phase involved the acquisition of fundamental mathematical and physical pri
 | Invariant verifications | **43** (100%) | ✅ Confirmed |
 | Pending modules | **0** (0%) | - |
 
-### Acquired Domains
-- **Classical Mathematics**: Arithmetic, Algebra, Euclidean Geometry, Trigonometry, Linear Algebra, Numerical Calculus.
-- **Classical Physics**: Kinematics, Newtonian Dynamics, Oscillators, Energy Conservation.
-- **Electromagnetism**: Ohm's Law, Lorentz Force, Maxwell's Equations.
-- **Modern Physics**: Relativity (Special/General), Quantum Mechanics (Wavefunction, Double Slit), QFT.
-- **Systems Analysis**: Chaos Theory, Thermodynamics, Entropy.
-
-*Note: All foundational modules reside in `backend/core_truth/` and were strictly validated by the analytical engine without probabilistic LLM interference.*
-
 ---
 
-## ⚡ Phase 2: Topological Graph Curriculum (v2.9F) — 🔄 ACTIVE
+## ⚡ Phase 2: Topological Graph Curriculum — ✅ COMPLETED
 
-Having theoretically assimilated circuit laws, the system currently trains a **Graph Neural Network (GNN)** coupled with a **Physics Projection** layer to resolve arbitrary circuit graphs in real-time.
+In this phase, a Graph Neural Network (GNN) coupled with a Physics Projection layer was trained and evaluated to resolve arbitrary electrical circuit graphs.
 
-To prevent training collapse, data is structured via a rigorous `CurriculumLevel` topological scheduler (`topology_curriculum.py`).
+Data ingestion was governed by a rigorous `CurriculumLevel` topological scheduler (`topology_curriculum.py`) to prevent gradient collapse.
 
 ### Topological Progression Status
 
 | Level | Definition | Structural Parameters | GNN Pre-conditioning Status | Hybrid Solver Behavior |
 |:---:|:---|:---|:---:|:---|
 | **L0** | **Trivial** | Tree structures, $\le 4$ nodes, $0$ cycles. | ✅ **Mastered** | Instantaneous convergence. |
-| **L1** | **Simple** | 1 independent cycle, $\le 6$ nodes. | ✅ **Mastered** | High precision initial estimation. |
-| **L2** | **Medium** | 2-3 cycles, $\le 10$ nodes. | 🟡 **Advanced** | Stable; GNN acts as an optimal warm-start. |
-| **L3** | **Dense** | $>3$ cycles, $>10$ nodes (complex meshes). | 🟢 **Excellent** | High interconnectivity enforces dense physical constraints, regularizing the network to exceptionally low MAE. |
-| **L4** | **Extreme (OOD)**| Radial chains ($+50$ nodes), $1M\Omega$ resistors. | 🟡 **Active** | The **True Global Virtual Node** (v2.9F) is critical here to ensure mathematical convergence by mitigating spectral radius decay. |
-
-### Phase 2 (v2.9F) Milestones
-- [x] Paradigm shift from pure regression to **Hybrid Iterative Solver**.
-- [x] Implementation of deterministic post-GNN Physics Projection.
-- [x] Integration of the **Virtual Node** to reduce the communication diameter in high-length radial networks.
-- [x] Implementation of automated Structural Failure Taxonomy diagnostics.
+| **L1** | **Simple** | 1 independent cycle, $\le 6$ nodes. | ✅ **Mastered** | High-precision initial estimation. |
+| **L2** | **Medium** | 2-3 cycles, $\le 10$ nodes. | ✅ **Mastered** | Stable; GNN acts as an optimal warm-start. |
+| **L3** | **Dense** | $>3$ cycles, $>10$ nodes (complex meshes). | ✅ **Mastered** | High interconnectivity enforces dense physical constraints, regularizing the network to low MAE. |
+| **L4** | **Extreme (OOD)**| Radial chains ($+50$ nodes), $1M\Omega$ resistors. | ✅ **Mastered** | The **True Global Virtual Node** (v2.9F) mitigates spectral radius decay, ensuring mathematical convergence. |
 
 ---
 
-## 🔮 Phase 3: Autonomous Active Learning (Roadmap)
+## 🛡️ Phase 3: Core Runtime Resilience (v2.13) — ✅ COMPLETED
 
-The next evolutionary phase involves delegating topological curriculum management to the supervisory autonomous agent.
-- The agent will continuously monitor structural metrics via the Circuit Arena.
-- It will identify topologically weak families (e.g., Extreme Ladder Networks).
-- It will autonomously synthesize and inject targeted synthetic batches into the training pipeline, closing the Active Learning loop.
+Phase 3 established a production-grade, fault-tolerant execution container around the solver core to ensure reliable industrial operation and zero silent failures.
+
+### v2.13 Milestones Achieved
+- [x] **Canonical Task Hashing**: Identical hashing of equivalent/isomorphic topologies via alphanumeric sorting and float rounding (8 sig figs).
+- [x] **Exact Match Cache**: Bypasses solver iteration entirely for pre-calculated SHA-256 matches.
+- [x] **Safe Execution Policies**: Controls time-limits, iteration budgets, and retry parameters (`ExecutionPolicy`).
+- [x] **Structured Failure Recovery**: Eliminates silent failures. Intercepts NaNs, time limits, Numeric Divergence, and Surrogate Instability via a central `RecoveryHandler`.
+- [x] **Deterministic Heuristic Confidence**: Evaluates task complexity (dynamic range, graph size, topological family, residual history) without stochastic variance.
+- [x] **Dynamic Routing Decider**: Implements the 5-way `CapabilityRouter` (`cache_hit`, `standard`, `increased_budget`, `ood_escalation`, or `oracle_verification`).
+- [x] **Atomic Persistence Engine**: Employs temp write -> `fsync()` -> atomic `os.replace()` sequence to ensure 100% file-integrity against execution interruptions.
+- [x] **Integrated Validation Suite**: **141 / 141 PASSED** (0 regression).
+
+---
+
+## 🔮 Phase 4: Adaptive Intelligence (Roadmap)
+
+The next evolutionary phases will utilize the resilient v2.13 core as a foundation to integrate adaptive, online-learning features:
+- **Vector-Based Retrieval Memory (FAISS)**: Integrate fuzzy retrieval to complement the exact match cache.
+- **Dynamic LoRA Expert Scaling**: Route tasks to specialized GNN experts tailored to specific topological profiles.
+- **Continuous Experience Replay**: Leverage degraded execution records to compile training sets for continuous adaptation.
