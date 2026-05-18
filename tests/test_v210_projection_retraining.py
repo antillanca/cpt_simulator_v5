@@ -172,8 +172,9 @@ class TestProjectionEffort:
         v_tensor = torch.tensor([oracle_voltages[n] for n in nodes], dtype=torch.float32)
 
         effort = measure_projection_effort(v_tensor, simple_graph, simple_circuit, projection_config)
-        assert effort.initial_residual < 1e-3
-        assert effort.final_residual < effort.initial_residual or effort.initial_residual < 1e-9
+        # Oracle voltages have tiny numerical residual (~1e-7), not zero
+        assert effort.initial_residual < 1e-6
+        assert effort.correction_distance < 1e-3
 
     def test_measure_effort_perturbed_start(
         self, simple_graph, simple_circuit, oracle_voltages, projection_config
@@ -224,11 +225,9 @@ class TestProjectionEffort:
     ):
         """compute_projection_effort convenience wrapper works with a mock model."""
         from backend.neural.models.circuit_gnn import EdgeAwareCircuitGNN
-        from backend.circuits.graph_dataset import CircuitGraph
 
-        # Create a tiny model that outputs near-oracle voltages
-        node_dim = simple_graph.x.shape[1]
-        edge_dim = simple_graph.edge_attr.shape[1] if simple_graph.edge_attr is not None else 4
+        node_dim = simple_graph.node_features.shape[1]
+        edge_dim = simple_graph.edge_features.shape[1]
         model = EdgeAwareCircuitGNN(node_dim=node_dim, edge_dim=edge_dim, hidden_dim=32)
 
         result = compute_projection_effort(

@@ -577,11 +577,11 @@ def main() -> int:
                 vmax = get_vmax(circuit)
                 with torch.no_grad():
                     raw_pred = model(
-                        graph.x,
+                        graph.node_features,
                         graph.edge_index,
-                        graph.edge_attr if use_edge and graph.edge_attr is not None else None,
+                        graph.edge_features if use_edge and graph.edge_features is not None else None,
                     )
-                    voltages = denormalize_voltages(raw_pred.squeeze(-1), vmax, "per_circuit_vmax")
+                    voltages = denormalize_voltages(raw_pred.squeeze(-1), vmax)
 
                 step_metrics = trace_proj.project_step_metrics(graph, circuit, voltages)
                 effort = measure_projection_effort(voltages, graph, circuit, trace_config)

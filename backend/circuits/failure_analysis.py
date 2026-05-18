@@ -11,18 +11,11 @@ import torch
 from backend.circuits.graph_dataset import CircuitGraph
 from backend.circuits.models import Circuit
 
-FAILURE_TYPES = [
-    "topology_collapse",
-    "extreme_resistance_instability",
-    "disconnected_graph_confusion",
-    "symmetry_failure",
-    "node_aliasing",
-    "conservation_drift",
-    "ood_generalization_failure",
-    "cycle_drift_failure",
-    "dense_mesh_leakage",
-    "bridge_node_instability",
-]
+from backend.core_spec.failure_taxonomy import FAILURE_TYPES as _OFFICIAL_FAILURE_TYPES
+
+# Backward-compatible local list — references the canonical taxonomy.
+# Any new failure types must be added to core_spec/failure_taxonomy.py first.
+FAILURE_TYPES = list(_OFFICIAL_FAILURE_TYPES)
 
 
 def _is_connected(circuit: Circuit) -> bool:

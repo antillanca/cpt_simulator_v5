@@ -301,6 +301,27 @@ def _node_kcl_residual(
     return residuals
 
 
+def _enforce_boundary_conditions(
+    voltages: torch.Tensor,
+    circuit: Circuit,
+    graph: CircuitGraph,
+) -> torch.Tensor:
+    """Enforce fixed voltage source values to prevent zero-initialization stall."""
+    if voltages.numel() == 0:
+        return voltages
+    node_idx = {name: i for i, name in enumerate(graph.node_names)}
+    for vs in circuit.voltage_sources:
+        pos_idx = node_idx.get(vs.positive)
+        neg_idx = node_idx.get(vs.negative)
+        if vs.negative == circuit.ground_node and pos_idx is not None:
+            voltages[pos_idx] = float(vs.voltage)
+        elif vs.positive == circuit.ground_node and neg_idx is not None:
+            voltages[neg_idx] = float(-vs.voltage)
+        elif pos_idx is not None and neg_idx is not None:
+            voltages[pos_idx] = voltages[neg_idx] + float(vs.voltage)
+    return voltages
+
+
 def _cycle_kvl_residual(
     voltages: torch.Tensor,
     graph: CircuitGraph,
@@ -533,6 +554,8 @@ class PhysicsProjection:
         v = voltages.clone()
         cfg = self.config
 
+        v = _enforce_boundary_conditions(v, circuit, graph)
+
         # Reset virtual node memory for fresh projection
         self.virtual_node.reset_memory()
 
@@ -568,6 +591,8 @@ class PhysicsProjection:
                     voltages,
                 )
                 break
+                
+            v = _enforce_boundary_conditions(v, circuit, graph)
 
         return v
 
@@ -591,6 +616,8 @@ class PhysicsProjection:
         v = voltages.clone()
         cfg = self.config
         metrics: List[Dict[str, float]] = []
+
+        v = _enforce_boundary_conditions(v, circuit, graph)
 
         # Reset virtual node memory
         self.virtual_node.reset_memory()
@@ -621,6 +648,8 @@ class PhysicsProjection:
             if torch.isnan(v).any() or torch.isinf(v).any():
                 v = torch.where(torch.isfinite(v), v, voltages)
                 break
+                
+            v = _enforce_boundary_conditions(v, circuit, graph)
 
             delta = (v - v_prev).abs().max().item()
             metrics.append({

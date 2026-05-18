@@ -185,11 +185,11 @@ def compute_projection_effort(
         vmax = get_vmax(circuit)
         with torch.no_grad():
             raw_pred = model(
-                graph.x,
+                graph.node_features,
                 graph.edge_index,
-                graph.edge_attr if use_edge_features and graph.edge_attr is not None else None,
+                graph.edge_features if use_edge_features and graph.edge_features is not None else None,
             )
-            voltages = denormalize_voltages(raw_pred.squeeze(-1), vmax, "per_circuit_vmax")
+            voltages = denormalize_voltages(raw_pred.squeeze(-1), vmax)
 
         effort = measure_projection_effort(voltages, graph, circuit, projection_config)
         efforts.append(effort)

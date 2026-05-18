@@ -33,7 +33,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from backend.circuits.dc_solver import solve_dc_circuit
 from backend.circuits.graph_dataset import CircuitGraph, circuit_to_graph
-from backend.circuits.losses import PhysicsInformedLoss
+from backend.circuits.losses import voltage_loss, invariant_aware_loss
 from backend.circuits.models import Circuit
 from backend.circuits.parser import parse_netlist
 from backend.circuits.physics_projection import PhysicsProjection, ProjectionConfig
@@ -113,7 +113,7 @@ def train_model(
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=5, factor=0.5)
-    loss_fn = PhysicsInformedLoss(ablation=ablation)
+    loss_fn = voltage_loss
 
     history = []
     for epoch in range(epochs):
@@ -122,14 +122,14 @@ def train_model(
         for graph, target_v, circuit in zip(train_graphs, train_targets, train_circuits):
             optimizer.zero_grad()
             vmax = get_vmax(circuit)
-            pred = model(graph.x, graph.edge_index, graph.edge_attr if use_edge else None)
-            pred_denorm = denormalize_voltages(pred.squeeze(-1), vmax, "per_circuit_vmax")
+            pred = model(graph.node_features, graph.edge_index, graph.edge_features if use_edge else None)
+            pred_denorm = denormalize_voltages(pred.squeeze(-1), vmax)
 
             # Target tensor
             nodes = list(target_v.keys())
             target_tensor = torch.tensor([target_v[n] for n in nodes], dtype=torch.float32)
 
-            loss = loss_fn(pred_denorm, target_tensor, graph, circuit)
+            loss = loss_fn(pred_denorm, target_tensor)
             loss.backward()
             optimizer.step()
             epoch_loss += loss.item()
@@ -157,10 +157,10 @@ def evaluate_effort(
         vmax = get_vmax(circuit)
         with torch.no_grad():
             raw_pred = model(
-                graph.x, graph.edge_index,
-                graph.edge_attr if use_edge and graph.edge_attr is not None else None,
+                graph.node_features, graph.edge_index,
+                graph.edge_features if use_edge and graph.edge_features is not None else None,
             )
-            voltages = denormalize_voltages(raw_pred.squeeze(-1), vmax, "per_circuit_vmax")
+            voltages = denormalize_voltages(raw_pred.squeeze(-1), vmax)
         effort = measure_projection_effort(voltages, graph, circuit, config)
         efforts.append(effort)
 
@@ -271,10 +271,10 @@ def main() -> int:
             vmax = get_vmax(circuit)
             with torch.no_grad():
                 raw_pred = model(
-                    graph.x, graph.edge_index,
-                    graph.edge_attr if graph.edge_attr is not None else None,
+                    graph.node_features, graph.edge_index,
+                    graph.edge_features if graph.edge_features is not None else None,
                 )
-                pred_v = denormalize_voltages(raw_pred.squeeze(-1), vmax, "per_circuit_vmax")
+                pred_v = denormalize_voltages(raw_pred.squeeze(-1), vmax)
             oracle_v = oracle_solutions[eval_offset + i]
             nodes = list(oracle_v.keys())
             for j, n in enumerate(nodes):
