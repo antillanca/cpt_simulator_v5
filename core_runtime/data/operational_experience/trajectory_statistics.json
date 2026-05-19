@@ -1,0 +1,19 @@
+{
+  "total_executions": 300,
+  "distribution": {
+    "oscillatory": 50,
+    "stable_linear": 92,
+    "divergence_risk": 16,
+    "fast_converging": 101,
+    "stalled": 29,
+    "retrieval_assisted": 12
+  },
+  "percentages": {
+    "oscillatory": 16.666666666666664,
+    "stable_linear": 30.666666666666664,
+    "divergence_risk": 5.333333333333334,
+    "fast_converging": 33.666666666666664,
+    "stalled": 9.666666666666666,
+    "retrieval_assisted": 4.0
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "release_version": "v2.15-runtime-stable",
+  "release_type": "stable_freeze",
+  "release_timestamp": "2026-05-19T01:00:00Z",
+  "git_commit_hash": "3468449c7c167b5fb388afa8e5a50fbcc7132889",
+  "hardware": {
+    "cpu": "AMD Ryzen 5 3450U with Radeon Vega Mobile Gfx",
+    "arch": "x86_64",
+    "ram_gb": 29,
+    "gpu": "none"
+  },
+  "software": {
+    "python": "3.14.4",
+    "torch": "2.12.0+cu130",
+    "numpy": "2.4.4",
+    "faiss": "1.13.2",
+    "os": "Fedora Linux (6.19.14-300.fc44.x86_64)"
+  },
+  "datasets": {
+    "train_10k": {
+      "path": "workspace/datasets/circuits/train_10k",
+      "format": "directory"
+    },
+    "train_10k_manifest": {
+      "path": "workspace/datasets/circuits/train_10k_subset_v29c.manifest.json"
+    },
+    "ood_circuits": {
+      "path": "workspace/datasets/circuits/ood_circuits_subset_v29c.jsonl"
+    }
+  },
+  "benchmark_seed": 42,
+  "runtime_configuration": {
+    "projection_max_iterations_fixed": 20,
+    "projection_stagnation_patience_fixed": 10,
+    "adaptive_scheduling_enabled": true,
+    "exact_cache_enabled": true,
+    "retrieval_memory_enabled": true,
+    "warmstart_enabled": true,
+    "faiss_enabled": true,
+    "embedding_dim": 64,
+    "retrieval_warmstart_similarity_threshold": 0.7,
+    "retrieval_semantic_similarity_threshold": 0.3
+  },
+  "projection_configuration": {
+    "gnn_type": "circuit_gnn",
+    "projection_convergence_target": 1e-6,
+    "escalation_threshold": 5.0,
+    "min_improvement_epsilon": 1e-8,
+    "divergence_detection_window": 3
+  },
+  "test_counts": {
+    "total_collected": 698,
+    "v215_adaptive_scheduling": 100,
+    "v215_oscillatory_convergence": 40,
+    "global_regression": 558
+  },
+  "validation_scripts": {
+    "benchmark": "scripts/run_runtime_benchmark.py",
+    "scheduler_overhead": "scripts/validate_scheduler_overhead.py",
+    "retrieval_warmstart": "scripts/validate_retrieval_warmstart.py",
+    "operational_experience_export": "scripts/export_operational_experience.py",
+    "paper_figures_export": "scripts/export_paper_figures.py"
+  },
+  "documentation": {
+    "adaptive_runtime_scheduling": "docs/V215_ADAPTIVE_RUNTIME_SCHEDULING.md",
+    "stability_guarantees": "docs/V215_STABILITY_GUARANTEES.md",
+    "release_manifest": "runtime_release_manifest_v215.json"
+  },
+  "v216_preparation": {
+    "experience_dataset_schema": "backend/runtime/experience_dataset_schema.py",
+    "note": "Schemas only. No replay, LoRA, or continual training implementation."
+  }
+}

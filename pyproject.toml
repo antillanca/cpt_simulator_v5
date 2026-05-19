@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "core-runtime-engine"
+version = "3.0.0"
+description = "CORE - Cognitive Operational Runtime Engine: domain-agnostic runtime for physics-informed surrogate projection"
+readme = "docs/CORE_RELEASE_README.md"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+authors = [
+    {name = "CPT Project"},
+]
+
+dependencies = [
+    "numpy>=1.24",
+    "torch>=2.0",
+    "faiss-cpu>=1.7",
+]
+
+[project.optional-dependencies]
+circuits = [
+    # Circuit domain dependencies - only needed for circuit execution
+    # All circuit-specific code is in core_runtime/domains/circuits/
+]
+linear-system = [
+    # Linear system domain - only requires numpy (already in core deps)
+]
+dev = [
+    "pytest>=7.0",
+    "pytest-xdist",
+    "matplotlib>=3.5",
+]
+all = [
+    "core-runtime-engine[circuits,linear-system,dev]",
+]
+
+[tool.setuptools.packages.find]
+include = ["core_runtime*"]
+exclude = ["backend*", "workspace*", "scripts*", "docs*"]
+
+[tool.pytest.ini_options]
+testpaths = ["core_runtime/tests", "tests"]
+addopts = "-q --tb=short"
+markers = [
+    "slow: marks tests as slow",
+    "circuit: marks circuit domain tests",
+    "linear_system: marks linear system domain tests",
+]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100

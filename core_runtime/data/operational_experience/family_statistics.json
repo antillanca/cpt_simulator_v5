@@ -1,0 +1,101 @@
+{
+  "tree": {
+    "count": 57,
+    "total_iters": 590,
+    "total_runtime": 1066.7622777142903,
+    "total_residual": 16.648476086181656,
+    "outcomes": {
+      "success": 18,
+      "budget_exhausted": 8,
+      "degraded": 1,
+      "cache_hit": 6,
+      "converged_early": 18,
+      "diverged": 1,
+      "stagnated": 5
+    },
+    "degraded": 1,
+    "avg_iterations": 10.350877192982455,
+    "avg_runtime_ms": 18.715127679198076,
+    "avg_final_residual": 0.29207852782774835,
+    "degraded_rate": 0.017543859649122806
+  },
+  "ladder": {
+    "count": 61,
+    "total_iters": 593,
+    "total_runtime": 1043.054477337757,
+    "total_residual": 31.22092445041393,
+    "outcomes": {
+      "success": 11,
+      "converged_early": 22,
+      "stagnated": 8,
+      "budget_exhausted": 11,
+      "cache_hit": 7,
+      "escalated": 1,
+      "diverged": 1
+    },
+    "degraded": 0,
+    "avg_iterations": 9.721311475409836,
+    "avg_runtime_ms": 17.099253726848474,
+    "avg_final_residual": 0.5118184336133431,
+    "degraded_rate": 0.0
+  },
+  "bridge": {
+    "count": 66,
+    "total_iters": 542,
+    "total_runtime": 1050.2799729083474,
+    "total_residual": 23.296240680328008,
+    "outcomes": {
+      "diverged": 2,
+      "converged_early": 15,
+      "success": 22,
+      "cache_hit": 13,
+      "budget_exhausted": 9,
+      "degraded": 4,
+      "stagnated": 1
+    },
+    "degraded": 4,
+    "avg_iterations": 8.212121212121213,
+    "avg_runtime_ms": 15.91333292285375,
+    "avg_final_residual": 0.3529733436413335,
+    "degraded_rate": 0.06060606060606061
+  },
+  "star": {
+    "count": 57,
+    "total_iters": 653,
+    "total_runtime": 1123.4243360229161,
+    "total_residual": 21.03075431262323,
+    "outcomes": {
+      "converged_early": 17,
+      "stagnated": 9,
+      "degraded": 2,
+      "escalated": 2,
+      "success": 13,
+      "cache_hit": 7,
+      "budget_exhausted": 7
+    },
+    "degraded": 2,
+    "avg_iterations": 11.456140350877194,
+    "avg_runtime_ms": 19.70919887759502,
+    "avg_final_residual": 0.3689606019758461,
+    "degraded_rate": 0.03508771929824561
+  },
+  "mesh": {
+    "count": 59,
+    "total_iters": 540,
+    "total_runtime": 1013.4549851832054,
+    "total_residual": 17.26807370944741,
+    "outcomes": {
+      "success": 16,
+      "converged_early": 18,
+      "cache_hit": 5,
+      "diverged": 1,
+      "budget_exhausted": 15,
+      "stagnated": 4
+    },
+    "degraded": 0,
+    "avg_iterations": 9.152542372881356,
+    "avg_runtime_ms": 17.177203138698395,
+    "avg_final_residual": 0.29267921541436287,
+    "degraded_rate": 0.0
+  }
+}

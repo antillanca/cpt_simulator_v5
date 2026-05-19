@@ -1,0 +1,28 @@
+{
+  "route_distribution": {
+    "oracle_forced": 18,
+    "retrieval_semantic": 31,
+    "standard": 133,
+    "retrieval_warmstart": 49,
+    "degraded": 7,
+    "cache_hit": 38,
+    "ood_escalated": 24
+  },
+  "outcome_distribution": {
+    "success": 80,
+    "diverged": 5,
+    "converged_early": 90,
+    "budget_exhausted": 50,
+    "stagnated": 27,
+    "degraded": 7,
+    "cache_hit": 38,
+    "escalated": 3
+  },
+  "avg_scheduler_overhead_ms": 0.0575000252569118,
+  "avg_projection_runtime_ms": 16.47347467087809,
+  "scheduler_efficiency_ratio": 286.4950858242953,
+  "total_escalations": 10,
+  "escalation_rate": 0.03333333333333333,
+  "warmstart_count": 49,
+  "avg_warmstart_iterations_saved": 6.204081632653061
+}

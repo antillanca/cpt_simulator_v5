@@ -1,0 +1,8 @@
+route,count
+standard,217
+retrieval_warmstart,79
+retrieval_semantic,43
+cache_hit,69
+ood_escalated,42
+oracle_forced,39
+degraded,11

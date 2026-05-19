@@ -1,0 +1,61 @@
+{
+  "manifest_version": "1.0",
+  "release_name": "CORE v3 Foundation",
+  "release_date": "2026-05-19",
+  "package_name": "core-runtime-engine",
+  "package_version": "3.0.0",
+  "frozen_runtime_version": "v2.15-runtime-stable",
+  "frozen_runtime_commit": "44f3ad57489dc2815e39b19e13765e2ab24a13db",
+  "environment": {
+    "python": "3.14.4",
+    "numpy": "2.4.4",
+    "torch": "2.12.0+cu130",
+    "faiss": "1.13.2",
+    "os": "Linux 6.19.14-300.fc44.x86_64",
+    "arch": "x86_64"
+  },
+  "domains": {
+    "circuits": {"version": "2.15.0", "status": "first_validated"},
+    "linear_system": {"version": "0.1.0", "status": "proof_of_concept"}
+  },
+  "test_counts": {
+    "core_tests": 32,
+    "total_tests": 697,
+    "skipped": 1
+  },
+  "package_layout": {
+    "core_runtime/core/runtime": "domain-agnostic task execution",
+    "core_runtime/core/memory": "exact cache + retrieval (FAISS)",
+    "core_runtime/core/routing": "capability router + execution scheduler",
+    "core_runtime/core/scheduling": "projection budget + trajectory + warmstart",
+    "core_runtime/core/specs": "task hashing + dataset registry + frozen specs",
+    "core_runtime/core/experience": "operational experience schemas",
+    "core_runtime/core/tracing": "execution traces",
+    "core_runtime/core/domain_sdk": "Protocol interfaces for domains",
+    "core_runtime/domains/circuits": "first validated domain",
+    "core_runtime/domains/linear_system": "proof-of-concept domain"
+  },
+  "migrated_artifacts": {
+    "operational_experience": "26 files migrated, all hashes preserved",
+    "paper_figures": "7+ PNG + CSV source tables",
+    "runtime_reports": "validation + retrieval + overhead reports",
+    "release_manifest": "v2.15 manifest preserved"
+  },
+  "frozen_specs": [
+    "DomainTaskBase interface",
+    "ExactMatchCache lookup semantics",
+    "RetrievalMemory query semantics",
+    "TrajectoryAnalyzer classification",
+    "ProjectionBudget allocation",
+    "ExecutionTrace recording",
+    "OperationalExperienceSchema serialization",
+    "ExperienceDatasetSchema structure"
+  ],
+  "compatibility_map": {
+    "backend.runtime.*": "core_runtime.core.* (shim with deprecation)",
+    "backend.core_runtime.*": "core_runtime.core.* (shim with deprecation)",
+    "backend.core_spec.*": "core_runtime.core.specs.* (shim with deprecation)"
+  },
+  "migration_log": "docs/MIGRATION_LOG.md",
+  "deterministic_guarantees_preserved": true
+}

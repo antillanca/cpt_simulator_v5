@@ -1,0 +1,283 @@
+{
+  "total_modules_audited": 30,
+  "core_modules": [
+    "backend/core_runtime/confidence_runtime.py",
+    "backend/core_runtime/exact_cache.py",
+    "backend/core_runtime/execution_policy.py",
+    "backend/core_runtime/execution_trace.py",
+    "backend/core_runtime/memory_runtime.py",
+    "backend/core_runtime/surrogate_runtime.py",
+    "backend/core_runtime/task_hashing.py",
+    "backend/core_runtime/task_runtime.py",
+    "backend/core_spec/experiment_spec.py",
+    "backend/core_spec/failure_taxonomy.py",
+    "backend/core_spec/memory_spec.py",
+    "backend/core_spec/model_spec.py",
+    "backend/core_spec/projection_spec.py",
+    "backend/core_spec/report_spec.py",
+    "backend/runtime/cost_estimator.py",
+    "backend/runtime/embedding_runtime.py",
+    "backend/runtime/experience_dataset_schema.py",
+    "backend/runtime/faiss_runtime.py",
+    "backend/runtime/operational_experience_schema.py",
+    "backend/runtime/projection_experience.py",
+    "backend/runtime/retrieval_memory.py",
+    "backend/runtime/trajectory_analysis.py",
+    "backend/runtime/warmstart_runtime.py"
+  ],
+  "circuit_modules": [
+    "backend/core_runtime/capability_router.py",
+    "backend/core_runtime/dataset_registry.py",
+    "backend/core_runtime/oracle_protocol.py",
+    "backend/core_runtime/projection_runtime.py",
+    "backend/core_spec/graph_spec.py",
+    "backend/runtime/execution_scheduler.py",
+    "backend/runtime/projection_scheduler.py"
+  ],
+  "core_count": 23,
+  "circuit_count": 7,
+  "details": [
+    {
+      "filepath": "backend/core_runtime/capability_router.py",
+      "is_circuit_dependent": true,
+      "circuit_imports": [
+        "backend.core_runtime.confidence_runtime"
+      ],
+      "circuit_symbols": [],
+      "recommendation": "circuits"
+    },
+    {
+      "filepath": "backend/core_runtime/confidence_runtime.py",
+      "is_circuit_dependent": false,
+      "circuit_imports": [],
+      "circuit_symbols": [],
+      "recommendation": "core"
+    },
+    {
+      "filepath": "backend/core_runtime/dataset_registry.py",
+      "is_circuit_dependent": true,
+      "circuit_imports": [],
+      "circuit_symbols": [
+        "topology_families",
+        "topology_families"
+      ],
+      "recommendation": "circuits"
+    },
+    {
+      "filepath": "backend/core_runtime/exact_cache.py",
+      "is_circuit_dependent": false,
+      "circuit_imports": [],
+      "circuit_symbols": [],
+      "recommendation": "core"
+    },
+    {
+      "filepath": "backend/core_runtime/execution_policy.py",
+      "is_circuit_dependent": false,
+      "circuit_imports": [],
+      "circuit_symbols": [],
+      "recommendation": "core"
+    },
+    {
+      "filepath": "backend/core_runtime/execution_trace.py",
+      "is_circuit_dependent": false,
+      "circuit_imports": [],
+      "circuit_symbols": [],
+      "recommendation": "core"
+    },
+    {
+      "filepath": "backend/core_runtime/memory_runtime.py",
+      "is_circuit_dependent": false,
+      "circuit_imports": [],
+      "circuit_symbols": [],
+      "recommendation": "core"
+    },
+    {
+      "filepath": "backend/core_runtime/oracle_protocol.py",
+      "is_circuit_dependent": true,
+      "circuit_imports": [
+        "backend.circuits.dc_solver",
+        "backend.circuits.models"
+      ],
+      "circuit_symbols": [
+        "Circuit",
+        "CircuitSolution",
+        "Circuit",
+        "solve_dc_circuit",
+        "Circuit",
+        "Circuit"
+      ],
+      "recommendation": "circuits"
+    },
+    {
+      "filepath": "backend/core_runtime/projection_runtime.py",
+      "is_circuit_dependent": true,
+      "circuit_imports": [
+        "backend.circuits.physics_projection",
+        "backend.circuits.physics_projection",
+        "backend.circuits.physics_projection",
+        "backend.circuits.physics_projection"
+      ],
+      "circuit_symbols": [
+        "PhysicsProjection"
+      ],
+      "recommendation": "circuits"
+    },
+    {
+      "filepath": "backend/core_runtime/surrogate_runtime.py",
+      "is_circuit_dependent": false,
+      "circuit_imports": [],
+      "circuit_symbols": [],
+      "recommendation": "core"
+    },
+    {
+      "filepath": "backend/core_runtime/task_hashing.py",
+      "is_circuit_dependent": false,
+      "circuit_imports": [],
+      "circuit_symbols": [],
+      "recommendation": "core"
+    },
+    {
+      "filepath": "backend/core_runtime/task_runtime.py",
+      "is_circuit_dependent": false,
+      "circuit_imports": [],
+      "circuit_symbols": [],
+      "recommendation": "core"
+    },
+    {
+      "filepath": "backend/core_spec/experiment_spec.py",
+      "is_circuit_dependent": false,
+      "circuit_imports": [],
+      "circuit_symbols": [],
+      "recommendation": "core"
+    },
+    {
+      "filepath": "backend/core_spec/failure_taxonomy.py",
+      "is_circuit_dependent": false,
+      "circuit_imports": [],
+      "circuit_symbols": [],
+      "recommendation": "core"
+    },
+    {
+      "filepath": "backend/core_spec/graph_spec.py",
+      "is_circuit_dependent": true,
+      "circuit_imports": [],
+      "circuit_symbols": [
+        "CanonicalCircuitGraph",
+        "CanonicalCircuitGraph",
+        "CanonicalCircuitGraph",
+        "CanonicalCircuitGraph",
+        "CanonicalCircuitGraph"
+      ],
+      "recommendation": "circuits"
+    },
+    {
+      "filepath": "backend/core_spec/memory_spec.py",
+      "is_circuit_dependent": false,
+      "circuit_imports": [],
+      "circuit_symbols": [],
+      "recommendation": "core"
+    },
+    {
+      "filepath": "backend/core_spec/model_spec.py",
+      "is_circuit_dependent": false,
+      "circuit_imports": [],
+      "circuit_symbols": [],
+      "recommendation": "core"
+    },
+    {
+      "filepath": "backend/core_spec/projection_spec.py",
+      "is_circuit_dependent": false,
+      "circuit_imports": [],
+      "circuit_symbols": [],
+      "recommendation": "core"
+    },
+    {
+      "filepath": "backend/core_spec/report_spec.py",
+      "is_circuit_dependent": false,
+      "circuit_imports": [],
+      "circuit_symbols": [],
+      "recommendation": "core"
+    },
+    {
+      "filepath": "backend/runtime/cost_estimator.py",
+      "is_circuit_dependent": false,
+      "circuit_imports": [],
+      "circuit_symbols": [],
+      "recommendation": "core"
+    },
+    {
+      "filepath": "backend/runtime/embedding_runtime.py",
+      "is_circuit_dependent": false,
+      "circuit_imports": [],
+      "circuit_symbols": [],
+      "recommendation": "core"
+    },
+    {
+      "filepath": "backend/runtime/execution_scheduler.py",
+      "is_circuit_dependent": true,
+      "circuit_imports": [
+        "backend.core_runtime.confidence_runtime"
+      ],
+      "circuit_symbols": [],
+      "recommendation": "circuits"
+    },
+    {
+      "filepath": "backend/runtime/experience_dataset_schema.py",
+      "is_circuit_dependent": false,
+      "circuit_imports": [],
+      "circuit_symbols": [],
+      "recommendation": "core"
+    },
+    {
+      "filepath": "backend/runtime/faiss_runtime.py",
+      "is_circuit_dependent": false,
+      "circuit_imports": [],
+      "circuit_symbols": [],
+      "recommendation": "core"
+    },
+    {
+      "filepath": "backend/runtime/operational_experience_schema.py",
+      "is_circuit_dependent": false,
+      "circuit_imports": [],
+      "circuit_symbols": [],
+      "recommendation": "core"
+    },
+    {
+      "filepath": "backend/runtime/projection_experience.py",
+      "is_circuit_dependent": false,
+      "circuit_imports": [],
+      "circuit_symbols": [],
+      "recommendation": "core"
+    },
+    {
+      "filepath": "backend/runtime/projection_scheduler.py",
+      "is_circuit_dependent": true,
+      "circuit_imports": [
+        "backend.core_runtime.confidence_runtime"
+      ],
+      "circuit_symbols": [],
+      "recommendation": "circuits"
+    },
+    {
+      "filepath": "backend/runtime/retrieval_memory.py",
+      "is_circuit_dependent": false,
+      "circuit_imports": [],
+      "circuit_symbols": [],
+      "recommendation": "core"
+    },
+    {
+      "filepath": "backend/runtime/trajectory_analysis.py",
+      "is_circuit_dependent": false,
+      "circuit_imports": [],
+      "circuit_symbols": [],
+      "recommendation": "core"
+    },
+    {
+      "filepath": "backend/runtime/warmstart_runtime.py",
+      "is_circuit_dependent": false,
+      "circuit_imports": [],
+      "circuit_symbols": [],
+      "recommendation": "core"
+    }
+  ]
+}
