@@ -106,6 +106,30 @@
     },
     {
       "archived_at": null,
+      "artifact_id": "00f488dc6a22ec33",
+      "artifact_type": "checkpoint",
+      "compatibility_status": "compatible",
+      "created_at": 0.0,
+      "fingerprint": "c9738b6be548a1b85af7734b7863d3d6909579be634e24909627796196dbeae8",
+      "last_accessed_at": null,
+      "metadata": {
+        "best_epoch": 1,
+        "dataset_path": "/tmp/pytest-of-john/pytest-602/test_deterministic_training_ch0/dataset.jsonl",
+        "model_type": "edge_aware",
+        "path": "/tmp/pytest-of-john/pytest-602/test_deterministic_training_ch0/run_b.pt"
+      },
+      "parent_fingerprints": [
+        "0106f3b28dbeef91e545f402581efe5129e0560370af6491026787be60dd6a73",
+        "65550533131130c117e2c09eda65f94cc197d06454bbea486cc956c33ffa6ceb",
+        "c7b36ed52557801e4cf7e02512b9e1498d5bfc339b622f686f4ee466afdfae97",
+        "faeef658bc8fcd477690669101d52ce464f66fffd49fe563d053a08768634456"
+      ],
+      "pinned": false,
+      "retention_status": "active",
+      "schema_version": "2.7.6"
+    },
+    {
+      "archived_at": null,
       "artifact_id": "016cdaf08d28d8f0",
       "artifact_type": "training_snapshot",
       "compatibility_status": "compatible",
@@ -1377,6 +1401,46 @@
       "pinned": false,
       "retention_status": "active",
       "schema_version": "2.9d"
+    },
+    {
+      "archived_at": null,
+      "artifact_id": "10181aadf2a1ade3",
+      "artifact_type": "training_snapshot",
+      "compatibility_status": "compatible",
+      "created_at": 0.0,
+      "fingerprint": "06b3a1eb6515dfcb85be862c0c71c172f6646407fdea8fe4dbee73d339e257da",
+      "last_accessed_at": null,
+      "metadata": {
+        "artifact_fingerprint": "06b3a1eb6515dfcb85be862c0c71c172f6646407fdea8fe4dbee73d339e257da",
+        "best_epoch": 1,
+        "checkpoint_fingerprint": "634499c29fad1ba201b45d5de8c51ea3b84151442e22881c1c5ed13d882546f8",
+        "config_fingerprint": "754136b9e29c8fe9b3e91e7be91325e60435ce530a8438e8379e1618c5bd0216",
+        "config_path": "configs/training/kaggle_v29b.yaml",
+        "cuda_enabled": false,
+        "dataset_fingerprint": "1c594d97bbc1b3696dcd826784add98df7555dba02c9f213de89027572479ff2",
+        "dataset_path": "/tmp/pytest-of-john/pytest-600/test_deterministic_training_ch0/dataset.jsonl",
+        "device_name": "cpu",
+        "eval_fingerprint": "1376c5898671ec6d11770e2d607be08494b309d421612e364cb3fe76de56e1f8",
+        "evaluation_fingerprint": "1376c5898671ec6d11770e2d607be08494b309d421612e364cb3fe76de56e1f8",
+        "git_commit": "2785753c718ea4b3a9cd8e23759ddb3e32ef5137",
+        "model_fingerprint": "be8f6bc006345050f5993e7bbd92fb2aeb6f0e149e6974b51fb6bca6ec14cf52",
+        "parent_oracle_version": "v2.8",
+        "resolved_config_path": "/home/john/www/cpt_simulator_v5/configs/training/kaggle_v29b.yaml",
+        "resolved_dataset_path": "/tmp/pytest-of-john/pytest-600/test_deterministic_training_ch0/dataset.jsonl",
+        "schema_version": "2.9b",
+        "seed": 42,
+        "torch_version": "2.12.0+cu130"
+      },
+      "parent_fingerprints": [
+        "1c594d97bbc1b3696dcd826784add98df7555dba02c9f213de89027572479ff2",
+        "754136b9e29c8fe9b3e91e7be91325e60435ce530a8438e8379e1618c5bd0216",
+        "a334a9d55c7bad50938b90354322fa0b7a5b68c4912dfde421789f0c128df9e0",
+        "be8f6bc006345050f5993e7bbd92fb2aeb6f0e149e6974b51fb6bca6ec14cf52",
+        "v2.8"
+      ],
+      "pinned": false,
+      "retention_status": "active",
+      "schema_version": "2.9b"
     },
     {
       "archived_at": null,
@@ -2874,6 +2938,30 @@
     },
     {
       "archived_at": null,
+      "artifact_id": "2459f5a29abca4ba",
+      "artifact_type": "checkpoint",
+      "compatibility_status": "compatible",
+      "created_at": 0.0,
+      "fingerprint": "aca7b242fe4008ce71c8852e6b8b46ecd1354231a30bc8e1733bd8686956f973",
+      "last_accessed_at": null,
+      "metadata": {
+        "best_epoch": 1,
+        "dataset_path": "/tmp/pytest-of-john/pytest-603/test_deterministic_training_ch0/dataset.jsonl",
+        "model_type": "edge_aware",
+        "path": "/tmp/pytest-of-john/pytest-603/test_deterministic_training_ch0/run_b.pt"
+      },
+      "parent_fingerprints": [
+        "15a7b50d9f9f8daeac32b5376e248382099a1c9a86d578a49e1aee827bd1fc2b",
+        "17e6172b4123092a39ac4c79936f1cba380f7c870154d804ca3d2cd3d09b11db",
+        "3e5dbb402259540531e508ca3e0f8a3ba98d044a08718ffabc9f917a287c7aa9",
+        "f449f253dd29f206aa0ee338fd678f23924953687ca9dcdc410a1b78c8e79c99"
+      ],
+      "pinned": false,
+      "retention_status": "active",
+      "schema_version": "2.7.6"
+    },
+    {
+      "archived_at": null,
       "artifact_id": "24bf08dc5fe31bf5",
       "artifact_type": "evaluation_report",
       "compatibility_status": "compatible",
@@ -3685,6 +3773,87 @@
     },
     {
       "archived_at": null,
+      "artifact_id": "35b9fe2d76423c72",
+      "artifact_type": "evaluation_report",
+      "compatibility_status": "compatible",
+      "created_at": 0.0,
+      "fingerprint": "6e1c68761c1badfb6c35564c04615f8b5dd95b0540865d4e10fa7bec8efa44af",
+      "last_accessed_at": null,
+      "metadata": {
+        "best_epoch": 1,
+        "best_eval_metrics": {
+          "count": 0,
+          "kcl_penalty": 0.0,
+          "kvl_penalty": 0.0,
+          "loss": 0.0,
+          "mae": 0.0,
+          "max_error": 0.0,
+          "power_penalty": 0.0,
+          "rmse": 0.0,
+          "voltage_loss": 0.0
+        },
+        "checkpoint_fingerprint": "c9738b6be548a1b85af7734b7863d3d6909579be634e24909627796196dbeae8",
+        "config_fingerprint": "faeef658bc8fcd477690669101d52ce464f66fffd49fe563d053a08768634456",
+        "dataset_fingerprint": "65550533131130c117e2c09eda65f94cc197d06454bbea486cc956c33ffa6ceb",
+        "device": "cpu",
+        "eval_count": 1,
+        "final_eval_metrics": {
+          "count": 0,
+          "kcl_penalty": 0.0,
+          "kvl_penalty": 0.0,
+          "loss": 0.0,
+          "mae": 0.0,
+          "max_error": 0.0,
+          "power_penalty": 0.0,
+          "rmse": 0.0,
+          "voltage_loss": 0.0
+        },
+        "history": [
+          {
+            "epoch": 1,
+            "eval_kcl_penalty": 0.0,
+            "eval_kvl_penalty": 0.0,
+            "eval_loss": 0.0,
+            "eval_mae_V": 0.0,
+            "eval_max_error_V": 0.0,
+            "eval_power_penalty": 0.0,
+            "eval_rmse_V": 0.0,
+            "eval_time_sec": 0.000369,
+            "eval_voltage_loss": 0.0,
+            "lr": 0.001,
+            "train_kcl_loss": 0.0,
+            "train_kvl_loss": 0.0,
+            "train_loss": 0.0,
+            "train_power_loss": 0.0,
+            "train_time_sec": 0.00043,
+            "train_voltage_loss": 0.0
+          }
+        ],
+        "model_type": "edge_aware",
+        "num_params": 83009,
+        "parent_oracle_version": "v2.8",
+        "physics": {
+          "lambda_kcl": 5.0,
+          "lambda_kvl": 5.0,
+          "lambda_power": 1.0
+        },
+        "reproducible": true,
+        "schema_version": "2.9d",
+        "seed": 42,
+        "snapshot_fingerprint": "0106f3b28dbeef91e545f402581efe5129e0560370af6491026787be60dd6a73",
+        "target_mode": "oracle",
+        "train_count": 2
+      },
+      "parent_fingerprints": [
+        "0106f3b28dbeef91e545f402581efe5129e0560370af6491026787be60dd6a73",
+        "c9738b6be548a1b85af7734b7863d3d6909579be634e24909627796196dbeae8"
+      ],
+      "pinned": false,
+      "retention_status": "active",
+      "schema_version": "2.9d"
+    },
+    {
+      "archived_at": null,
       "artifact_id": "36d03eb68e97296d",
       "artifact_type": "checkpoint",
       "compatibility_status": "compatible",
@@ -3706,6 +3875,87 @@
       "pinned": false,
       "retention_status": "active",
       "schema_version": "2.7.6"
+    },
+    {
+      "archived_at": null,
+      "artifact_id": "3724ea56de32f55d",
+      "artifact_type": "evaluation_report",
+      "compatibility_status": "compatible",
+      "created_at": 0.0,
+      "fingerprint": "7566ee6682a22630c9541d80096edffe8d711b05c5e94fad77bbe03b97e19f12",
+      "last_accessed_at": null,
+      "metadata": {
+        "best_epoch": 1,
+        "best_eval_metrics": {
+          "count": 0,
+          "kcl_penalty": 0.0,
+          "kvl_penalty": 0.0,
+          "loss": 0.0,
+          "mae": 0.0,
+          "max_error": 0.0,
+          "power_penalty": 0.0,
+          "rmse": 0.0,
+          "voltage_loss": 0.0
+        },
+        "checkpoint_fingerprint": "6212b4d204751f33f40f5e626a2262f97da1a30ce223ec3c729f9d7cde964419",
+        "config_fingerprint": "1de89193294c40e05c71e84cfdef6a682d3bf166b77152b4ba236895450dc219",
+        "dataset_fingerprint": "f5c5e4b590bea6d59a66a6f836f873c6de779cee97197e1aa55a1da605c610a1",
+        "device": "cpu",
+        "eval_count": 1,
+        "final_eval_metrics": {
+          "count": 0,
+          "kcl_penalty": 0.0,
+          "kvl_penalty": 0.0,
+          "loss": 0.0,
+          "mae": 0.0,
+          "max_error": 0.0,
+          "power_penalty": 0.0,
+          "rmse": 0.0,
+          "voltage_loss": 0.0
+        },
+        "history": [
+          {
+            "epoch": 1,
+            "eval_kcl_penalty": 0.0,
+            "eval_kvl_penalty": 0.0,
+            "eval_loss": 0.0,
+            "eval_mae_V": 0.0,
+            "eval_max_error_V": 0.0,
+            "eval_power_penalty": 0.0,
+            "eval_rmse_V": 0.0,
+            "eval_time_sec": 0.00032,
+            "eval_voltage_loss": 0.0,
+            "lr": 0.001,
+            "train_kcl_loss": 0.0,
+            "train_kvl_loss": 0.0,
+            "train_loss": 0.0,
+            "train_power_loss": 0.0,
+            "train_time_sec": 0.00034,
+            "train_voltage_loss": 0.0
+          }
+        ],
+        "model_type": "edge_aware",
+        "num_params": 83009,
+        "parent_oracle_version": "v2.8",
+        "physics": {
+          "lambda_kcl": 5.0,
+          "lambda_kvl": 5.0,
+          "lambda_power": 1.0
+        },
+        "reproducible": true,
+        "schema_version": "2.9d",
+        "seed": 42,
+        "snapshot_fingerprint": "c22e19fc9feebfdc392fdb18bf5fb275c186763761e7df58b68646c295d6cbf8",
+        "target_mode": "oracle",
+        "train_count": 2
+      },
+      "parent_fingerprints": [
+        "6212b4d204751f33f40f5e626a2262f97da1a30ce223ec3c729f9d7cde964419",
+        "c22e19fc9feebfdc392fdb18bf5fb275c186763761e7df58b68646c295d6cbf8"
+      ],
+      "pinned": false,
+      "retention_status": "active",
+      "schema_version": "2.9d"
     },
     {
       "archived_at": null,
@@ -4096,6 +4346,46 @@
       "pinned": false,
       "retention_status": "active",
       "schema_version": "2.7.6"
+    },
+    {
+      "archived_at": null,
+      "artifact_id": "3b22fe1d8737778a",
+      "artifact_type": "training_snapshot",
+      "compatibility_status": "compatible",
+      "created_at": 0.0,
+      "fingerprint": "f449f253dd29f206aa0ee338fd678f23924953687ca9dcdc410a1b78c8e79c99",
+      "last_accessed_at": null,
+      "metadata": {
+        "artifact_fingerprint": "f449f253dd29f206aa0ee338fd678f23924953687ca9dcdc410a1b78c8e79c99",
+        "best_epoch": 1,
+        "checkpoint_fingerprint": "a024ca85fcf6e20065a7c19a209bcdb17d4f847652499aea34feb6ee82a92407",
+        "config_fingerprint": "17e6172b4123092a39ac4c79936f1cba380f7c870154d804ca3d2cd3d09b11db",
+        "config_path": "configs/training/kaggle_v29b.yaml",
+        "cuda_enabled": false,
+        "dataset_fingerprint": "3e5dbb402259540531e508ca3e0f8a3ba98d044a08718ffabc9f917a287c7aa9",
+        "dataset_path": "/tmp/pytest-of-john/pytest-603/test_deterministic_training_ch0/dataset.jsonl",
+        "device_name": "cpu",
+        "eval_fingerprint": "1376c5898671ec6d11770e2d607be08494b309d421612e364cb3fe76de56e1f8",
+        "evaluation_fingerprint": "1376c5898671ec6d11770e2d607be08494b309d421612e364cb3fe76de56e1f8",
+        "git_commit": "2785753c718ea4b3a9cd8e23759ddb3e32ef5137",
+        "model_fingerprint": "be8f6bc006345050f5993e7bbd92fb2aeb6f0e149e6974b51fb6bca6ec14cf52",
+        "parent_oracle_version": "v2.8",
+        "resolved_config_path": "/home/john/www/cpt_simulator_v5/configs/training/kaggle_v29b.yaml",
+        "resolved_dataset_path": "/tmp/pytest-of-john/pytest-603/test_deterministic_training_ch0/dataset.jsonl",
+        "schema_version": "2.9b",
+        "seed": 42,
+        "torch_version": "2.12.0+cu130"
+      },
+      "parent_fingerprints": [
+        "15a7b50d9f9f8daeac32b5376e248382099a1c9a86d578a49e1aee827bd1fc2b",
+        "17e6172b4123092a39ac4c79936f1cba380f7c870154d804ca3d2cd3d09b11db",
+        "3e5dbb402259540531e508ca3e0f8a3ba98d044a08718ffabc9f917a287c7aa9",
+        "be8f6bc006345050f5993e7bbd92fb2aeb6f0e149e6974b51fb6bca6ec14cf52",
+        "v2.8"
+      ],
+      "pinned": false,
+      "retention_status": "active",
+      "schema_version": "2.9b"
     },
     {
       "archived_at": null,
@@ -5190,6 +5480,30 @@
     },
     {
       "archived_at": null,
+      "artifact_id": "4e8a89542f48f7fe",
+      "artifact_type": "checkpoint",
+      "compatibility_status": "compatible",
+      "created_at": 0.0,
+      "fingerprint": "6212b4d204751f33f40f5e626a2262f97da1a30ce223ec3c729f9d7cde964419",
+      "last_accessed_at": null,
+      "metadata": {
+        "best_epoch": 1,
+        "dataset_path": "/tmp/pytest-of-john/pytest-601/test_deterministic_training_ch0/dataset.jsonl",
+        "model_type": "edge_aware",
+        "path": "/tmp/pytest-of-john/pytest-601/test_deterministic_training_ch0/run_b.pt"
+      },
+      "parent_fingerprints": [
+        "1de89193294c40e05c71e84cfdef6a682d3bf166b77152b4ba236895450dc219",
+        "a4700964f86aad6324b6ff2309acfc0ac9312a4cd6d530fae9b2841bb0d6667e",
+        "c22e19fc9feebfdc392fdb18bf5fb275c186763761e7df58b68646c295d6cbf8",
+        "f5c5e4b590bea6d59a66a6f836f873c6de779cee97197e1aa55a1da605c610a1"
+      ],
+      "pinned": false,
+      "retention_status": "active",
+      "schema_version": "2.7.6"
+    },
+    {
+      "archived_at": null,
       "artifact_id": "5007200b120aaeeb",
       "artifact_type": "checkpoint",
       "compatibility_status": "compatible",
@@ -5407,6 +5721,87 @@
       "parent_fingerprints": [
         "6fba655dfe2047181e45934a61102d35436640c9d60bda0efc2e57140f2019d3",
         "8e8b03a4a2d258665115b855103decd1236286abe062a0551fbae11b69f447ef"
+      ],
+      "pinned": false,
+      "retention_status": "active",
+      "schema_version": "2.9d"
+    },
+    {
+      "archived_at": null,
+      "artifact_id": "543805c5723d0320",
+      "artifact_type": "evaluation_report",
+      "compatibility_status": "compatible",
+      "created_at": 0.0,
+      "fingerprint": "b62971c5c7236e274f974c432e2197af26d232ed49b26cafc491a271714d3896",
+      "last_accessed_at": null,
+      "metadata": {
+        "best_epoch": 1,
+        "best_eval_metrics": {
+          "count": 0,
+          "kcl_penalty": 0.0,
+          "kvl_penalty": 0.0,
+          "loss": 0.0,
+          "mae": 0.0,
+          "max_error": 0.0,
+          "power_penalty": 0.0,
+          "rmse": 0.0,
+          "voltage_loss": 0.0
+        },
+        "checkpoint_fingerprint": "d85f3683ff83a0fe5591772950ec44c68b8931f3b6c556078b8cc0c9dcef6be3",
+        "config_fingerprint": "754136b9e29c8fe9b3e91e7be91325e60435ce530a8438e8379e1618c5bd0216",
+        "dataset_fingerprint": "1c594d97bbc1b3696dcd826784add98df7555dba02c9f213de89027572479ff2",
+        "device": "cpu",
+        "eval_count": 1,
+        "final_eval_metrics": {
+          "count": 0,
+          "kcl_penalty": 0.0,
+          "kvl_penalty": 0.0,
+          "loss": 0.0,
+          "mae": 0.0,
+          "max_error": 0.0,
+          "power_penalty": 0.0,
+          "rmse": 0.0,
+          "voltage_loss": 0.0
+        },
+        "history": [
+          {
+            "epoch": 1,
+            "eval_kcl_penalty": 0.0,
+            "eval_kvl_penalty": 0.0,
+            "eval_loss": 0.0,
+            "eval_mae_V": 0.0,
+            "eval_max_error_V": 0.0,
+            "eval_power_penalty": 0.0,
+            "eval_rmse_V": 0.0,
+            "eval_time_sec": 0.000247,
+            "eval_voltage_loss": 0.0,
+            "lr": 0.001,
+            "train_kcl_loss": 0.0,
+            "train_kvl_loss": 0.0,
+            "train_loss": 0.0,
+            "train_power_loss": 0.0,
+            "train_time_sec": 0.000236,
+            "train_voltage_loss": 0.0
+          }
+        ],
+        "model_type": "edge_aware",
+        "num_params": 83009,
+        "parent_oracle_version": "v2.8",
+        "physics": {
+          "lambda_kcl": 5.0,
+          "lambda_kvl": 5.0,
+          "lambda_power": 1.0
+        },
+        "reproducible": true,
+        "schema_version": "2.9d",
+        "seed": 42,
+        "snapshot_fingerprint": "06b3a1eb6515dfcb85be862c0c71c172f6646407fdea8fe4dbee73d339e257da",
+        "target_mode": "oracle",
+        "train_count": 2
+      },
+      "parent_fingerprints": [
+        "06b3a1eb6515dfcb85be862c0c71c172f6646407fdea8fe4dbee73d339e257da",
+        "d85f3683ff83a0fe5591772950ec44c68b8931f3b6c556078b8cc0c9dcef6be3"
       ],
       "pinned": false,
       "retention_status": "active",
@@ -6767,6 +7162,87 @@
     },
     {
       "archived_at": null,
+      "artifact_id": "6d6d36576a2ec292",
+      "artifact_type": "evaluation_report",
+      "compatibility_status": "compatible",
+      "created_at": 0.0,
+      "fingerprint": "0a0eccf5250939e813467c3f92f1032ed974055278f4e4c17304582b31f4dbc5",
+      "last_accessed_at": null,
+      "metadata": {
+        "best_epoch": 1,
+        "best_eval_metrics": {
+          "count": 0,
+          "kcl_penalty": 0.0,
+          "kvl_penalty": 0.0,
+          "loss": 0.0,
+          "mae": 0.0,
+          "max_error": 0.0,
+          "power_penalty": 0.0,
+          "rmse": 0.0,
+          "voltage_loss": 0.0
+        },
+        "checkpoint_fingerprint": "c9738b6be548a1b85af7734b7863d3d6909579be634e24909627796196dbeae8",
+        "config_fingerprint": "faeef658bc8fcd477690669101d52ce464f66fffd49fe563d053a08768634456",
+        "dataset_fingerprint": "65550533131130c117e2c09eda65f94cc197d06454bbea486cc956c33ffa6ceb",
+        "device": "cpu",
+        "eval_count": 1,
+        "final_eval_metrics": {
+          "count": 0,
+          "kcl_penalty": 0.0,
+          "kvl_penalty": 0.0,
+          "loss": 0.0,
+          "mae": 0.0,
+          "max_error": 0.0,
+          "power_penalty": 0.0,
+          "rmse": 0.0,
+          "voltage_loss": 0.0
+        },
+        "history": [
+          {
+            "epoch": 1,
+            "eval_kcl_penalty": 0.0,
+            "eval_kvl_penalty": 0.0,
+            "eval_loss": 0.0,
+            "eval_mae_V": 0.0,
+            "eval_max_error_V": 0.0,
+            "eval_power_penalty": 0.0,
+            "eval_rmse_V": 0.0,
+            "eval_time_sec": 0.000256,
+            "eval_voltage_loss": 0.0,
+            "lr": 0.001,
+            "train_kcl_loss": 0.0,
+            "train_kvl_loss": 0.0,
+            "train_loss": 0.0,
+            "train_power_loss": 0.0,
+            "train_time_sec": 0.000238,
+            "train_voltage_loss": 0.0
+          }
+        ],
+        "model_type": "edge_aware",
+        "num_params": 83009,
+        "parent_oracle_version": "v2.8",
+        "physics": {
+          "lambda_kcl": 5.0,
+          "lambda_kvl": 5.0,
+          "lambda_power": 1.0
+        },
+        "reproducible": true,
+        "schema_version": "2.9d",
+        "seed": 42,
+        "snapshot_fingerprint": "0106f3b28dbeef91e545f402581efe5129e0560370af6491026787be60dd6a73",
+        "target_mode": "oracle",
+        "train_count": 2
+      },
+      "parent_fingerprints": [
+        "0106f3b28dbeef91e545f402581efe5129e0560370af6491026787be60dd6a73",
+        "c9738b6be548a1b85af7734b7863d3d6909579be634e24909627796196dbeae8"
+      ],
+      "pinned": false,
+      "retention_status": "active",
+      "schema_version": "2.9d"
+    },
+    {
+      "archived_at": null,
       "artifact_id": "6db4d1d77d53d16c",
       "artifact_type": "evaluation_report",
       "compatibility_status": "compatible",
@@ -7315,6 +7791,46 @@
       "pinned": false,
       "retention_status": "active",
       "schema_version": "2.9d"
+    },
+    {
+      "archived_at": null,
+      "artifact_id": "77d2e82d61499fcd",
+      "artifact_type": "training_snapshot",
+      "compatibility_status": "compatible",
+      "created_at": 0.0,
+      "fingerprint": "0106f3b28dbeef91e545f402581efe5129e0560370af6491026787be60dd6a73",
+      "last_accessed_at": null,
+      "metadata": {
+        "artifact_fingerprint": "0106f3b28dbeef91e545f402581efe5129e0560370af6491026787be60dd6a73",
+        "best_epoch": 1,
+        "checkpoint_fingerprint": "3f1b8ada1e15c9882d38b407ed0e7de14e0dc21a871496dadbdcf62e035eeff6",
+        "config_fingerprint": "faeef658bc8fcd477690669101d52ce464f66fffd49fe563d053a08768634456",
+        "config_path": "configs/training/kaggle_v29b.yaml",
+        "cuda_enabled": false,
+        "dataset_fingerprint": "65550533131130c117e2c09eda65f94cc197d06454bbea486cc956c33ffa6ceb",
+        "dataset_path": "/tmp/pytest-of-john/pytest-602/test_deterministic_training_ch0/dataset.jsonl",
+        "device_name": "cpu",
+        "eval_fingerprint": "1376c5898671ec6d11770e2d607be08494b309d421612e364cb3fe76de56e1f8",
+        "evaluation_fingerprint": "1376c5898671ec6d11770e2d607be08494b309d421612e364cb3fe76de56e1f8",
+        "git_commit": "2785753c718ea4b3a9cd8e23759ddb3e32ef5137",
+        "model_fingerprint": "be8f6bc006345050f5993e7bbd92fb2aeb6f0e149e6974b51fb6bca6ec14cf52",
+        "parent_oracle_version": "v2.8",
+        "resolved_config_path": "/home/john/www/cpt_simulator_v5/configs/training/kaggle_v29b.yaml",
+        "resolved_dataset_path": "/tmp/pytest-of-john/pytest-602/test_deterministic_training_ch0/dataset.jsonl",
+        "schema_version": "2.9b",
+        "seed": 42,
+        "torch_version": "2.12.0+cu130"
+      },
+      "parent_fingerprints": [
+        "65550533131130c117e2c09eda65f94cc197d06454bbea486cc956c33ffa6ceb",
+        "be8f6bc006345050f5993e7bbd92fb2aeb6f0e149e6974b51fb6bca6ec14cf52",
+        "c7b36ed52557801e4cf7e02512b9e1498d5bfc339b622f686f4ee466afdfae97",
+        "faeef658bc8fcd477690669101d52ce464f66fffd49fe563d053a08768634456",
+        "v2.8"
+      ],
+      "pinned": false,
+      "retention_status": "active",
+      "schema_version": "2.9b"
     },
     {
       "archived_at": null,
@@ -8584,6 +9100,87 @@
       "pinned": false,
       "retention_status": "active",
       "schema_version": "2.9b"
+    },
+    {
+      "archived_at": null,
+      "artifact_id": "96d71a98a97e5c0a",
+      "artifact_type": "evaluation_report",
+      "compatibility_status": "compatible",
+      "created_at": 0.0,
+      "fingerprint": "285fd3d0c6c2d04ef90af48495a3a772fab0cec668efdbfd6d10b36df8621892",
+      "last_accessed_at": null,
+      "metadata": {
+        "best_epoch": 1,
+        "best_eval_metrics": {
+          "count": 0,
+          "kcl_penalty": 0.0,
+          "kvl_penalty": 0.0,
+          "loss": 0.0,
+          "mae": 0.0,
+          "max_error": 0.0,
+          "power_penalty": 0.0,
+          "rmse": 0.0,
+          "voltage_loss": 0.0
+        },
+        "checkpoint_fingerprint": "6212b4d204751f33f40f5e626a2262f97da1a30ce223ec3c729f9d7cde964419",
+        "config_fingerprint": "1de89193294c40e05c71e84cfdef6a682d3bf166b77152b4ba236895450dc219",
+        "dataset_fingerprint": "f5c5e4b590bea6d59a66a6f836f873c6de779cee97197e1aa55a1da605c610a1",
+        "device": "cpu",
+        "eval_count": 1,
+        "final_eval_metrics": {
+          "count": 0,
+          "kcl_penalty": 0.0,
+          "kvl_penalty": 0.0,
+          "loss": 0.0,
+          "mae": 0.0,
+          "max_error": 0.0,
+          "power_penalty": 0.0,
+          "rmse": 0.0,
+          "voltage_loss": 0.0
+        },
+        "history": [
+          {
+            "epoch": 1,
+            "eval_kcl_penalty": 0.0,
+            "eval_kvl_penalty": 0.0,
+            "eval_loss": 0.0,
+            "eval_mae_V": 0.0,
+            "eval_max_error_V": 0.0,
+            "eval_power_penalty": 0.0,
+            "eval_rmse_V": 0.0,
+            "eval_time_sec": 0.000277,
+            "eval_voltage_loss": 0.0,
+            "lr": 0.001,
+            "train_kcl_loss": 0.0,
+            "train_kvl_loss": 0.0,
+            "train_loss": 0.0,
+            "train_power_loss": 0.0,
+            "train_time_sec": 0.000334,
+            "train_voltage_loss": 0.0
+          }
+        ],
+        "model_type": "edge_aware",
+        "num_params": 83009,
+        "parent_oracle_version": "v2.8",
+        "physics": {
+          "lambda_kcl": 5.0,
+          "lambda_kvl": 5.0,
+          "lambda_power": 1.0
+        },
+        "reproducible": true,
+        "schema_version": "2.9d",
+        "seed": 42,
+        "snapshot_fingerprint": "c22e19fc9feebfdc392fdb18bf5fb275c186763761e7df58b68646c295d6cbf8",
+        "target_mode": "oracle",
+        "train_count": 2
+      },
+      "parent_fingerprints": [
+        "6212b4d204751f33f40f5e626a2262f97da1a30ce223ec3c729f9d7cde964419",
+        "c22e19fc9feebfdc392fdb18bf5fb275c186763761e7df58b68646c295d6cbf8"
+      ],
+      "pinned": false,
+      "retention_status": "active",
+      "schema_version": "2.9d"
     },
     {
       "archived_at": null,
@@ -11480,6 +12077,87 @@
     },
     {
       "archived_at": null,
+      "artifact_id": "c6cd698a8d0fdb58",
+      "artifact_type": "evaluation_report",
+      "compatibility_status": "compatible",
+      "created_at": 0.0,
+      "fingerprint": "3ef58620f49be3edffb780d77ac202375e49270b34aaecfdd809519c2b7ede6d",
+      "last_accessed_at": null,
+      "metadata": {
+        "best_epoch": 1,
+        "best_eval_metrics": {
+          "count": 0,
+          "kcl_penalty": 0.0,
+          "kvl_penalty": 0.0,
+          "loss": 0.0,
+          "mae": 0.0,
+          "max_error": 0.0,
+          "power_penalty": 0.0,
+          "rmse": 0.0,
+          "voltage_loss": 0.0
+        },
+        "checkpoint_fingerprint": "aca7b242fe4008ce71c8852e6b8b46ecd1354231a30bc8e1733bd8686956f973",
+        "config_fingerprint": "17e6172b4123092a39ac4c79936f1cba380f7c870154d804ca3d2cd3d09b11db",
+        "dataset_fingerprint": "3e5dbb402259540531e508ca3e0f8a3ba98d044a08718ffabc9f917a287c7aa9",
+        "device": "cpu",
+        "eval_count": 1,
+        "final_eval_metrics": {
+          "count": 0,
+          "kcl_penalty": 0.0,
+          "kvl_penalty": 0.0,
+          "loss": 0.0,
+          "mae": 0.0,
+          "max_error": 0.0,
+          "power_penalty": 0.0,
+          "rmse": 0.0,
+          "voltage_loss": 0.0
+        },
+        "history": [
+          {
+            "epoch": 1,
+            "eval_kcl_penalty": 0.0,
+            "eval_kvl_penalty": 0.0,
+            "eval_loss": 0.0,
+            "eval_mae_V": 0.0,
+            "eval_max_error_V": 0.0,
+            "eval_power_penalty": 0.0,
+            "eval_rmse_V": 0.0,
+            "eval_time_sec": 0.000252,
+            "eval_voltage_loss": 0.0,
+            "lr": 0.001,
+            "train_kcl_loss": 0.0,
+            "train_kvl_loss": 0.0,
+            "train_loss": 0.0,
+            "train_power_loss": 0.0,
+            "train_time_sec": 0.000246,
+            "train_voltage_loss": 0.0
+          }
+        ],
+        "model_type": "edge_aware",
+        "num_params": 83009,
+        "parent_oracle_version": "v2.8",
+        "physics": {
+          "lambda_kcl": 5.0,
+          "lambda_kvl": 5.0,
+          "lambda_power": 1.0
+        },
+        "reproducible": true,
+        "schema_version": "2.9d",
+        "seed": 42,
+        "snapshot_fingerprint": "f449f253dd29f206aa0ee338fd678f23924953687ca9dcdc410a1b78c8e79c99",
+        "target_mode": "oracle",
+        "train_count": 2
+      },
+      "parent_fingerprints": [
+        "aca7b242fe4008ce71c8852e6b8b46ecd1354231a30bc8e1733bd8686956f973",
+        "f449f253dd29f206aa0ee338fd678f23924953687ca9dcdc410a1b78c8e79c99"
+      ],
+      "pinned": false,
+      "retention_status": "active",
+      "schema_version": "2.9d"
+    },
+    {
+      "archived_at": null,
       "artifact_id": "c7917e19060c0f3b",
       "artifact_type": "evaluation_report",
       "compatibility_status": "compatible",
@@ -11640,6 +12318,46 @@
         "429edb852df30f23906454d7acb32c439559facba90fd23391bde5b263865b11",
         "445a83415b52e1e69b21b5604e569d4f7b4534fd752004007ced6502e3f3046f",
         "b1e1db46fd820c87a26bd8a47476ba8e93c9b8f65126207a391eff872688f952",
+        "v2.8"
+      ],
+      "pinned": false,
+      "retention_status": "active",
+      "schema_version": "2.9b"
+    },
+    {
+      "archived_at": null,
+      "artifact_id": "cd37d803cdef452f",
+      "artifact_type": "training_snapshot",
+      "compatibility_status": "compatible",
+      "created_at": 0.0,
+      "fingerprint": "c22e19fc9feebfdc392fdb18bf5fb275c186763761e7df58b68646c295d6cbf8",
+      "last_accessed_at": null,
+      "metadata": {
+        "artifact_fingerprint": "c22e19fc9feebfdc392fdb18bf5fb275c186763761e7df58b68646c295d6cbf8",
+        "best_epoch": 1,
+        "checkpoint_fingerprint": "a628f4037ca4b86d20621a5a7161cfb732f412ef4ace78b9bbf36a58b9379468",
+        "config_fingerprint": "1de89193294c40e05c71e84cfdef6a682d3bf166b77152b4ba236895450dc219",
+        "config_path": "configs/training/kaggle_v29b.yaml",
+        "cuda_enabled": false,
+        "dataset_fingerprint": "f5c5e4b590bea6d59a66a6f836f873c6de779cee97197e1aa55a1da605c610a1",
+        "dataset_path": "/tmp/pytest-of-john/pytest-601/test_deterministic_training_ch0/dataset.jsonl",
+        "device_name": "cpu",
+        "eval_fingerprint": "1376c5898671ec6d11770e2d607be08494b309d421612e364cb3fe76de56e1f8",
+        "evaluation_fingerprint": "1376c5898671ec6d11770e2d607be08494b309d421612e364cb3fe76de56e1f8",
+        "git_commit": "2785753c718ea4b3a9cd8e23759ddb3e32ef5137",
+        "model_fingerprint": "be8f6bc006345050f5993e7bbd92fb2aeb6f0e149e6974b51fb6bca6ec14cf52",
+        "parent_oracle_version": "v2.8",
+        "resolved_config_path": "/home/john/www/cpt_simulator_v5/configs/training/kaggle_v29b.yaml",
+        "resolved_dataset_path": "/tmp/pytest-of-john/pytest-601/test_deterministic_training_ch0/dataset.jsonl",
+        "schema_version": "2.9b",
+        "seed": 42,
+        "torch_version": "2.12.0+cu130"
+      },
+      "parent_fingerprints": [
+        "1de89193294c40e05c71e84cfdef6a682d3bf166b77152b4ba236895450dc219",
+        "a4700964f86aad6324b6ff2309acfc0ac9312a4cd6d530fae9b2841bb0d6667e",
+        "be8f6bc006345050f5993e7bbd92fb2aeb6f0e149e6974b51fb6bca6ec14cf52",
+        "f5c5e4b590bea6d59a66a6f836f873c6de779cee97197e1aa55a1da605c610a1",
         "v2.8"
       ],
       "pinned": false,
@@ -13039,6 +13757,30 @@
       "pinned": false,
       "retention_status": "active",
       "schema_version": "2.9b"
+    },
+    {
+      "archived_at": null,
+      "artifact_id": "e569337527b0f8f1",
+      "artifact_type": "checkpoint",
+      "compatibility_status": "compatible",
+      "created_at": 0.0,
+      "fingerprint": "d85f3683ff83a0fe5591772950ec44c68b8931f3b6c556078b8cc0c9dcef6be3",
+      "last_accessed_at": null,
+      "metadata": {
+        "best_epoch": 1,
+        "dataset_path": "/tmp/pytest-of-john/pytest-600/test_deterministic_training_ch0/dataset.jsonl",
+        "model_type": "edge_aware",
+        "path": "/tmp/pytest-of-john/pytest-600/test_deterministic_training_ch0/run_b.pt"
+      },
+      "parent_fingerprints": [
+        "06b3a1eb6515dfcb85be862c0c71c172f6646407fdea8fe4dbee73d339e257da",
+        "1c594d97bbc1b3696dcd826784add98df7555dba02c9f213de89027572479ff2",
+        "754136b9e29c8fe9b3e91e7be91325e60435ce530a8438e8379e1618c5bd0216",
+        "a334a9d55c7bad50938b90354322fa0b7a5b68c4912dfde421789f0c128df9e0"
+      ],
+      "pinned": false,
+      "retention_status": "active",
+      "schema_version": "2.7.6"
     },
     {
       "archived_at": null,
@@ -16437,6 +17179,168 @@
     },
     {
       "archived_at": null,
+      "artifact_id": "fbde0266018ada15",
+      "artifact_type": "evaluation_report",
+      "compatibility_status": "compatible",
+      "created_at": 0.0,
+      "fingerprint": "05191074b46348cf5532c86f9420ae3950ddb977d25c1c2f0c88afe068963d52",
+      "last_accessed_at": null,
+      "metadata": {
+        "best_epoch": 1,
+        "best_eval_metrics": {
+          "count": 0,
+          "kcl_penalty": 0.0,
+          "kvl_penalty": 0.0,
+          "loss": 0.0,
+          "mae": 0.0,
+          "max_error": 0.0,
+          "power_penalty": 0.0,
+          "rmse": 0.0,
+          "voltage_loss": 0.0
+        },
+        "checkpoint_fingerprint": "aca7b242fe4008ce71c8852e6b8b46ecd1354231a30bc8e1733bd8686956f973",
+        "config_fingerprint": "17e6172b4123092a39ac4c79936f1cba380f7c870154d804ca3d2cd3d09b11db",
+        "dataset_fingerprint": "3e5dbb402259540531e508ca3e0f8a3ba98d044a08718ffabc9f917a287c7aa9",
+        "device": "cpu",
+        "eval_count": 1,
+        "final_eval_metrics": {
+          "count": 0,
+          "kcl_penalty": 0.0,
+          "kvl_penalty": 0.0,
+          "loss": 0.0,
+          "mae": 0.0,
+          "max_error": 0.0,
+          "power_penalty": 0.0,
+          "rmse": 0.0,
+          "voltage_loss": 0.0
+        },
+        "history": [
+          {
+            "epoch": 1,
+            "eval_kcl_penalty": 0.0,
+            "eval_kvl_penalty": 0.0,
+            "eval_loss": 0.0,
+            "eval_mae_V": 0.0,
+            "eval_max_error_V": 0.0,
+            "eval_power_penalty": 0.0,
+            "eval_rmse_V": 0.0,
+            "eval_time_sec": 0.000246,
+            "eval_voltage_loss": 0.0,
+            "lr": 0.001,
+            "train_kcl_loss": 0.0,
+            "train_kvl_loss": 0.0,
+            "train_loss": 0.0,
+            "train_power_loss": 0.0,
+            "train_time_sec": 0.000242,
+            "train_voltage_loss": 0.0
+          }
+        ],
+        "model_type": "edge_aware",
+        "num_params": 83009,
+        "parent_oracle_version": "v2.8",
+        "physics": {
+          "lambda_kcl": 5.0,
+          "lambda_kvl": 5.0,
+          "lambda_power": 1.0
+        },
+        "reproducible": true,
+        "schema_version": "2.9d",
+        "seed": 42,
+        "snapshot_fingerprint": "f449f253dd29f206aa0ee338fd678f23924953687ca9dcdc410a1b78c8e79c99",
+        "target_mode": "oracle",
+        "train_count": 2
+      },
+      "parent_fingerprints": [
+        "aca7b242fe4008ce71c8852e6b8b46ecd1354231a30bc8e1733bd8686956f973",
+        "f449f253dd29f206aa0ee338fd678f23924953687ca9dcdc410a1b78c8e79c99"
+      ],
+      "pinned": false,
+      "retention_status": "active",
+      "schema_version": "2.9d"
+    },
+    {
+      "archived_at": null,
+      "artifact_id": "fcb35df52430e370",
+      "artifact_type": "evaluation_report",
+      "compatibility_status": "compatible",
+      "created_at": 0.0,
+      "fingerprint": "bd5c9cecb47c6ad9b2d94a5b121b896f97e546c1fae94016a708a4d4ba4d8606",
+      "last_accessed_at": null,
+      "metadata": {
+        "best_epoch": 1,
+        "best_eval_metrics": {
+          "count": 0,
+          "kcl_penalty": 0.0,
+          "kvl_penalty": 0.0,
+          "loss": 0.0,
+          "mae": 0.0,
+          "max_error": 0.0,
+          "power_penalty": 0.0,
+          "rmse": 0.0,
+          "voltage_loss": 0.0
+        },
+        "checkpoint_fingerprint": "d85f3683ff83a0fe5591772950ec44c68b8931f3b6c556078b8cc0c9dcef6be3",
+        "config_fingerprint": "754136b9e29c8fe9b3e91e7be91325e60435ce530a8438e8379e1618c5bd0216",
+        "dataset_fingerprint": "1c594d97bbc1b3696dcd826784add98df7555dba02c9f213de89027572479ff2",
+        "device": "cpu",
+        "eval_count": 1,
+        "final_eval_metrics": {
+          "count": 0,
+          "kcl_penalty": 0.0,
+          "kvl_penalty": 0.0,
+          "loss": 0.0,
+          "mae": 0.0,
+          "max_error": 0.0,
+          "power_penalty": 0.0,
+          "rmse": 0.0,
+          "voltage_loss": 0.0
+        },
+        "history": [
+          {
+            "epoch": 1,
+            "eval_kcl_penalty": 0.0,
+            "eval_kvl_penalty": 0.0,
+            "eval_loss": 0.0,
+            "eval_mae_V": 0.0,
+            "eval_max_error_V": 0.0,
+            "eval_power_penalty": 0.0,
+            "eval_rmse_V": 0.0,
+            "eval_time_sec": 0.000291,
+            "eval_voltage_loss": 0.0,
+            "lr": 0.001,
+            "train_kcl_loss": 0.0,
+            "train_kvl_loss": 0.0,
+            "train_loss": 0.0,
+            "train_power_loss": 0.0,
+            "train_time_sec": 0.000298,
+            "train_voltage_loss": 0.0
+          }
+        ],
+        "model_type": "edge_aware",
+        "num_params": 83009,
+        "parent_oracle_version": "v2.8",
+        "physics": {
+          "lambda_kcl": 5.0,
+          "lambda_kvl": 5.0,
+          "lambda_power": 1.0
+        },
+        "reproducible": true,
+        "schema_version": "2.9d",
+        "seed": 42,
+        "snapshot_fingerprint": "06b3a1eb6515dfcb85be862c0c71c172f6646407fdea8fe4dbee73d339e257da",
+        "target_mode": "oracle",
+        "train_count": 2
+      },
+      "parent_fingerprints": [
+        "06b3a1eb6515dfcb85be862c0c71c172f6646407fdea8fe4dbee73d339e257da",
+        "d85f3683ff83a0fe5591772950ec44c68b8931f3b6c556078b8cc0c9dcef6be3"
+      ],
+      "pinned": false,
+      "retention_status": "active",
+      "schema_version": "2.9d"
+    },
+    {
+      "archived_at": null,
       "artifact_id": "fccc5cf3ab833b73",
       "artifact_type": "evaluation_report",
       "compatibility_status": "compatible",
@@ -16783,6 +17687,6 @@
       "schema_version": "2.9b"
     }
   ],
-  "registry_fingerprint": "e4cd7e5a91c31b323e2af0db66ac4adc21d89471c8075a0995c1f3c9ed1c23a6",
+  "registry_fingerprint": "3eb0e7151fc6e0883c3c23b4f3e0070c087bc4dc3dadd085f3f598975352e9d3",
   "schema_version": "2.7.8"
 }

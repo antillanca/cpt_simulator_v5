@@ -1,5 +1,19 @@
 # CORE Paper Positioning
 
+## What CORE Is
+
+CORE is not a simulator, nor a GNN framework, nor a physics solver.
+It is a **deterministic hybrid runtime** that orchestrates oracle
+computation, surrogate inference, constraint projection, memory
+retrieval, and adaptive scheduling to execute verifiable cognitive
+tasks.
+
+CORE is the canonical runtime. CPT (Circuit Projection Tool) is the
+first-domain validation lineage, originating from `cpt_simulator_v5`.
+Circuits were the historical first domain that validated the entire
+runtime architecture: adaptive scheduling, trajectory analysis,
+retrieval-assisted warmstart, exact caching, and constraint projection.
+
 ## Core Contributions
 
 ### 1. Adaptive Scheduling Without Correctness Sacrifice

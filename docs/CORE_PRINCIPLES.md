@@ -44,10 +44,30 @@
 
 ## What CORE Is
 
+CORE is not a simulator, nor a GNN framework, nor a physics solver.
+It is a **deterministic hybrid runtime** that orchestrates oracle
+computation, surrogate inference, constraint projection, memory
+retrieval, and adaptive scheduling to execute verifiable cognitive
+tasks.
+
+Specifically:
 - A scheduling, routing, caching, and tracing runtime
 - Domain-agnostic: knows DomainTask, not CircuitTask
 - Deterministic: same input = same trace
 - Reproducible: frozen specs and hashes enable exact replay
+
+## CPT Lineage
+
+CORE's first validated domain is **CPT** (Circuit Projection Tool),
+originating from `cpt_simulator_v5`. Circuits were the historical
+first domain that validated the runtime architecture. The adaptive
+scheduling, trajectory analysis, retrieval memory, and exact cache
+were all designed and validated on circuit problems before being
+abstracted into the domain-agnostic CORE framework.
+
+CORE is the canonical runtime. CPT is the first-domain validation
+lineage. The circuit domain code in `core_runtime/domains/circuits/`
+carries forward all v2.15 guarantees unchanged.
 
 ## What CORE Is NOT
 

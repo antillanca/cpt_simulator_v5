@@ -161,5 +161,30 @@ Files migrated: 26
 | workspace/paper_figures/fig6_topology_family_convergence.png | core_runtime/data/paper_figures/fig6_topology_family_convergence.png | YES |
 | workspace/paper_figures/fig7_scheduler_overhead_vs_savings.csv | core_runtime/data/paper_figures/fig7_scheduler_overhead_vs_savings.csv | YES |
 | workspace/paper_figures/fig7_scheduler_overhead_vs_savings.png | core_runtime/data/paper_figures/fig7_scheduler_overhead_vs_savings.png | YES |
-| workspace/paper_figures/figures_summary.csv | core_runtime/data/paper_figures/figures_summary.csv | YES |
-| runtime_release_manifest_v215.json | core_runtime/data/runtime_release_manifest_v215.json | YES |
+|| workspace/paper_figures/figures_summary.csv | core_runtime/data/paper_figures/figures_summary.csv | YES |
+
+## 2026-05-19 -- v3.1 Observability & SDK Validation
+
+### linear_system domain upgraded to v0.2.0
+
+| Change | Description |
+|--------|-------------|
+| LinearSystemConfidence | Added exponential decay confidence scoring |
+| LinearSystemTrace | Added deterministic execution trace builder |
+| execute_linear_system_pipeline() | Full E2E pipeline: surrogate -> projection -> evaluator -> confidence -> trace |
+| DomainConfidence registered | linear_system now registers confidence in domain registry |
+| Version bump | 0.1.0 -> 0.2.0 |
+
+### Manifest updated to v1.1
+
+- Added sdk_validation section with per-protocol status
+- Added operational_experience SHA-256 hashes
+- Added paper_figures and runtime_reports references
+- Added v3_1_additions section
+- Added frozen_guarantees list (14 guarantees)
+
+### Operational experience verification
+
+- 300 execution dataset confirmed intact in core_runtime/data/
+- SHA-256 hashes computed and recorded in manifest
+- Workspace copies verified identical

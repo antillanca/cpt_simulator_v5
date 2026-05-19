@@ -92,7 +92,7 @@ class TestCoreVersioning:
 
     def test_linear_system_version(self):
         from core_runtime.domains import linear_system
-        assert linear_system.__version__ == "0.1.0"
+        assert linear_system.__version__ == "0.2.0"
 
 
 class TestDeterministicGuaranteesPreserved:

@@ -4,9 +4,19 @@
 
 CORE = **Cognitive Operational Runtime Engine**
 
-A domain-agnostic runtime for physics-informed surrogate projection.
+CORE is not a simulator, nor a GNN framework, nor a physics solver.
+It is a deterministic hybrid runtime that orchestrates oracle
+computation, surrogate inference, constraint projection, memory
+retrieval, and adaptive scheduling to execute verifiable cognitive
+tasks.
+
 CORE schedules, routes, caches, and traces execution -- it never
 performs domain-specific computation itself.
+
+CORE is the canonical runtime. CPT (Circuit Projection Tool) is the
+first-domain validation lineage, originating from cpt_simulator_v5.
+Circuits were the historical first domain that validated the runtime
+architecture. All v2.15 guarantees carry forward unchanged.
 
 ## Package Structure
 
@@ -26,7 +36,7 @@ core_runtime/
     oracle/         -- generic oracle interface (future)
   domains/
     circuits/       -- first validated domain (v2.15.0 lineage)
-    linear_system/  -- proof-of-concept second domain (v0.1.0)
+ linear_system/ -- proof-of-concept second domain (v0.2.0)
   benchmarks/
   data/             -- migrated operational artifacts
   tests/
@@ -102,4 +112,11 @@ in backend/runtime/_compat.py with deprecation warnings.
 
 Projection remains the final authority. CORE schedules and routes,
 but never modifies domain-specific physics equations or projection
-semantics.
+logic.
+
+## v3.1 Observability Additions
+
+- linear_system domain now exercises FULL SDK pipeline (Oracle, Surrogate, Projection, Evaluator, Confidence, Trace)
+- execute_linear_system_pipeline() provides canonical E2E SDK validation
+- Operational experience dataset (300 executions) verified with SHA-256 hashes in manifest
+- Paper figures (7 PNG + CSV) and runtime reports (4 files) preserved in core_runtime/data/

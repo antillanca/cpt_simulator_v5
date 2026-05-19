@@ -1,11 +1,12 @@
 {
-  "manifest_version": "1.0",
-  "release_name": "CORE v3 Foundation",
+  "manifest_version": "1.1",
+  "release_name": "CORE v3.1 Observability & SDK Validation",
   "release_date": "2026-05-19",
   "package_name": "core-runtime-engine",
-  "package_version": "3.0.0",
+  "package_version": "3.1.0",
   "frozen_runtime_version": "v2.15-runtime-stable",
   "frozen_runtime_commit": "44f3ad57489dc2815e39b19e13765e2ab24a13db",
+  "v3_0_commit": "2785753",
   "environment": {
     "python": "3.14.4",
     "numpy": "2.4.4",
@@ -16,46 +17,80 @@
   },
   "domains": {
     "circuits": {"version": "2.15.0", "status": "first_validated"},
-    "linear_system": {"version": "0.1.0", "status": "proof_of_concept"}
+    "linear_system": {"version": "0.2.0", "status": "full_sdk_validated"}
   },
-  "test_counts": {
-    "core_tests": 32,
-    "total_tests": 697,
-    "skipped": 1
+  "sdk_validation": {
+    "linear_system": {
+      "DomainOracle": true,
+      "DomainSurrogate": true,
+      "DomainProjection": true,
+      "DomainEvaluator": true,
+      "DomainConfidence": true,
+      "DomainTaskBase": true,
+      "memory_registration": true,
+      "execution_trace_emission": true,
+      "full_pipeline": true,
+      "pipeline_function": "execute_linear_system_pipeline"
+    }
   },
-  "package_layout": {
-    "core_runtime/core/runtime": "domain-agnostic task execution",
-    "core_runtime/core/memory": "exact cache + retrieval (FAISS)",
-    "core_runtime/core/routing": "capability router + execution scheduler",
-    "core_runtime/core/scheduling": "projection budget + trajectory + warmstart",
-    "core_runtime/core/specs": "task hashing + dataset registry + frozen specs",
-    "core_runtime/core/experience": "operational experience schemas",
-    "core_runtime/core/tracing": "execution traces",
-    "core_runtime/core/domain_sdk": "Protocol interfaces for domains",
-    "core_runtime/domains/circuits": "first validated domain",
-    "core_runtime/domains/linear_system": "proof-of-concept domain"
+  "operational_experience": {
+    "execution_count": 300,
+    "location": "core_runtime/data/operational_experience/",
+    "sha256": {
+      "family_statistics.json": "e9359cf9ed9bb2c25aa83756d273c60004f8ba6fa0f05d44b3706a7a40b72c94",
+      "retrieval_statistics.json": "4adc3e7b38ebc3746b407e6a4fb1951ec09e546415853c203df56606f59a5efa",
+      "scheduler_statistics.json": "04f2c993bc5b99d2bb443f977fff4139b1c00bd00bafb9681f18a0cfa8d8e66f",
+      "trajectory_statistics.json": "a2edeb06b37a293fb3ce4973f54faf342fec7c3562d8686e6804488707452943",
+      "operational_experience.csv": "377821853aa0cc35b1ffacb5d36552162b85532c427bd10c4faa6a7c4e91471c",
+      "operational_experience.jsonl": "4e22b120b7dd3301b3bcb00a70c5e76561db33e3ca6cb8e23ebc5ceb28a72431"
+    }
   },
-  "migrated_artifacts": {
-    "operational_experience": "26 files migrated, all hashes preserved",
-    "paper_figures": "7+ PNG + CSV source tables",
-    "runtime_reports": "validation + retrieval + overhead reports",
-    "release_manifest": "v2.15 manifest preserved"
+  "paper_figures": {
+    "count": 7,
+    "location": "core_runtime/data/paper_figures/"
   },
-  "frozen_specs": [
-    "DomainTaskBase interface",
-    "ExactMatchCache lookup semantics",
-    "RetrievalMemory query semantics",
-    "TrajectoryAnalyzer classification",
-    "ProjectionBudget allocation",
-    "ExecutionTrace recording",
-    "OperationalExperienceSchema serialization",
-    "ExperienceDatasetSchema structure"
+  "runtime_reports": {
+    "location": "core_runtime/data/runtime_reports/",
+    "files": [
+      "domain_dependency_audit.json",
+      "retrieval_effectiveness_report.json",
+      "scheduler_overhead_report.json",
+      "v215_final_validation_report.md"
+    ]
+  },
+  "runtime_release_manifest_v215": "core_runtime/data/runtime_release_manifest_v215.json",
+ "test_counts": {
+ "core_tests": 43,
+ "total_tests": 742,
+ "skipped": 1,
+ "v31_new_tests": 12
+ },
+  "frozen_guarantees": [
+    "Projection remains the final authority",
+    "Same input = same execution trace",
+    "Deterministic hashing unchanged",
+    "Exact cache lookup semantics unchanged",
+    "Retrieval memory query semantics unchanged",
+    "Trajectory analyzer classification unchanged",
+    "Scheduler never modifies physics equations",
+    "Scheduler never bypasses projection correctness",
+    "Exact cache always has priority",
+    "Retrieval memory only provides initialization hints",
+    "Warmstart never replaces projection validation",
+    "All routing decisions are deterministic",
+    "Degraded executions never enter clean retrieval indexes",
+    "Every execution is fully traceable"
   ],
-  "compatibility_map": {
-    "backend.runtime.*": "core_runtime.core.* (shim with deprecation)",
-    "backend.core_runtime.*": "core_runtime.core.* (shim with deprecation)",
-    "backend.core_spec.*": "core_runtime.core.specs.* (shim with deprecation)"
-  },
-  "migration_log": "docs/MIGRATION_LOG.md",
-  "deterministic_guarantees_preserved": true
+ "v3_1_additions": {
+ "linear_system_confidence": "LinearSystemConfidence class with exponential decay scoring",
+ "linear_system_trace": "LinearSystemTrace class for deterministic execution traces",
+ "full_pipeline": "execute_linear_system_pipeline() for end-to-end SDK validation",
+ "domain_confidence_registered": "LinearSystemConfidence registered in domain registry",
+ "oscillatory_convergence_frozen": "test_core_oscillatory_convergence.py -- 12 tests freezing [0.8,0.4,0.5,0.25,0.3,0.1] edge case",
+ "scheduler_consistency_verified": "DomainTask abstraction did NOT change circuit scheduler behavior (100/100 adaptive tests pass)",
+ "operational_experience_analyzed": "docs/OPERATIONAL_EXPERIENCE_SUMMARY.md -- 300 execution descriptive analysis",
+ "third_domain_planned": "docs/THIRD_DOMAIN_PLAN.md -- propositional logic verification (plan only, no implementation)",
+ "positioning_documented": "Required positioning statement in CORE_ARCHITECTURE.md, CORE_PRINCIPLES.md, PAPER_POSITIONING.md, README",
+ "cpt_lineage_documented": "CPT as first-domain validation lineage documented in 4 core docs"
+ }
 }
