@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CORE v3.2 — Operational Dashboard</title>
+<style>
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", monospace;
+    background: #1a1a2e;
+    color: #e0e0e0;
+    margin: 0;
+    padding: 20px;
+}
+.container {
+    max-width: 960px;
+    margin: 0 auto;
+}
+h1 {
+    color: #4a90d9;
+    border-bottom: 2px solid #4a90d9;
+    padding-bottom: 10px;
+}
+h2 {
+    color: #5cb85c;
+    margin-top: 30px;
+}
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+.card {
+    background: #16213e;
+    border: 1px solid #0f3460;
+    border-radius: 8px;
+    padding: 16px;
+}
+.stat {
+    text-align: center;
+    padding: 12px;
+}
+.stat-value {
+    font-size: 28px;
+    font-weight: bold;
+    color: #4a90d9;
+}
+.stat-label {
+    font-size: 12px;
+    color: #888;
+    text-transform: uppercase;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0;
+}
+th, td {
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid #0f3460;
+}
+th {
+    color: #5cb85c;
+}
+.chart-container {
+    text-align: center;
+    margin: 10px 0;
+}
+.footer {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #0f3460;
+    font-size: 12px;
+    color: #666;
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>CORE v3.2 — Operational Dashboard</h1>
+<p>Generated: 2026-05-19T17:24:18.015982+00:00</p>
+
+<div class="grid">
+<div class="card stat">
+<div class="stat-value">20</div>
+<div class="stat-label">Total Tasks</div>
+</div>
+<div class="card stat">
+<div class="stat-value">1</div>
+<div class="stat-label">Converged</div>
+</div>
+<div class="card stat">
+<div class="stat-value">18</div>
+<div class="stat-label">Degraded</div>
+</div>
+<div class="card stat">
+<div class="stat-value">1.03 ms</div>
+<div class="stat-label">Avg Runtime</div>
+</div>
+</div>
+
+<h2>Projection Iterations</h2>
+<div class="chart-container">
+<svg width="600" height="300" xmlns="http://www.w3.org/2000/svg" style="font-family:monospace;font-size:11px;">
+<text x="300" y="20" text-anchor="middle" font-size="14" font-weight="bold">Projection Iterations Distribution</text>
+<text x="75" y="44" text-anchor="end" fill="#666">19</text>
+<line x1="80" y1="40" x2="580" y2="40" stroke="#ddd" stroke-width="1"/>
+<text x="75" y="94" text-anchor="end" fill="#666">14</text>
+<line x1="80" y1="90" x2="580" y2="90" stroke="#ddd" stroke-width="1"/>
+<text x="75" y="144" text-anchor="end" fill="#666">10</text>
+<line x1="80" y1="140" x2="580" y2="140" stroke="#ddd" stroke-width="1"/>
+<text x="75" y="194" text-anchor="end" fill="#666">5</text>
+<line x1="80" y1="190" x2="580" y2="190" stroke="#ddd" stroke-width="1"/>
+<text x="75" y="244" text-anchor="end" fill="#666">0</text>
+<line x1="80" y1="240" x2="580" y2="240" stroke="#ddd" stroke-width="1"/>
+<rect x="95" y="230" width="46" height="10" fill="#4a90d9" rx="2"/>
+<text x="118" y="226" text-anchor="middle" font-size="9" fill="#333">1</text>
+<text x="118" y="255" text-anchor="middle" font-size="8" fill="#666" transform="rotate(-30,118,255)">39.0</text>
+<rect x="145" y="240" width="46" height="0" fill="#4a90d9" rx="2"/>
+<text x="168" y="255" text-anchor="middle" font-size="8" fill="#666" transform="rotate(-30,168,255)">40.1</text>
+<rect x="195" y="240" width="46" height="0" fill="#4a90d9" rx="2"/>
+<text x="218" y="255" text-anchor="middle" font-size="8" fill="#666" transform="rotate(-30,218,255)">41.2</text>
+<rect x="245" y="240" width="46" height="0" fill="#4a90d9" rx="2"/>
+<text x="268" y="255" text-anchor="middle" font-size="8" fill="#666" transform="rotate(-30,268,255)">42.3</text>
+<rect x="295" y="240" width="46" height="0" fill="#4a90d9" rx="2"/>
+<text x="318" y="255" text-anchor="middle" font-size="8" fill="#666" transform="rotate(-30,318,255)">43.4</text>
+<rect x="345" y="240" width="46" height="0" fill="#4a90d9" rx="2"/>
+<text x="368" y="255" text-anchor="middle" font-size="8" fill="#666" transform="rotate(-30,368,255)">44.5</text>
+<rect x="395" y="240" width="46" height="0" fill="#4a90d9" rx="2"/>
+<text x="418" y="255" text-anchor="middle" font-size="8" fill="#666" transform="rotate(-30,418,255)">45.6</text>
+<rect x="445" y="240" width="46" height="0" fill="#4a90d9" rx="2"/>
+<text x="468" y="255" text-anchor="middle" font-size="8" fill="#666" transform="rotate(-30,468,255)">46.7</text>
+<rect x="495" y="240" width="46" height="0" fill="#4a90d9" rx="2"/>
+<text x="518" y="255" text-anchor="middle" font-size="8" fill="#666" transform="rotate(-30,518,255)">47.8</text>
+<rect x="545" y="40" width="46" height="200" fill="#4a90d9" rx="2"/>
+<text x="568" y="36" text-anchor="middle" font-size="9" fill="#333">19</text>
+<text x="568" y="255" text-anchor="middle" font-size="8" fill="#666" transform="rotate(-30,568,255)">48.9</text>
+</svg>
+</div>
+<div class="grid">
+<div class="card stat">
+<div class="stat-value">49.5</div>
+<div class="stat-label">Avg Iterations</div>
+</div>
+<div class="card stat">
+<div class="stat-value">1</div>
+<div class="stat-label">Converged</div>
+</div>
+</div>
+
+<h2>Residuals</h2>
+<div class="chart-container">
+<svg width="600" height="300" xmlns="http://www.w3.org/2000/svg" style="font-family:monospace;font-size:11px;">
+<text x="300" y="20" text-anchor="middle" font-size="14" font-weight="bold">Projection Residual Distribution</text>
+<text x="75" y="44" text-anchor="end" fill="#666">17</text>
+<line x1="80" y1="40" x2="580" y2="40" stroke="#ddd" stroke-width="1"/>
+<text x="75" y="94" text-anchor="end" fill="#666">13</text>
+<line x1="80" y1="90" x2="580" y2="90" stroke="#ddd" stroke-width="1"/>
+<text x="75" y="144" text-anchor="end" fill="#666">8</text>
+<line x1="80" y1="140" x2="580" y2="140" stroke="#ddd" stroke-width="1"/>
+<text x="75" y="194" text-anchor="end" fill="#666">4</text>
+<line x1="80" y1="190" x2="580" y2="190" stroke="#ddd" stroke-width="1"/>
+<text x="75" y="244" text-anchor="end" fill="#666">0</text>
+<line x1="80" y1="240" x2="580" y2="240" stroke="#ddd" stroke-width="1"/>
+<rect x="95" y="40" width="46" height="200" fill="#5cb85c" rx="2"/>
+<text x="118" y="36" text-anchor="middle" font-size="9" fill="#333">17</text>
+<text x="118" y="255" text-anchor="middle" font-size="8" fill="#666" transform="rotate(-30,118,255)">0.0</text>
+<rect x="145" y="229" width="46" height="11" fill="#5cb85c" rx="2"/>
+<text x="168" y="225" text-anchor="middle" font-size="9" fill="#333">1</text>
+<text x="168" y="255" text-anchor="middle" font-size="8" fill="#666" transform="rotate(-30,168,255)">28.2</text>
+<rect x="195" y="240" width="46" height="0" fill="#5cb85c" rx="2"/>
+<text x="218" y="255" text-anchor="middle" font-size="8" fill="#666" transform="rotate(-30,218,255)">56.3</text>
+<rect x="245" y="229" width="46" height="11" fill="#5cb85c" rx="2"/>
+<text x="268" y="225" text-anchor="middle" font-size="9" fill="#333">1</text>
+<text x="268" y="255" text-anchor="middle" font-size="8" fill="#666" transform="rotate(-30,268,255)">84.5</text>
+<rect x="295" y="240" width="46" height="0" fill="#5cb85c" rx="2"/>
+<text x="318" y="255" text-anchor="middle" font-size="8" fill="#666" transform="rotate(-30,318,255)">112.6</text>
+<rect x="345" y="240" width="46" height="0" fill="#5cb85c" rx="2"/>
+<text x="368" y="255" text-anchor="middle" font-size="8" fill="#666" transform="rotate(-30,368,255)">140.8</text>
+<rect x="395" y="240" width="46" height="0" fill="#5cb85c" rx="2"/>
+<text x="418" y="255" text-anchor="middle" font-size="8" fill="#666" transform="rotate(-30,418,255)">168.9</text>
+<rect x="445" y="240" width="46" height="0" fill="#5cb85c" rx="2"/>
+<text x="468" y="255" text-anchor="middle" font-size="8" fill="#666" transform="rotate(-30,468,255)">197.1</text>
+<rect x="495" y="240" width="46" height="0" fill="#5cb85c" rx="2"/>
+<text x="518" y="255" text-anchor="middle" font-size="8" fill="#666" transform="rotate(-30,518,255)">225.2</text>
+<rect x="545" y="229" width="46" height="11" fill="#5cb85c" rx="2"/>
+<text x="568" y="225" text-anchor="middle" font-size="9" fill="#333">1</text>
+<text x="568" y="255" text-anchor="middle" font-size="8" fill="#666" transform="rotate(-30,568,255)">253.4</text>
+</svg>
+</div>
+<div class="grid">
+<div class="card stat">
+<div class="stat-value">2.18e+02</div>
+<div class="stat-label">Avg Surrogate Residual</div>
+</div>
+<div class="card stat">
+<div class="stat-value">2.34e+01</div>
+<div class="stat-label">Avg Projection Residual</div>
+</div>
+</div>
+
+<h2>Routing Distribution</h2>
+<div class="chart-container">
+<svg width="600" height="300" xmlns="http://www.w3.org/2000/svg" style="font-family:monospace;font-size:11px;">
+<text x="300" y="20" text-anchor="middle" font-size="14" font-weight="bold">Routing Decisions</text>
+<text x="75" y="44" text-anchor="end" fill="#666">20.0</text>
+<line x1="80" y1="40" x2="580" y2="40" stroke="#ddd" stroke-width="1"/>
+<text x="75" y="94" text-anchor="end" fill="#666">15.0</text>
+<line x1="80" y1="90" x2="580" y2="90" stroke="#ddd" stroke-width="1"/>
+<text x="75" y="144" text-anchor="end" fill="#666">10.0</text>
+<line x1="80" y1="140" x2="580" y2="140" stroke="#ddd" stroke-width="1"/>
+<text x="75" y="194" text-anchor="end" fill="#666">5.0</text>
+<line x1="80" y1="190" x2="580" y2="190" stroke="#ddd" stroke-width="1"/>
+<text x="75" y="244" text-anchor="end" fill="#666">0.0</text>
+<line x1="80" y1="240" x2="580" y2="240" stroke="#ddd" stroke-width="1"/>
+<rect x="230" y="40" width="60" height="200" fill="#f0ad4e" rx="2"/>
+<text x="260" y="36" text-anchor="middle" font-size="9" fill="#333">20.0</text>
+<text x="260" y="255" text-anchor="middle" font-size="9" fill="#666" transform="rotate(-30,260,255)">jacobi_preco</text>
+</svg>
+</div>
+
+<h2>Runtime Distribution</h2>
+<div class="chart-container">
+<svg width="600" height="300" xmlns="http://www.w3.org/2000/svg" style="font-family:monospace;font-size:11px;">
+<text x="300" y="20" text-anchor="middle" font-size="14" font-weight="bold">Runtime Buckets</text>
+<text x="75" y="44" text-anchor="end" fill="#666">11.0</text>
+<line x1="80" y1="40" x2="580" y2="40" stroke="#ddd" stroke-width="1"/>
+<text x="75" y="94" text-anchor="end" fill="#666">8.2</text>
+<line x1="80" y1="90" x2="580" y2="90" stroke="#ddd" stroke-width="1"/>
+<text x="75" y="144" text-anchor="end" fill="#666">5.5</text>
+<line x1="80" y1="140" x2="580" y2="140" stroke="#ddd" stroke-width="1"/>
+<text x="75" y="194" text-anchor="end" fill="#666">2.8</text>
+<line x1="80" y1="190" x2="580" y2="190" stroke="#ddd" stroke-width="1"/>
+<text x="75" y="244" text-anchor="end" fill="#666">0.0</text>
+<line x1="80" y1="240" x2="580" y2="240" stroke="#ddd" stroke-width="1"/>
+<rect x="155" y="40" width="60" height="200" fill="#d9534f" rx="2"/>
+<text x="185" y="36" text-anchor="middle" font-size="9" fill="#333">11.0</text>
+<text x="185" y="255" text-anchor="middle" font-size="9" fill="#666" transform="rotate(-30,185,255)">medium</text>
+<rect x="405" y="77" width="60" height="163" fill="#d9534f" rx="2"/>
+<text x="435" y="73" text-anchor="middle" font-size="9" fill="#333">9.0</text>
+<text x="435" y="255" text-anchor="middle" font-size="9" fill="#666" transform="rotate(-30,435,255)">fast</text>
+</svg>
+</div>
+
+<h2>Convergence by Family (System Size)</h2>
+<table>
+<tr><th>Size</th><th>Total</th><th>Converged</th><th>Rate</th><th>Avg Iters</th></tr>
+<tr><td>10</td><td>3</td><td>0</td><td>0.0%</td><td>50.0</td></tr>
+<tr><td>11</td><td>1</td><td>0</td><td>0.0%</td><td>50.0</td></tr>
+<tr><td>2</td><td>2</td><td>1</td><td>50.0%</td><td>44.5</td></tr>
+<tr><td>3</td><td>1</td><td>0</td><td>0.0%</td><td>50.0</td></tr>
+<tr><td>4</td><td>2</td><td>0</td><td>0.0%</td><td>50.0</td></tr>
+<tr><td>5</td><td>2</td><td>0</td><td>0.0%</td><td>50.0</td></tr>
+<tr><td>6</td><td>2</td><td>0</td><td>0.0%</td><td>50.0</td></tr>
+<tr><td>7</td><td>3</td><td>0</td><td>0.0%</td><td>50.0</td></tr>
+<tr><td>8</td><td>2</td><td>0</td><td>0.0%</td><td>50.0</td></tr>
+<tr><td>9</td><td>2</td><td>0</td><td>0.0%</td><td>50.0</td></tr>
+</table>
+
+<h2>Failure Types</h2>
+<table>
+<tr><th>Type</th><th>Count</th><th>Rate</th></tr>
+<tr><td>Degraded Execution</td><td>18</td><td>90.0%</td></tr>
+<tr><td>Non-Converged Projection</td><td>19</td><td>95.0%</td></tr>
+</table>
+
+<div class="footer">
+<p>CORE v3.2 Operational Dashboard — Deterministic, Auditable, Reproducible</p>
+<p>Report generated by scripts/generate_operational_dashboard.py</p>
+</div>
+
+</div>
+</body>
+</html>

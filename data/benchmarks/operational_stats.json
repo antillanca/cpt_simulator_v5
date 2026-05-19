@@ -1,0 +1,70 @@
+{
+  "total_tasks": 20,
+  "convergence_count": 1,
+  "escalation_count": 0,
+  "warmstart_effective_count": 0,
+  "degraded_count": 18,
+  "routing_distribution": {
+    "jacobi_preconditioner": 20
+  },
+  "avg_projection_iterations": 49.45,
+  "avg_surrogate_residual": 218.00338474446153,
+  "avg_projection_residual": 23.40521668719088,
+  "avg_runtime_ms": 1.0269788501318544,
+  "runtime_distribution": {
+    "medium": 11,
+    "fast": 9
+  },
+  "family_convergence": {
+    "9": {
+      "total": 2,
+      "converged": 0,
+      "avg_iters": 50.0
+    },
+    "6": {
+      "total": 2,
+      "converged": 0,
+      "avg_iters": 50.0
+    },
+    "7": {
+      "total": 3,
+      "converged": 0,
+      "avg_iters": 50.0
+    },
+    "8": {
+      "total": 2,
+      "converged": 0,
+      "avg_iters": 50.0
+    },
+    "5": {
+      "total": 2,
+      "converged": 0,
+      "avg_iters": 50.0
+    },
+    "10": {
+      "total": 3,
+      "converged": 0,
+      "avg_iters": 50.0
+    },
+    "2": {
+      "total": 2,
+      "converged": 1,
+      "avg_iters": 44.5
+    },
+    "11": {
+      "total": 1,
+      "converged": 0,
+      "avg_iters": 50.0
+    },
+    "4": {
+      "total": 2,
+      "converged": 0,
+      "avg_iters": 50.0
+    },
+    "3": {
+      "total": 1,
+      "converged": 0,
+      "avg_iters": 50.0
+    }
+  }
+}

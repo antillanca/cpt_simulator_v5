@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "core-runtime-engine"
-version = "3.0.0"
+version = "3.2.0a1"
 description = "CORE - Cognitive Operational Runtime Engine: domain-agnostic runtime for physics-informed surrogate projection"
 readme = "docs/CORE_RELEASE_README.md"
 license = {text = "MIT"}
@@ -12,17 +12,26 @@ requires-python = ">=3.11"
 authors = [
     {name = "CPT Project"},
 ]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Physics",
+]
 
 dependencies = [
     "numpy>=1.24",
-    "torch>=2.0",
-    "faiss-cpu>=1.7",
 ]
 
 [project.optional-dependencies]
 circuits = [
-    # Circuit domain dependencies - only needed for circuit execution
-    # All circuit-specific code is in core_runtime/domains/circuits/
+    "torch>=2.0",
+    "faiss-cpu>=1.7",
 ]
 linear-system = [
     # Linear system domain - only requires numpy (already in core deps)
@@ -32,9 +41,16 @@ dev = [
     "pytest-xdist",
     "matplotlib>=3.5",
 ]
-all = [
-    "core-runtime-engine[circuits,linear-system,dev]",
+docs = [
+    "markdown>=3.4",
 ]
+all = [
+    "core-runtime-engine[circuits,linear-system,dev,docs]",
+]
+
+[project.scripts]
+core-smoke-benchmark = "scripts.run_smoke_benchmark:main"
+core-fuzz = "scripts.fuzz_runtime_deterministic:main"
 
 [tool.setuptools.packages.find]
 include = ["core_runtime*"]

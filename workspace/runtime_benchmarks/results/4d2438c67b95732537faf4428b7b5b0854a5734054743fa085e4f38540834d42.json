@@ -1,0 +1,24 @@
+{
+  "failure_type": null,
+  "oracle_runtime_ms": 0.0,
+  "oracle_voltages": [
+    0.108233243227005,
+    0.061139095574617386,
+    0.014798612333834171
+  ],
+  "projected_voltages": [
+    0.108233243227005,
+    0.061139095574617386,
+    0.014798612333834171
+  ],
+  "projection_runtime_ms": 0.495248,
+  "surrogate_runtime_ms": 0.044701,
+  "surrogate_voltages": [
+    0.1167951375246048,
+    0.07394476234912872,
+    0.011329954490065575
+  ],
+  "task_fingerprint": "ls-56bfb818306ce393-da9d06429cd99ff2",
+  "task_id": "smoke_42_0000",
+  "total_runtime_ms": 0.539949
+}

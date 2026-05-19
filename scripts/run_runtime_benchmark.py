@@ -207,7 +207,7 @@ def _run_fixed_vs_adaptive_comparison(args, results: list[dict], output_dir: Pat
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="CPT Runtime Benchmark Runner (v2.15)")
-    parser.add_argument("--dataset", required=True, help="Path to dataset (.pt)")
+    parser.add_argument("--dataset", required=False, default=None, help="Path to dataset (.pt)")
     parser.add_argument("--checkpoint", default=None, help="Path to surrogate checkpoint")
     parser.add_argument("--no-projection", action="store_true", help="Disable projection")
     parser.add_argument("--seed", type=int, default=42)
@@ -216,7 +216,25 @@ def main() -> None:
     parser.add_argument("--embedding-dim", type=int, default=64, help="GNN hidden dim for embeddings")
     parser.add_argument("--compare-fixed-vs-adaptive", action="store_true",
                         help="Run BOTH fixed-budget (v2.14) and adaptive (v2.15) modes, compare results")
+    parser.add_argument("--smoke", action="store_true",
+                        help="CI smoke mode: fast subset via linear_system domain (no GPU)")
     args = parser.parse_args()
+
+    # --- Smoke mode: delegate to standalone smoke benchmark ---
+    if args.smoke:
+        from scripts.run_smoke_benchmark import run_smoke_benchmark, format_text_report
+        report = run_smoke_benchmark(
+            seed=args.seed,
+            sample_count=args.max_samples or 10,
+            budget=50,
+            output_dir=args.output_dir,
+        )
+        print(format_text_report(report))
+        sys.exit(0 if report.overall_pass else 1)
+
+    # Non-smoke mode requires --dataset
+    if args.dataset is None:
+        parser.error("--dataset is required when not using --smoke mode")
 
     torch.manual_seed(args.seed)
 

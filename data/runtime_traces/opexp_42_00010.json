@@ -1,0 +1,23 @@
+{
+  "created_at": "2026-05-19T17:18:38.524259+00:00",
+  "task_id": "opexp_42_00010",
+  "trace": {
+    "confidence_score": 0.0,
+    "domain_name": "linear_system",
+    "edge_count": 16,
+    "evaluation_correct": false,
+    "evaluation_residual": 37.919628643501746,
+    "fingerprint": "ls-7920bdf0ea546655-ffd942da7bc26163",
+    "node_count": 4,
+    "projection_converged": false,
+    "projection_iterations": 50,
+    "projection_method": "iterative_refinement",
+    "projection_residual": 37.919628643501746,
+    "projection_runtime_ms": 0.7188819581642747,
+    "surrogate_method": "jacobi_preconditioner",
+    "surrogate_residual": 813.8942476934749,
+    "surrogate_runtime_ms": 0.07897196337580681,
+    "task_id": "opexp_42_00010",
+    "trajectory_length": 50
+  }
+}

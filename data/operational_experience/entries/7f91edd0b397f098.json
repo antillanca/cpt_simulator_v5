@@ -1,0 +1,13 @@
+{
+  "confidence_score": 5.372254603058283e-06,
+  "converged": false,
+  "created_at": "2026-05-19T17:18:38.505015+00:00",
+  "domain": "linear_system",
+  "evaluation_correct": false,
+  "projection_iterations": 50,
+  "projection_residual": 5.218244771762768,
+  "runtime_ms": 1.3999229995533824,
+  "surrogate_residual": 12.134262885962798,
+  "task_hash": "ls-0e2d3ae52936a3c0-1046d06f8a01afd7",
+  "task_id": "opexp_42_00000"
+}
