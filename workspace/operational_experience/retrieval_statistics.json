@@ -1,0 +1,19 @@
+{
+  "total_retrieval_routed": 80,
+  "retrieval_rate": 0.26666666666666666,
+  "avg_similarity": 0.5261212710566749,
+  "warmstart_applied_count": 49,
+  "avg_warmstart_iterations_saved": 6.204081632653061,
+  "convergence_by_route": {
+    "retrieval_semantic": {
+      "count": 31,
+      "avg_iters": 10.96774193548387,
+      "avg_residual": 0.6383005851039661
+    },
+    "retrieval_warmstart": {
+      "count": 49,
+      "avg_iters": 10.081632653061224,
+      "avg_residual": 0.3431015489791044
+    }
+  }
+}

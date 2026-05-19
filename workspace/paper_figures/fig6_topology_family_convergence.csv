@@ -1,0 +1,6 @@
+topology_family,fixed_avg_iters,adaptive_avg_iters
+ladder,23.18,16.39
+bridge,12.62,8.23
+mesh,14.04,9.06
+tree,12.40,7.33
+star,13.20,8.99

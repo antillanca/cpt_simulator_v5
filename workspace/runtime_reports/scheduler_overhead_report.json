@@ -1,0 +1,29 @@
+{
+  "version": "v2.15",
+  "validation_type": "scheduler_overhead",
+  "timestamp": "2026-05-19T02:22:55Z",
+  "sample_count": 500,
+  "seed": 42,
+  "scheduler_overhead": {
+    "avg_ms": 0.025896138,
+    "p50_ms": 0.024725499999999997,
+    "p99_ms": 0.03954459,
+    "total_ms": 12.948069
+  },
+  "projection_savings": {
+    "fixed_total_iterations": 10000,
+    "adaptive_total_iterations": 8008,
+    "iterations_saved": 1992,
+    "avg_iteration_time_ms": 1.5,
+    "fixed_projection_time_ms": 15000.0,
+    "adaptive_projection_time_ms": 12012.0,
+    "saved_projection_time_ms": 2988.0
+  },
+  "efficiency": {
+    "scheduler_efficiency_ratio": 230.76800100462856,
+    "target": 5.0,
+    "target_met": true
+  },
+  "verdict": "PASS",
+  "warning": ""
+}

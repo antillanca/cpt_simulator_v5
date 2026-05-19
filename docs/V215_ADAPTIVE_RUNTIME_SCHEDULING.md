@@ -119,6 +119,56 @@ Task → ExecutionScheduler.schedule()
 | `escalate` | current_residual >= escalation_threshold |
 | `budget_exhausted` | iteration >= max_iterations |
 
+## Operational Guarantees
+
+These principles are invariant under all v2.15 runtime configurations.
+Violating any of these constitutes a critical regression.
+
+1. **Projection remains the final authority.** The scheduler allocates
+   effort budget but never overrides projection results. Every converged
+   state is produced by the projection loop, not the scheduler.
+
+2. **The scheduler never modifies physics equations.** Kirchhoff
+   constraints, MNA formulation, and GNN forward passes are untouched.
+   The scheduler only decides when to stop iterating.
+
+3. **The scheduler never bypasses projection correctness.** Early
+   stopping, stagnation detection, and escalation all preserve the
+   invariant that the final state satisfies projection convergence
+   criteria or is explicitly marked as non-converged.
+
+4. **Exact cache always has priority.** If a task hash matches a
+   previous successful execution, the cached result is returned
+   immediately. No adaptive logic overrides a cache hit.
+
+5. **Retrieval memory only provides initialization hints.** Warmstart
+   vectors seed the projection initial state but do not replace
+   projection validation. The projection loop still runs and checks
+   convergence.
+
+6. **Warmstart never replaces projection validation.** Even when
+   retrieval similarity is high, the projection loop executes with at
+   least a reduced budget and validates convergence against the same
+   residual thresholds.
+
+7. **All routing decisions are deterministic.** Given the same inputs
+   (task hash, retrieval similarity, confidence, cost estimate, family
+   statistics), the scheduler produces the same budget allocation every
+   time. There is zero randomness in the scheduling path.
+
+8. **Same input produces the same execution trace.** Deterministic
+   routing plus deterministic projection means identical inputs yield
+   identical iteration counts, residual trajectories, and outcomes.
+
+9. **Degraded executions never enter clean retrieval indexes.** When
+   the runtime is in degraded mode (system resource constraints), the
+   execution is flagged and its results are excluded from the FAISS
+   retrieval index and operational experience accumulation.
+
+10. **Every execution is fully traceable.** Each run produces an
+    `OperationalExperienceEntry` recording the full decision path:
+    route, budget, trajectory, outcome, and all intermediate metrics.
+
 ## Determinism Guarantees
 
 - **Zero randomness**: all decisions are deterministic functions of inputs
@@ -199,3 +249,111 @@ both calling conventions correctly.
 | `scripts/run_runtime_benchmark.py` | v2.15 metrics + persistence |
 | `tests/test_v215_adaptive_scheduling.py` | 100 tests (new) |
 | `docs/V215_ADAPTIVE_RUNTIME_SCHEDULING.md` | This document |
+
+## Benchmark Methodology
+
+### Correctness Preservation Benchmark
+
+Run with `--compare-fixed-vs-adaptive` flag:
+
+```bash
+python scripts/run_runtime_benchmark.py \
+    --dataset workspace/datasets/circuit_v29f_10k.pt \
+    --compare-fixed-vs-adaptive \
+    --seed 42
+```
+
+Compares fixed-budget (v2.14: max_iterations=20, patience=10) against
+adaptive-budget (v2.15) execution. Acceptance conditions:
+
+| Condition | Threshold |
+|-----------|-----------|
+| Residual correctness | adaptive <= fixed * 1.01 |
+| KCL violation | adaptive <= fixed |
+| KVL violation | adaptive <= fixed |
+| Average iterations | adaptive < fixed |
+| Average runtime | adaptive < fixed |
+
+### Oscillatory Convergence Validation
+
+```bash
+pytest tests/test_v215_oscillatory_convergence.py -v
+```
+
+40 test cases covering: oscillatory-accepted, divergence-risk,
+stalled, fast-converging, and `_is_diverging()` regression.
+
+### Scheduler Overhead Validation
+
+```bash
+python scripts/validate_scheduler_overhead.py --n-samples 500 --seed 42
+```
+
+Measures `scheduler_efficiency_ratio = saved_projection_time / scheduler_overhead`.
+Target: > 5.0x. Emits explicit warning if overhead exceeds savings.
+
+### Retrieval Effectiveness Validation
+
+```bash
+python scripts/validate_retrieval_warmstart.py \
+    --dataset workspace/datasets/circuit_v29f_10k.pt \
+    --max-samples 100 --seed 42
+```
+
+Compares warmstart vs coldstart iterations. Uses two-sided sign test
+for statistical significance. Reports honestly: if retrieval does not
+help, says so explicitly.
+
+## Retrieval-Assisted Scheduling
+
+When the FAISS retrieval index contains a semantically similar past
+execution (cosine similarity >= 0.7), the scheduler:
+
+1. Routes to `retrieval_warmstart` path
+2. Reduces budget to 60% of standard (fewer iterations needed)
+3. Reduces patience to 70% of standard
+4. Seeds the projection initial state with the retrieved solution
+
+If similarity is between 0.3 and 0.7, routes to `retrieval_semantic`
+with moderate budget. Below 0.3, falls through to standard routing.
+
+Key invariant: retrieval similarity never bypasses the projection loop.
+It only changes the starting point and the effort budget.
+
+## Operational Metrics
+
+| Metric | Source | Purpose |
+|--------|--------|---------|
+| `projection_iterations` | ProjectionResult | Convergence effort |
+| `final_residual` | ProjectionResult | Solution quality |
+| `scheduler_overhead_ms` | ExecutionOutcome | Scheduler cost |
+| `projection_runtime_ms` | ExecutionOutcome | Projection cost |
+| `total_runtime_ms` | ExecutionOutcome | End-to-end cost |
+| `escalation_count` | ExecutionOutcome | Oracle intervention rate |
+| `warmstart_iterations_saved` | ExecutionOutcome | Retrieval benefit |
+| `trajectory_class` | TrajectoryAnalyzer | Convergence behavior |
+| `convergence_class` | TrajectoryAnalyzer | Classification label |
+| `budget_efficiency_ratio` | Benchmark | Used/allocated ratio |
+
+## Reproducibility Instructions
+
+1. Clone repository at tag `v2.15-runtime-stable`
+2. Install dependencies: `pip install -r requirements.txt`
+3. Verify: `pytest tests/ -q` (expect 697+ passing)
+4. Run benchmark: `python scripts/run_runtime_benchmark.py --dataset <path> --seed 42`
+5. Run overhead validation: `python scripts/validate_scheduler_overhead.py --seed 42`
+6. Run retrieval validation: `python scripts/validate_retrieval_warmstart.py --seed 42`
+7. Export experience: `python scripts/export_operational_experience.py --seed 42`
+8. Export figures: `python scripts/export_paper_figures.py --seed 42`
+9. Verify manifest: `cat runtime_release_manifest_v215.json`
+
+All scripts accept `--seed` for deterministic reproduction.
+Same seed + same dataset = identical results.
+
+## Known Limitations
+
+- Retrieval effectiveness depends on FAISS index size and diversity
+- Scheduler overhead ratio depends on per-iteration projection cost
+- Oscillatory trajectories may require oracle escalation
+- Degraded mode reduces budget aggressively (by design)
+- Warmstart effectiveness varies by topology family

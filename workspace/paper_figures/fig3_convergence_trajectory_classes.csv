@@ -1,0 +1,7 @@
+trajectory_class,count,percentage
+fast_converging,175,35.0
+stable_linear,158,31.6
+oscillatory,71,14.2
+stalled,48,9.6
+divergence_risk,35,7.0
+retrieval_assisted,13,2.6
