@@ -398,7 +398,7 @@ def train_one_epoch(
             edge_features = edge_features[:, :4]
         elif ablation == "norm_only":
             edge_features = edge_features[:, :5]
-        elif ablation == "topo_only":
+        elif ablation in ("topo_only", "full", "curr_only"):
             if edge_features.size(1) < edge_dim:
                 pad = torch.zeros(edge_features.size(0), edge_dim - edge_features.size(1),
                                   device=device, dtype=edge_features.dtype)
@@ -476,23 +476,23 @@ def evaluate(
             edge_index = g.edge_index.to(device)
             true_voltage = g.target_voltages.to(device)
 
-        # Apply ablation slicing / padding
-        if ablation in ("baseline", "norm_only"):
-            node_features = node_features[:, :8]
-        elif ablation in ("topo_only", "full", "curr_only"):
-            if node_features.size(1) < node_dim:
-                pad = torch.zeros(node_features.size(0), node_dim - node_features.size(1),
-                                  device=device, dtype=node_features.dtype)
-                node_features = torch.cat([node_features, pad], dim=1)
-        if ablation == "baseline":
-            edge_features = edge_features[:, :4]
-        elif ablation == "norm_only":
-            edge_features = edge_features[:, :5]
-        elif ablation == "topo_only":
-            if edge_features.size(1) < edge_dim:
-                pad = torch.zeros(edge_features.size(0), edge_dim - edge_features.size(1),
-                                  device=device, dtype=edge_features.dtype)
-                edge_features = torch.cat([edge_features, pad], dim=1)
+            # Apply ablation slicing / padding
+            if ablation in ("baseline", "norm_only"):
+                node_features = node_features[:, :8]
+            elif ablation in ("topo_only", "full", "curr_only"):
+                if node_features.size(1) < node_dim:
+                    pad = torch.zeros(node_features.size(0), node_dim - node_features.size(1),
+                                      device=device, dtype=node_features.dtype)
+                    node_features = torch.cat([node_features, pad], dim=1)
+            if ablation == "baseline":
+                edge_features = edge_features[:, :4]
+            elif ablation == "norm_only":
+                edge_features = edge_features[:, :5]
+            elif ablation in ("topo_only", "full", "curr_only"):
+                if edge_features.size(1) < edge_dim:
+                    pad = torch.zeros(edge_features.size(0), edge_dim - edge_features.size(1),
+                                      device=device, dtype=edge_features.dtype)
+                    edge_features = torch.cat([edge_features, pad], dim=1)
 
             if use_edge_features:
                 pred_norm = model(node_features, edge_index, edge_features)
@@ -528,6 +528,7 @@ def evaluate(
             total_power += power
             total_loss += total
             count += 1
+
 
     n = max(count, 1)
     result = {

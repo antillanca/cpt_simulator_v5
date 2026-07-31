@@ -1,21 +1,33 @@
-"""CPT Core Runtime — Capability Router (v2.14).
+"""CPT Core Runtime — Capability Router (v3.3).
 
 Deterministic rule-based routing. NO machine learning routing yet.
 
-v2.14 adds:
-- semantic_retrieval routing (FAISS hit, no exact cache)
-- warmstart_projection routing (warmstart available)
-- degraded_execution routing
-- cost-aware budget allocation
+v3.3 adds:
+- trustworthiness-aware routing
+- uncertainty memory consultation
+- trust-level-based budget allocation
 
 Routing priority:
-1. exact_cache_hit     → return cached result immediately
-2. semantic_retrieval  → use warmstart from similar circuit
+1. exact_cache_hit → return cached result immediately
+2. semantic_retrieval → use warmstart from similar circuit
 3. warmstart_projection → project with warmstart init
 4. standard_projection → project with standard init
-5. increased_budget    → more projection iterations
+5. increased_budget → more projection iterations
 6. oracle_verification → force oracle check
-7. degraded_execution  → runtime failure path
+7. degraded_execution → runtime failure path
+
+Trust-aware rules (v3.3):
+- If task_hash in uncertainty memory → increase caution
+- If trust_level is INDETERMINATE → allocate higher projection budget
+- If trust_level is CERTAIN → use standard budget
+- If trust_level is TRANSITIONAL → use conservative budget + preserve audit trail
+
+SAFETY GUARANTEE:
+- Router consults trust signals for BUDGET ALLOCATION only
+- Router does NOT bypass projection
+- Router does NOT override physics
+- Router does NOT skip verification
+- Router does NOT change outputs based on philosophy
 
 ALL routing decisions remain 100% deterministic.
 """
@@ -23,12 +35,16 @@ ALL routing decisions remain 100% deterministic.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
 from backend.core_runtime.task_runtime import RuntimeTask
 from backend.core_runtime.confidence_runtime import ConfidenceEstimate
 from backend.core_runtime.execution_policy import ExecutionPolicy
 from backend.runtime.cost_estimator import ExecutionCostEstimate
+
+if TYPE_CHECKING:
+    from core_runtime.core.trustworthiness_runtime import TrustworthinessAudit
+    from core_runtime.core.uncertainty_memory import UncertaintyMemory
 
 
 # ---------------------------------------------------------------------------
@@ -74,8 +90,11 @@ class RoutingDecision:
 class CapabilityRouter:
     """Deterministic rule-based capability router.
 
-    v2.14 adds: retrieval similarity, warmstart, cost estimation.
+    v3.3 adds: trust-aware routing, uncertainty memory consultation.
     All decisions remain deterministic and auditable.
+
+    SAFETY: Trust levels only influence budget allocation.
+    They never bypass projection, override physics, or skip verification.
     """
 
     _FAILURE_REPEAT_THRESHOLD = 3
@@ -86,10 +105,12 @@ class CapabilityRouter:
         policy: ExecutionPolicy | None = None,
         failure_counts: dict[str, int] | None = None,
         min_similarity_warmstart: float = 0.5,
+        uncertainty_memory: UncertaintyMemory | None = None,
     ) -> None:
         self._policy = policy or ExecutionPolicy()
         self._failure_counts: dict[str, int] = failure_counts or {}
         self._min_similarity = min_similarity_warmstart
+        self._uncertainty_memory = uncertainty_memory
 
     def route(
         self,
@@ -99,22 +120,26 @@ class CapabilityRouter:
         retrieval_similarity: float = 0.0,
         cost_estimate: ExecutionCostEstimate | None = None,
         is_degraded: bool = False,
+        trust_audit: TrustworthinessAudit | None = None,
     ) -> RoutingDecision:
         """Make a deterministic routing decision.
 
         Priority:
-        1. Exact cache hit → return immediately
-        2. Degraded execution → failure path
+        1. Exact cache hit — always first (unchanged)
+        2. Degraded execution — failure path
         3. Repeated failure topology → force oracle verification
-        4. Likely OOD → large projection budget
-        5. High similarity retrieval → warmstart projection
-        6. Moderate similarity → semantic retrieval path
-        7. High confidence → small projection budget
-        8. Default → standard projection budget
+        4. Uncertainty memory hit → increase caution (v3.3)
+        5. INDETERMINATE trust → high budget + oracle (v3.3)
+        6. TRANSITIONAL trust → conservative budget (v3.3)
+        7. Likely OOD → large projection budget
+        8. High similarity retrieval → warmstart projection
+        9. Moderate similarity → semantic retrieval path
+        10. High confidence → small projection budget
+        11. Default → standard projection budget
         """
         topo = task.metadata.get("topology_family", "unknown")
 
-        # Rule 1: Exact cache hit — always first
+        # Rule 1: Exact cache hit — always first, UNCHANGED
         if cache_hit:
             return RoutingDecision(
                 action="exact_cache_hit",
@@ -124,7 +149,7 @@ class CapabilityRouter:
                 estimated_cost=cost_estimate,
             )
 
-        # Rule 2: Degraded execution
+        # Rule 2: Degraded execution — UNCHANGED
         if is_degraded:
             return RoutingDecision(
                 action="degraded_execution",
@@ -134,7 +159,7 @@ class CapabilityRouter:
                 estimated_cost=cost_estimate,
             )
 
-        # Rule 3: Repeated failure topology → force oracle
+        # Rule 3: Repeated failure topology → force oracle — UNCHANGED
         failure_count = self._failure_counts.get(topo, 0)
         if failure_count >= self._FAILURE_REPEAT_THRESHOLD:
             return RoutingDecision(
@@ -145,9 +170,48 @@ class CapabilityRouter:
                 estimated_cost=cost_estimate,
             )
 
-        # Rule 4: Likely OOD → large budget + oracle
+        # Rule 4 (v3.3): Uncertainty memory hit → increase caution
+        task_hash = task.metadata.get("task_hash", "")
+        in_uncertainty = (
+            self._uncertainty_memory is not None
+            and self._uncertainty_memory.contains(task_hash)
+        )
+        if in_uncertainty:
+            return RoutingDecision(
+                action="increased_budget",
+                projection_budget=self._policy.projection_budget_high,
+                force_oracle=True,
+                reason=f"Task in uncertainty memory — high budget + oracle verification",
+                estimated_cost=cost_estimate,
+            )
+
+        # Rule 5 (v3.3): INDETERMINATE trust → high budget + oracle
+        if trust_audit is not None:
+            from core_runtime.core.trustworthiness_runtime import TrustLevel
+            if trust_audit.trust_level == TrustLevel.INDETERMINATE:
+                return RoutingDecision(
+                    action="increased_budget",
+                    projection_budget=self._policy.projection_budget_high,
+                    force_oracle=True,
+                    reason=f"INDETERMINATE trust ({len(trust_audit.flags)} flags) — high budget + oracle",
+                    estimated_cost=cost_estimate,
+                )
+            # Rule 6 (v3.3): TRANSITIONAL trust → conservative budget
+            if trust_audit.trust_level == TrustLevel.TRANSITIONAL:
+                budget = (
+                    self._policy.projection_budget_low
+                    + self._policy.projection_budget_high
+                ) // 2
+                return RoutingDecision(
+                    action="standard_projection",
+                    projection_budget=budget,
+                    force_oracle=False,
+                    reason=f"TRANSITIONAL trust — conservative budget ({budget})",
+                    estimated_cost=cost_estimate,
+                )
+
+        # Rule 7: Likely OOD → large budget + oracle — UNCHANGED
         if confidence.likely_ood:
-            # Still try warmstart if similarity is very high
             if retrieval_similarity >= self._min_similarity:
                 return RoutingDecision(
                     action="warmstart_projection",
@@ -165,7 +229,7 @@ class CapabilityRouter:
                 estimated_cost=cost_estimate,
             )
 
-        # Rule 5: High similarity retrieval → warmstart projection
+        # Rule 8: High similarity retrieval → warmstart projection — UNCHANGED
         if retrieval_similarity >= self._min_similarity:
             budget = self._policy.projection_budget_low
             if cost_estimate and cost_estimate.estimated_projection_iterations > budget:
@@ -179,7 +243,7 @@ class CapabilityRouter:
                 estimated_cost=cost_estimate,
             )
 
-        # Rule 6: Moderate similarity → semantic retrieval path
+        # Rule 9: Moderate similarity → semantic retrieval path — UNCHANGED
         if retrieval_similarity >= 0.3:
             return RoutingDecision(
                 action="semantic_retrieval",
@@ -190,7 +254,7 @@ class CapabilityRouter:
                 estimated_cost=cost_estimate,
             )
 
-        # Rule 7: High confidence → small budget
+        # Rule 10: High confidence → small budget — UNCHANGED
         if confidence.confidence_score >= 0.7:
             return RoutingDecision(
                 action="standard_projection",
@@ -200,7 +264,7 @@ class CapabilityRouter:
                 estimated_cost=cost_estimate,
             )
 
-        # Rule 8: Default — standard projection
+        # Rule 11: Default — standard projection — UNCHANGED
         return RoutingDecision(
             action="standard_projection",
             projection_budget=self._policy.projection_budget_high,

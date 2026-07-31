@@ -1,0 +1,208 @@
+{
+  "version": "v3.3",
+  "seed": 42,
+  "sample_count": 20,
+  "avg_residual": 0.004367475176344874,
+  "avg_projection_iterations": 50.0,
+  "avg_runtime_ms": 0.612830399768427,
+  "avg_trust_score": 0.995632524823655,
+  "avg_uncertainty_score": 0.004367475176344874,
+  "certain_rate": 0.0,
+  "transitional_rate": 0.0,
+  "indeterminate_rate": 1.0,
+  "audit_trigger_rate": 1.0,
+  "uncertainty_memory_hit_rate": 1.0,
+  "explanation_generation_rate": 1.0,
+  "flag_distribution": {
+    "escalation_triggered": 20,
+    "high_projection_effort": 20,
+    "high_residual_heuristic": 3
+  },
+  "explanation_distribution": {
+    "projection_escalated": 20
+  },
+  "correctness_unchanged": true,
+  "overall_pass": true,
+  "samples": [
+    {
+      "task_hash": "trust_bench_0000",
+      "trust_level": "indeterminate",
+      "confidence": 0.9987566996137336,
+      "uncertainty": 0.0012433003862663784,
+      "residual": 0.0012433003862663784,
+      "iterations": 50,
+      "explanation_type": "projection_escalated"
+    },
+    {
+      "task_hash": "trust_bench_0001",
+      "trust_level": "indeterminate",
+      "confidence": 0.9999924283000496,
+      "uncertainty": 7.571699950321709e-06,
+      "residual": 7.571699950321709e-06,
+      "iterations": 50,
+      "explanation_type": "projection_escalated"
+    },
+    {
+      "task_hash": "trust_bench_0002",
+      "trust_level": "indeterminate",
+      "confidence": 0.9999934316019229,
+      "uncertainty": 6.568398077062675e-06,
+      "residual": 6.568398077062675e-06,
+      "iterations": 50,
+      "explanation_type": "projection_escalated"
+    },
+    {
+      "task_hash": "trust_bench_0003",
+      "trust_level": "indeterminate",
+      "confidence": 0.9999938864778278,
+      "uncertainty": 6.11352217213165e-06,
+      "residual": 6.11352217213165e-06,
+      "iterations": 50,
+      "explanation_type": "projection_escalated"
+    },
+    {
+      "task_hash": "trust_bench_0004",
+      "trust_level": "indeterminate",
+      "confidence": 0.9999998640569517,
+      "uncertainty": 1.3594304826143127e-07,
+      "residual": 1.3594304826143127e-07,
+      "iterations": 50,
+      "explanation_type": "projection_escalated"
+    },
+    {
+      "task_hash": "trust_bench_0005",
+      "trust_level": "indeterminate",
+      "confidence": 0.9999999921990197,
+      "uncertainty": 7.800980330127486e-09,
+      "residual": 7.800980330127486e-09,
+      "iterations": 50,
+      "explanation_type": "projection_escalated"
+    },
+    {
+      "task_hash": "trust_bench_0006",
+      "trust_level": "indeterminate",
+      "confidence": 0.9999998522281757,
+      "uncertainty": 1.477718242833425e-07,
+      "residual": 1.477718242833425e-07,
+      "iterations": 50,
+      "explanation_type": "projection_escalated"
+    },
+    {
+      "task_hash": "trust_bench_0007",
+      "trust_level": "indeterminate",
+      "confidence": 0.9498917782915076,
+      "uncertainty": 0.05010822170849238,
+      "residual": 0.05010822170849238,
+      "iterations": 50,
+      "explanation_type": "projection_escalated"
+    },
+    {
+      "task_hash": "trust_bench_0008",
+      "trust_level": "indeterminate",
+      "confidence": 0.9848615459056205,
+      "uncertainty": 0.01513845409437957,
+      "residual": 0.01513845409437957,
+      "iterations": 50,
+      "explanation_type": "projection_escalated"
+    },
+    {
+      "task_hash": "trust_bench_0009",
+      "trust_level": "indeterminate",
+      "confidence": 0.9999999984695693,
+      "uncertainty": 1.530430649293325e-09,
+      "residual": 1.530430649293325e-09,
+      "iterations": 50,
+      "explanation_type": "projection_escalated"
+    },
+    {
+      "task_hash": "trust_bench_0010",
+      "trust_level": "indeterminate",
+      "confidence": 0.99999980736772,
+      "uncertainty": 1.9263228002329021e-07,
+      "residual": 1.9263228002329021e-07,
+      "iterations": 50,
+      "explanation_type": "projection_escalated"
+    },
+    {
+      "task_hash": "trust_bench_0011",
+      "trust_level": "indeterminate",
+      "confidence": 0.9999999094259311,
+      "uncertainty": 9.057406892174276e-08,
+      "residual": 9.057406892174276e-08,
+      "iterations": 50,
+      "explanation_type": "projection_escalated"
+    },
+    {
+      "task_hash": "trust_bench_0012",
+      "trust_level": "indeterminate",
+      "confidence": 0.9999999263425794,
+      "uncertainty": 7.365742058556245e-08,
+      "residual": 7.365742058556245e-08,
+      "iterations": 50,
+      "explanation_type": "projection_escalated"
+    },
+    {
+      "task_hash": "trust_bench_0013",
+      "trust_level": "indeterminate",
+      "confidence": 0.994158390890611,
+      "uncertainty": 0.005841609109389,
+      "residual": 0.005841609109389,
+      "iterations": 50,
+      "explanation_type": "projection_escalated"
+    },
+    {
+      "task_hash": "trust_bench_0014",
+      "trust_level": "indeterminate",
+      "confidence": 0.985751031556383,
+      "uncertainty": 0.014248968443616979,
+      "residual": 0.014248968443616979,
+      "iterations": 50,
+      "explanation_type": "projection_escalated"
+    },
+    {
+      "task_hash": "trust_bench_0015",
+      "trust_level": "indeterminate",
+      "confidence": 0.9998826116923476,
+      "uncertainty": 0.00011738830765241679,
+      "residual": 0.00011738830765241679,
+      "iterations": 50,
+      "explanation_type": "projection_escalated"
+    },
+    {
+      "task_hash": "trust_bench_0016",
+      "trust_level": "indeterminate",
+      "confidence": 0.9994338201929662,
+      "uncertainty": 0.0005661798070337597,
+      "residual": 0.0005661798070337597,
+      "iterations": 50,
+      "explanation_type": "projection_escalated"
+    },
+    {
+      "task_hash": "trust_bench_0017",
+      "trust_level": "indeterminate",
+      "confidence": 0.9999355240042,
+      "uncertainty": 6.447599579999714e-05,
+      "residual": 6.447599579999714e-05,
+      "iterations": 50,
+      "explanation_type": "projection_escalated"
+    },
+    {
+      "task_hash": "trust_bench_0018",
+      "trust_level": "indeterminate",
+      "confidence": 0.9999999980502263,
+      "uncertainty": 1.9497736361736057e-09,
+      "residual": 1.9497736361736057e-09,
+      "iterations": 50,
+      "explanation_type": "projection_escalated"
+    },
+    {
+      "task_hash": "trust_bench_0019",
+      "trust_level": "indeterminate",
+      "confidence": 0.9999999998057593,
+      "uncertainty": 1.942407851909776e-10,
+      "residual": 1.942407851909776e-10,
+      "iterations": 50,
+      "explanation_type": "projection_escalated"
+    }
+  ]
+}

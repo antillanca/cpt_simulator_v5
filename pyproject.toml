@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "core-runtime-engine"
-version = "3.2.0a1"
+version = "3.3.0a1"
 description = "CORE - Cognitive Operational Runtime Engine: domain-agnostic runtime for physics-informed surrogate projection"
 readme = "docs/CORE_RELEASE_README.md"
 license = {text = "MIT"}
